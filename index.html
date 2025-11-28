@@ -206,13 +206,25 @@
       const chatMessages = document.querySelector('.chat-messages');
       const budgetSelector = document.querySelector('.budget-selector');
       const contactForm = document.querySelector('.contact-form');
+      const chatToggle = document.querySelector('.chat-toggle');
+      const chatWindow = document.querySelector('.chat-window');
+      const chatClose = document.querySelector('.chat-close');
+      const chatWidget = document.querySelector('.chat-widget');
 
       // Hide the old form - we'll use chat instead
       if (contactForm) contactForm.style.display = 'none';
 
+      chatToggle.addEventListener('click', () => {
+        chatWidget.classList.add('open');
+      });
+
+      chatClose.addEventListener('click', () => {
+        chatWidget.classList.remove('open');
+      });
+
       // Conversation state
-      let state = 'intro'; // intro, select_project, chatting, asking_details, asking_name, asking_brand, asking_email, asking_budget, done
-      let collectedInfo = { name: '', brand: '', contact: '', contactMethod: '', budget: '', projectType: '', projectDetails: [] };
+      let state = 'intro'; // intro, select_project, chatting, asking_details, asking_name, asking_brand, asking_role, asking_email, asking_budget, done
+      let collectedInfo = { name: '', brand: '', role: '', contact: '', contactMethod: '', budget: '', projectType: '', projectDetails: [] };
       let messageCount = 0;
       let mentionedSmallBudget = false;
       let usedResponses = [];
@@ -249,22 +261,15 @@
       }
 
       const lowBudgetResponses = [
-        "I appreciate the honesty! That budget is better suited for hourly consulting – maybe a few focused sessions to guide your team?",
-        "Thanks for being upfront! At that level, I'd suggest hourly consulting – we can tackle specific challenges together.",
-        "Got it! For that budget, hourly consulting makes the most sense. We could do strategy sessions or design reviews.",
-        "I hear you! That's consulting territory – happy to help with focused advice sessions at €100/hr + VAT."
+        "Haha, I love the honesty! With that budget, we could create some amazing concepts with Midjourney. What do you think?",
+        "I hear you! For that budget, we can explore some creative ideas using Midjourney. It's a great tool for quick and beautiful results.",
+        "Got it! That's a perfect budget for a Midjourney exploration. We can generate a bunch of cool visuals for your project.",
       ];
 
       // Project types
       const projectTypes = [
-        { id: 'new-brand', label: '🎨 New Brand', desc: 'Build identity from scratch' },
-        { id: 'rebrand', label: '🔄 Rebrand', desc: 'Refresh existing brand' },
-        { id: 'new-website', label: '🌐 New Website', desc: 'Design & build from zero' },
-        { id: 'redesign-website', label: '✨ Website Redesign', desc: 'Improve existing site' },
-        { id: 'new-app', label: '📱 New App Design', desc: 'Mobile or web app UI/UX' },
-        { id: 'app-redesign', label: '🔧 App Redesign', desc: 'Improve existing app' },
-        { id: 'app-dev', label: '💻 App Development', desc: 'Build the actual product' },
-        { id: 'other', label: '💡 Something else', desc: 'Tell me about it' }
+        { id: 'new-project', label: '🚀 New Project' },
+        { id: 'other', label: '🤔 Something else' }
       ];
 
       // Witty responses
@@ -283,7 +288,7 @@
         "I've survived design feedback from German engineers. I can handle this. What's up?",
         "Bold opener! I respect it. Now what can I actually help you with?"
       ];
-
+      
       const complimentResponses = [
         "Thank you! 25 years and 4 continents of practice helps. What can I create for you?",
         "That's so kind! Now let me earn that compliment – what are we building?",
@@ -305,6 +310,8 @@
         "Cool! What makes your project unique?",
         "I see! Who's the competition we're beating?"
       ];
+
+      const DISCOUNT_PERCENTAGE = 0.30; // 30% discount
 
       function detectIntent(text) {
         const lower = text.toLowerCase().trim();
@@ -394,9 +401,9 @@
                 setTimeout(() => addMessageTyping("Intriguing! I love unusual projects. Tell me what you have in mind."), 400);
               } else {
                 const responses = [
-                  `${type.label.split(' ')[0]} Nice choice! Tell me a bit about it.`,
-                  `${type.label} – exciting! What's the story behind this project?`,
-                  `Love it! ${type.desc}. What's the vision?`,
+                  `${type.label.split(' ')[0]} - Nice choice! Tell me a bit about it.`, 
+                  `${type.label} – exciting! What's the story behind this project?`, 
+                  `Love it! What's the vision?`, 
                   `Great pick! I've done quite a few of these. What makes yours special?`
                 ];
                 setTimeout(() => addMessageTyping(getRandomResponse(responses)), 400);
@@ -414,7 +421,7 @@
           });
         });
       }
-
+      
       function showContactMethodToggle() {
         const toggleHtml = `
           <p>How do you prefer to be contacted?</p>
@@ -463,6 +470,7 @@
 
         if (mentionedSmallBudget) {
           cardsHtml += `
+          <div class="budget-note" style="text-align:center;font-size:11px;color:#666;padding:8px 12px;margin-bottom:8px;line-height:1.4;">For smaller scopes, work is billed hourly: €100 + VAT (€119/hr for German entities)</div>
           <div class="chat-budget-btn" data-budget="Hourly (€100+VAT/hr)" style="padding:10px 12px;border:1px solid #ddd;border-radius:8px;background:#fff;cursor:pointer;transition:all 0.2s;margin-bottom:6px;">
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
               <div style="font-size:15px;font-weight:700;color:#333;">€100/hr <span style="font-size:10px;font-weight:400;color:#666;">+VAT</span></div>
@@ -472,64 +480,70 @@
               <span style="${checkStyle}">✓ Strategy</span>
               <span style="${checkStyle}">✓ Reviews</span>
               <span style="${checkStyle}">✓ Quick fixes</span>
+              <span style="${checkStyle}">✓ Quick fixes</span>
               <span style="${uncheckStyle}">✗ Full brand</span>
               <span style="${uncheckStyle}">✗ Website</span>
             </div>
           </div>`;
         }
 
+        // Helper to format discount
+        const formatDiscountedPrice = (originalPrice) => {
+          const isPlus = originalPrice.includes('+');
+          const cleanPrice = originalPrice.replace('k', '').replace('€', '').replace('+', '');
+          let value = parseInt(cleanPrice) * 1000;
+
+          const discountedValue = value * (1 - DISCOUNT_PERCENTAGE);
+          let discountedPrice = `€${discountedValue / 1000}k`;
+          if (isPlus) discountedPrice += '+';
+
+          return `<span style="display:inline-block;margin-right:8px;background:#ff4d4d;color:white;padding:2px 6px;border-radius:4px;font-size:10px;font-weight:bold;">🔥 30% OFF</span><s style="color:#ff4d4d;font-size:12px;">${originalPrice}</s> ${discountedPrice}`;
+        };
+
         cardsHtml += `
-          <div class="chat-budget-btn" data-budget="€10k - Branding" style="padding:10px 12px;border:1px solid #ddd;border-radius:8px;background:#fff;cursor:pointer;transition:all 0.2s;margin-bottom:6px;">
+          <div class="chat-budget-btn" data-budget="€20k - The Foundation" style="padding:10px 12px;border:1px solid #ddd;border-radius:8px;background:#fff;cursor:pointer;transition:all 0.2s;margin-bottom:6px;">
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
-              <div><span style="font-size:10px;text-decoration:line-through;color:#999;">€20k</span> <span style="font-size:15px;font-weight:700;color:#e53935;">€10k</span></div>
-              <div style="font-size:9px;color:#e53935;font-weight:600;">50% OFF</div>
+              <div style="font-size:15px;font-weight:700;color:#333;">${formatDiscountedPrice('€20k')}</div>
+              <div style="font-size:9px;color:#666;">Full Branding</div>
             </div>
-            <div style="font-size:10px;line-height:1.4;display:flex;flex-wrap:wrap;gap:2px 10px;">
-              <span style="${checkStyle}">✓ Logo</span>
-              <span style="${checkStyle}">✓ Guidelines</span>
-              <span style="${checkStyle}">✓ Typography</span>
-              <span style="${checkStyle}">✓ Assets</span>
-              <span style="${uncheckStyle}">✗ Website</span>
-              <span style="${uncheckStyle}">✗ Photo/Video</span>
+            <div style="font-size:10px;line-height:1.4;display:flex;flex-direction:column;gap:2px;">
+              <span style="${checkStyle}">✓ Research & Workshops</span>
+              <span style="${checkStyle}">✓ Story & Communication</span>
+              <span style="${checkStyle}">✓ Digital Brand Libraries</span>
+              <span style="${checkStyle}">✓ Internal/External Materials</span>
+              <span style="font-size:9px;color:#888;margin-top:4px;">(2 months)</span>
             </div>
           </div>
 
-          <div class="chat-budget-btn" data-budget="€20k - Brand + Web" style="padding:10px 12px;border:1px solid #ddd;border-radius:8px;background:#fff;cursor:pointer;transition:all 0.2s;margin-bottom:6px;">
+          <div class="chat-budget-btn" data-budget="€40k - The Experience" style="padding:10px 12px;border:1px solid #ddd;border-radius:8px;background:#fff;cursor:pointer;transition:all 0.2s;margin-bottom:6px;">
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
-              <div><span style="font-size:10px;text-decoration:line-through;color:#999;">€40k</span> <span style="font-size:15px;font-weight:700;color:#e53935;">€20k</span></div>
-              <div style="font-size:9px;color:#e53935;font-weight:600;">50% OFF</div>
+                <div style="font-size:15px;font-weight:700;color:#333;">${formatDiscountedPrice('€40k')}</div>
+                <div style="font-size:9px;color:#666;">Branding + Website</div>
             </div>
-            <div style="font-size:10px;line-height:1.4;display:flex;flex-wrap:wrap;gap:2px 10px;">
-              <span style="${checkStyle}">✓ Logo</span>
-              <span style="${checkStyle}">✓ Guidelines</span>
-              <span style="${checkStyle}">✓ Typography</span>
-              <span style="${checkStyle}">✓ Assets</span>
-              <span style="${checkStyle}">✓ Website</span>
-              <span style="${checkStyle}">✓ Responsive</span>
-              <span style="${uncheckStyle}">✗ Photo/Video</span>
+            <div style="font-size:10px;line-height:1.4;display:flex;flex-direction:column;gap:2px;">
+              <span style="${checkStyle}">✓ Everything in Foundation</span>
+              <span style="${checkStyle}">✓ Stakeholder Alignment</span>
+              <span style="${checkStyle}">✓ Ultra-Modern & Responsive Design</span>
+              <span style="${checkStyle}">✓ High-Performance Code</span>
             </div>
           </div>
 
-          <div class="chat-budget-btn" data-budget="€30k+ - Full Package" style="padding:10px 12px;border:1px solid #333;border-radius:8px;background:#f8f8f8;cursor:pointer;transition:all 0.2s;margin-bottom:6px;">
+          <div class="chat-budget-btn" data-budget="€60k+ - The Full Monty" style="padding:10px 12px;border:1px solid #333;border-radius:8px;background:#f8f8f8;cursor:pointer;transition:all 0.2s;margin-bottom:6px;">
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
-              <div><span style="font-size:10px;text-decoration:line-through;color:#999;">€60k+</span> <span style="font-size:15px;font-weight:700;color:#e53935;">€30k+</span></div>
-              <div style="font-size:9px;color:#e53935;font-weight:600;">50% OFF</div>
+              <div style="font-size:15px;font-weight:700;color:#333;">${formatDiscountedPrice('€60k+')}</div>
+              <div style="font-size:9px;color:#666;">Full Service</div>
             </div>
-            <div style="font-size:10px;line-height:1.4;display:flex;flex-wrap:wrap;gap:2px 10px;">
-              <span style="${checkStyle}">✓ Logo</span>
-              <span style="${checkStyle}">✓ Guidelines</span>
-              <span style="${checkStyle}">✓ Assets</span>
-              <span style="${checkStyle}">✓ Website</span>
-              <span style="${checkStyle}">✓ Photo</span>
-              <span style="${checkStyle}">✓ Video/Motion</span>
-              <span style="${checkStyle}">✓ 3D</span>
+            <div style="font-size:10px;line-height:1.4;display:flex;flex-direction:column;gap:2px;">
+              <span style="${checkStyle}">✓ Everything in Experience</span>
+              <span style="${checkStyle}">✓ Photo & Video Production</span>
+              <span style="${checkStyle}">✓ Motion Graphics & 3D</span>
+              <span style="${checkStyle}">✓ Ongoing Support</span>
             </div>
           </div>`;
 
         const btnHtml = `
           <p>Last question – what's your budget range?</p>
-          <p style="font-size:11px;color:#e53935;margin:8px 0 12px;font-weight:600;">🔥 LIMITED TIME: 50% OFF all packages!</p>
-          <div style="display:flex;flex-direction:column;">
+          <div style="display:flex;flex-direction:column;margin-top:12px;">
             ${cardsHtml}
           </div>
         `;
@@ -546,7 +560,7 @@
               this.style.background = '#f5f5f5';
             });
             btn.addEventListener('mouseleave', function() {
-              if (this.dataset.budget.includes('30k')) {
+              if (this.dataset.budget.includes('60k')) {
                 this.style.borderColor = '#333';
                 this.style.background = '#fafafa';
               } else {
@@ -561,14 +575,18 @@
       function showInlineSummary() {
         const contactLabel = collectedInfo.contactMethod === 'email' ? 'Email' :
                             collectedInfo.contactMethod === 'mobile' ? 'Mobile' : 'LinkedIn';
-        let summary = `Hi Chris!\n\nName: ${collectedInfo.name}\nBrand: ${collectedInfo.brand || 'N/A'}\n${contactLabel}: ${collectedInfo.contact}\nProject: ${collectedInfo.projectType}\nBudget: ${collectedInfo.budget}\n\nDetails:\n${collectedInfo.projectDetails.join('\n')}`;
+        let summary = `Hi Chris!\n\nName: ${collectedInfo.name}\nBrand: ${collectedInfo.brand || 'N/A'}\nRole: ${collectedInfo.role || 'N/A'}\n${contactLabel}: ${collectedInfo.contact}\nProject: ${collectedInfo.projectType}\nBudget: ${collectedInfo.budget}\n\nDetails:\n${collectedInfo.projectDetails.join('\n')}`;
 
         const summaryHtml = `
           <p style="margin-bottom:10px;">Perfect! Here's your inquiry – feel free to edit:</p>
           <textarea id="inline-summary" style="width:100%;height:140px;border:1px solid #ddd;border-radius:8px;padding:10px;font-size:12px;font-family:inherit;resize:none;margin-bottom:12px;">${summary}</textarea>
-          <div style="display:flex;gap:8px;">
+          <p style="margin-bottom:10px;">How would you like to send this to me?</p>
+          <div id="contact-buttons" style="display:flex;flex-wrap:wrap;gap:8px;">
             <button id="btn-whatsapp" style="flex:1;padding:12px;background:#25D366;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;">📱 WhatsApp</button>
             <button id="btn-email" style="flex:1;padding:12px;background:#333;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;">📧 Email</button>
+            <button id="btn-telegram" style="flex:1;padding:12px;background:#0088cc;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;">✈️ Telegram</button>
+            <button id="btn-sms" style="flex:1;padding:12px;background:#007bff;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;">💬 SMS</button>
+            <button id="btn-discord" style="flex:1;padding:12px;background:#7289da;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;" title="Discord integration requires a server. This will be implemented soon.">👾 Discord (soon)</button>
           </div>
         `;
         addMessageTyping(summaryHtml, true, () => {
@@ -582,6 +600,22 @@
             const msg = document.getElementById('inline-summary').value;
             window.location.href = `mailto:chris@scar.lat?subject=Project Inquiry - ${collectedInfo.name}&body=${encodeURIComponent(msg)}`;
             setTimeout(() => addMessageTyping("Email ready! Looking forward to connecting. ✌️"), 300);
+          });
+
+          document.getElementById('btn-telegram')?.addEventListener('click', () => {
+            const msg = document.getElementById('inline-summary').value;
+            window.open(`https://t.me/share/url?url=https://scar.lat&text=${encodeURIComponent(msg)}`, '_blank');
+            setTimeout(() => addMessageTyping("Telegram ready! Looking forward to connecting. ✌️"), 300);
+          });
+
+          document.getElementById('btn-sms')?.addEventListener('click', () => {
+            const msg = document.getElementById('inline-summary').value;
+            window.location.href = `sms:+491705958989?body=${encodeURIComponent(msg)}`;
+            setTimeout(() => addMessageTyping("SMS ready! Looking forward to connecting. ✌️"), 300);
+          });
+
+          document.getElementById('btn-discord')?.addEventListener('click', () => {
+            addMessageTyping("Discord integration is coming soon! It requires a bit more magic on my end. For now, please choose another method. 😊");
           });
         });
       }
@@ -677,6 +711,13 @@
 
         if (state === 'asking_brand') {
           collectedInfo.brand = text;
+          state = 'asking_role';
+          setTimeout(() => addMessageTyping("And what's your role in the company?"), 400);
+          return;
+        }
+
+        if (state === 'asking_role') {
+          collectedInfo.role = text;
           state = 'asking_contact_method';
           setTimeout(() => showContactMethodToggle(), 400);
           return;
@@ -692,7 +733,7 @@
         // Default fallback
         setTimeout(() => addMessageTyping("Hmm, tell me more about that!"), 400);
       }
-
+      
       // Event listeners
       if (chatSend) chatSend.addEventListener('click', handleUserMessage);
       if (chatInput) chatInput.addEventListener('keypress', e => { if (e.key === 'Enter') handleUserMessage(); });
@@ -720,7 +761,13 @@
     .country-dropdown { min-width: 250px !important; }
     .country-option { padding: 10px 12px !important; }
     * { font-family: Helvetica, Arial, sans-serif !important; }
-    #images .item small .brand-name { font-size: 130% !important; font-weight: 600 !important; display: block; }
+    /* Updated for 20% larger text */
+    .frame { font-size: 14.4rem !important; }
+    @media (max-width: 1024px) {
+      .frame { font-size: 19.2px !important; }
+    }
+    #hero #images .item small { font-size: 9.6rem !important; }
+    #hero #images .item small .brand-name { font-size: 156% !important; font-weight: 600 !important; display: block; }
     .typing-indicator .message-content p {
       display: flex;
       gap: 4px;
@@ -734,12 +781,9 @@
       border-color: #333 !important;
       background: #f5f5f5 !important;
     }
-    /* Make chat scrollable on hover */
-    .chat-window:hover .chat-messages {
-      overflow-y: auto !important;
-    }
+    /* Make chat scrollable always */
     .chat-messages {
-      overflow-y: hidden;
+      overflow-y: auto;
       scroll-behavior: smooth;
     }
     .chat-messages::-webkit-scrollbar {
@@ -758,5 +802,3 @@
   </style>
 </body>
 </html>
-
-
