@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=5">
+	<meta name="format-detection" content="telephone=no">
+	<meta name="robots" content="all">
+	<title>Chris Scarlat — Product, Brand, Designer</title>
+	<meta name="description" content="Implementation of a infinite layers grid">
+	<link rel="icon" href="./fav/fav.ico" sizes="any">
+	<link rel="icon" href="./fav/fav.svg">
+	<link rel="mask-icon" href="./fav/fav-mask.svg" color="#FFFFFF">
+	<link rel="apple-touch-icon" href="./fav/apple-touch.png">
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+	<style>* { font-family: 'Inter', Helvetica, Arial, sans-serif !important; }</style>
+  <script type="module" crossorigin src="./assets/index-f0c34be0.js"></script>
+  <link rel="stylesheet" href="./assets/index-89f78340.css">
+</head>
+<body>
+	<main id="main">
+		<header class="frame">
+			<div class="frame-left">
+				<h1><a href="https://scar.lat">CHRIS SCARLAT</a></h1>
+			</div>
+
+			<button class="menu-toggle" aria-label="Toggle menu">
+				<svg class="menu-icon" viewBox="0 0 24 24" width="24" height="24">
+					<circle cx="12" cy="8" r="2" fill="currentColor"/>
+					<circle cx="12" cy="16" r="2" fill="currentColor"/>
+				</svg>
+				<svg class="close-icon" viewBox="0 0 24 24" width="24" height="24">
+					<line x1="6" y1="6" x2="18" y2="18" stroke="currentColor" stroke-width="2"/>
+					<line x1="18" y1="6" x2="6" y2="18" stroke="currentColor" stroke-width="2"/>
+				</svg>
+			</button>
+
+			<div id="cdawrap" class="cdawrap">
+				<a href="https://tympanus.net/codrops/?p=" class="nav-linkedin">LinkedIn</a>
+				<a href="tel:+491705958989">+49 170 595 8989</a>
+				<a href="https://calendar.scar.lat" class="nav-book-call">BOOK CALL</a>
+				<a href="#" class="chat-menu-link nav-chat">CHAT</a>
+			</div>
+
+			<div class="menu-overlay"></div>
+		</header>
+		<section id="hero">
+			<div id="images"></div>
+		</section>
+
+		<!-- Chat Widget -->
+		<div class="chat-widget">
+			<button class="chat-toggle" aria-label="Open chat">
+				<img src="https://scar.lat/signature/chris-scarlat.gif" alt="Chat" class="chat-avatar" />
+			</button>
+
+			<div class="chat-window">
+				<div class="chat-header">
+					<div class="chat-header-left">
+						<h3>Project Inquiry</h3>
+						<div class="language-selector">
+							<button class="lang-btn active" data-lang="en">EN</button>
+							<button class="lang-btn" data-lang="de">DE</button>
+							<button class="lang-btn" data-lang="kr">KR</button>
+							<button class="lang-btn" data-lang="jp">JP</button>
+							<button class="lang-btn" data-lang="es">ES</button>
+						</div>
+					</div>
+					<button class="chat-close" aria-label="Close chat">×</button>
+				</div>
+				<div class="chat-messages">
+					<div class="message bot-message" id="initial-message">
+						<img src="https://scar.lat/signature/chris-scarlat.gif" alt="Chris" class="bot-avatar" />
+						<div class="message-content">
+							<p>Hey! Looking to start a project?</p>
+						</div>
+					</div>
+				</div>
+				<div class="budget-selector" style="display: none;">
+					<div class="budget-note">For smaller scopes, work is billed hourly: €100 + VAT (€119/hr for German entities)</div>
+					<div class="budget-options">
+						<button class="budget-btn" data-budget="10k">
+							<span class="price-discounted">€10k</span>
+						</button>
+						<button class="budget-btn" data-budget="20k">
+							<span class="price-discounted">€20k</span>
+						</button>
+						<button class="budget-btn" data-budget="30k+">
+							<span class="price-discounted">€30k+</span>
+						</button>
+					</div>
+				</div>
+				<div class="contact-form" style="display: none;">
+					<div class="form-header-bar">
+						<div class="selected-budget-display"></div>
+						<button class="form-minimize" title="Minimize form">_</button>
+					</div>
+					<div class="form-fields">
+						<div class="form-field">
+							<input type="text" class="form-input" id="contact-name" placeholder=" " required />
+							<label for="contact-name" class="form-label">Full name *</label>
+							<span class="form-check">✓</span>
+						</div>
+						<div class="form-field">
+							<input type="text" class="form-input" id="contact-brand" placeholder=" " />
+							<label for="contact-brand" class="form-label">Brand name</label>
+							<span class="form-check">✓</span>
+						</div>
+						<div class="form-field">
+							<select class="form-input form-select" id="contact-position">
+								<option value="">Select your role (optional)</option>
+								<option value="Founder">Founder</option>
+								<option value="Friend of Founder">Friend of Founder</option>
+								<option value="Partner of Founder">Partner of Founder</option>
+								<option value="Investor">Investor</option>
+								<option value="VC">VC</option>
+								<option value="Product">Product</option>
+								<option value="Design">Design</option>
+								<option value="Marketing">Marketing</option>
+								<option value="Dev / Engineering">Dev / Engineering</option>
+								<option value="Business / Sales">Business / Sales</option>
+								<option value="Consultant">Consultant</option>
+								<option value="C-Level">C-Level</option>
+								<option value="Other">Other</option>
+							</select>
+							<label for="contact-position" class="form-label">Your role</label>
+							<span class="form-check">✓</span>
+						</div>
+						<div class="form-field contact-method-field">
+							<div class="contact-method-toggle">
+								<button type="button" class="contact-method-btn active" data-method="email">Email</button>
+								<button type="button" class="contact-method-btn" data-method="phone">Phone</button>
+								<button type="button" class="contact-method-btn" data-method="linkedin">LinkedIn</button>
+							</div>
+							<div class="contact-input-wrapper">
+								<input type="email" class="form-input" id="contact-email" placeholder=" " required />
+								<div class="phone-input-wrapper" style="display: none;">
+									<button type="button" class="country-selector">
+										<span class="country-flag">🇩🇪</span>
+										<span class="country-code">+49</span>
+									</button>
+									<div class="country-dropdown" style="display: none;">
+										<input type="text" class="country-search" placeholder="Search country..." />
+										<div class="country-list">
+											<button type="button" class="country-option" data-code="+49" data-flag="🇩🇪" data-name="Germany">🇩🇪 Germany (+49)</button>
+											<button type="button" class="country-option" data-code="+1" data-flag="🇺🇸" data-name="United States">🇺🇸 United States (+1)</button>
+											<button type="button" class="country-option" data-code="+44" data-flag="🇬🇧" data-name="United Kingdom">🇬🇧 United Kingdom (+44)</button>
+											<button type="button" class="country-option" data-code="+33" data-flag="🇫🇷" data-name="France">🇫🇷 France (+33)</button>
+											<button type="button" class="country-option" data-code="+34" data-flag="🇪🇸" data-name="Spain">🇪🇸 Spain (+34)</button>
+											<button type="button" class="country-option" data-code="+39" data-flag="🇮🇹" data-name="Italy">🇮🇹 Italy (+39)</button>
+											<button type="button" class="country-option" data-code="+31" data-flag="🇳🇱" data-name="Netherlands">🇳🇱 Netherlands (+31)</button>
+											<button type="button" class="country-option" data-code="+41" data-flag="🇨🇭" data-name="Switzerland">🇨🇭 Switzerland (+41)</button>
+											<button type="button" class="country-option" data-code="+43" data-flag="🇦🇹" data-name="Austria">🇦🇹 Austria (+43)</button>
+											<button type="button" class="country-option" data-code="+32" data-flag="🇧🇪" data-name="Belgium">🇧🇪 Belgium (+32)</button>
+											<button type="button" class="country-option" data-code="+86" data-flag="🇨🇳" data-name="China">🇨🇳 China (+86)</button>
+											<button type="button" class="country-option" data-code="+91" data-flag="🇮🇳" data-name="India">🇮🇳 India (+91)</button>
+											<button type="button" class="country-option" data-code="+81" data-flag="🇯🇵" data-name="Japan">🇯🇵 Japan (+81)</button>
+											<button type="button" class="country-option" data-code="+82" data-flag="🇰🇷" data-name="South Korea">🇰🇷 South Korea (+82)</button>
+											<button type="button" class="country-option" data-code="+61" data-flag="🇦🇺" data-name="Australia">🇦🇺 Australia (+61)</button>
+											<button type="button" class="country-option" data-code="+64" data-flag="🇳🇿" data-name="New Zealand">🇳🇿 New Zealand (+64)</button>
+											<button type="button" class="country-option" data-code="+55" data-flag="🇧🇷" data-name="Brazil">🇧🇷 Brazil (+55)</button>
+											<button type="button" class="country-option" data-code="+52" data-flag="🇲🇽" data-name="Mexico">🇲🇽 Mexico (+52)</button>
+											<button type="button" class="country-option" data-code="+7" data-flag="🇷🇺" data-name="Russia">🇷🇺 Russia (+7)</button>
+											<button type="button" class="country-option" data-code="+27" data-flag="🇿🇦" data-name="South Africa">🇿🇦 South Africa (+27)</button>
+										</div>
+									</div>
+									<input type="tel" class="form-input phone-number-input" id="contact-phone" placeholder=" " />
+								</div>
+								<input type="url" class="form-input" id="contact-linkedin" placeholder=" " style="display: none;" />
+								<label for="contact-email" class="form-label contact-label">Your email *</label>
+								<span class="form-check">✓</span>
+							</div>
+						</div>
+						<input type="text" class="honeypot" id="website" style="display: none;" tabindex="-1" autocomplete="off" />
+						<button class="form-submit">Submit Details</button>
+					</div>
+				</div>
+				<div class="form-minimized-notice" style="display: none;">
+					<div class="minimized-content">
+						<div class="budget-dropdown">
+							<button class="budget-display-btn">€10k</button>
+							<div class="budget-options-dropdown" style="display: none;">
+								<button class="budget-option-btn" data-budget="10k">€10k</button>
+								<button class="budget-option-btn" data-budget="20k">€20k</button>
+								<button class="budget-option-btn" data-budget="30k+">€30k+</button>
+							</div>
+						</div>
+						<button class="resume-form-btn">Resume form</button>
+					</div>
+				</div>
+				<div class="form-minimized-compact" style="display: none;">
+					<button class="resume-form-compact-btn">Resume Form</button>
+				</div>
+				<div class="chat-input-container">
+					<input type="text" class="chat-input" placeholder="Type your message..." />
+					<button class="chat-send">Send</button>
+				</div>
+			</div>
+		</div>
+	</main>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const chatInput = document.querySelector('.chat-input');
+      const chatSend = document.querySelector('.chat-send');
+      const chatMessages = document.querySelector('.chat-messages');
+      const budgetSelector = document.querySelector('.budget-selector');
+      const contactForm = document.querySelector('.contact-form');
+
+      // Hide the old form - we'll use chat instead
+      if (contactForm) contactForm.style.display = 'none';
+
+      // Conversation state
+      let state = 'intro'; // intro, select_project, chatting, asking_details, asking_name, asking_brand, asking_email, asking_budget, done
+      let collectedInfo = { name: '', brand: '', contact: '', contactMethod: '', budget: '', projectType: '', projectDetails: [] };
+      let messageCount = 0;
+      let mentionedSmallBudget = false;
+      let usedResponses = [];
+
+      // Keywords for detection
+      const smallBudgetKeywords = ['small budget', 'limited budget', 'tight budget', 'not much money', 'low budget', 'minimal budget', 'cheap', 'affordable', 'kleines budget', 'wenig geld'];
+      const greetingKeywords = ['hey', 'hi', 'hello', 'hallo', 'good morning', 'good afternoon', 'good evening', 'yo', 'hola', 'sup', 'wassup', 'whats up'];
+      const funnyKeywords = ['haha', 'lol', 'lmao', 'rofl', '😂', '🤣', '😄', '😆', 'joke', 'funny', 'kidding', 'jk'];
+      const rudeKeywords = ['stupid', 'dumb', 'idiot', 'suck', 'hate', 'worst', 'terrible', 'awful'];
+      const complimentKeywords = ['amazing', 'awesome', 'great work', 'love your', 'beautiful', 'impressive', 'talented', 'incredible'];
+      const budgetKeywords = ['budget', 'price', 'cost', 'rate', 'pricing', 'money', 'euro', 'eur', '€', 'how much', 'preis', 'kosten'];
+
+      // Detect if user mentions a specific low amount
+      function detectLowBudgetAmount(text) {
+        const lower = text.toLowerCase();
+        // Match patterns like: 300 eur, €500, 1000 euro, 2k, €1.5k, etc.
+        const patterns = [
+          /(\d+(?:[\.,]\d+)?)\s*(?:€|eur|euro|euros)/i,
+          /€\s*(\d+(?:[\.,]\d+)?)/i,
+          /(\d+(?:[\.,]\d+)?)\s*k\b/i,
+          /(\d+(?:[\.,]\d+)?)\s*(?:dollar|usd|\$)/i
+        ];
+        for (let p of patterns) {
+          const match = text.match(p);
+          if (match) {
+            let amount = parseFloat(match[1].replace(',', '.'));
+            // Check if it's in "k" format
+            if (/k\b/i.test(text) && amount < 100) amount *= 1000;
+            // Consider < 5000 as low budget
+            if (amount < 5000) return amount;
+          }
+        }
+        return null;
+      }
+
+      const lowBudgetResponses = [
+        "I appreciate the honesty! That budget is better suited for hourly consulting – maybe a few focused sessions to guide your team?",
+        "Thanks for being upfront! At that level, I'd suggest hourly consulting – we can tackle specific challenges together.",
+        "Got it! For that budget, hourly consulting makes the most sense. We could do strategy sessions or design reviews.",
+        "I hear you! That's consulting territory – happy to help with focused advice sessions at €100/hr + VAT."
+      ];
+
+      // Project types
+      const projectTypes = [
+        { id: 'new-brand', label: '🎨 New Brand', desc: 'Build identity from scratch' },
+        { id: 'rebrand', label: '🔄 Rebrand', desc: 'Refresh existing brand' },
+        { id: 'new-website', label: '🌐 New Website', desc: 'Design & build from zero' },
+        { id: 'redesign-website', label: '✨ Website Redesign', desc: 'Improve existing site' },
+        { id: 'new-app', label: '📱 New App Design', desc: 'Mobile or web app UI/UX' },
+        { id: 'app-redesign', label: '🔧 App Redesign', desc: 'Improve existing app' },
+        { id: 'app-dev', label: '💻 App Development', desc: 'Build the actual product' },
+        { id: 'other', label: '💡 Something else', desc: 'Tell me about it' }
+      ];
+
+      // Witty responses
+      const funnyResponses = [
+        "Ha! I like you already. But let's focus – what are we building? 😄",
+        "Alright comedian, I see you! Now what project brought you here?",
+        "LOL okay okay, I appreciate the humor! So what's the real mission?",
+        "That made me smile! Now let's make something that makes others smile too.",
+        "You're fun! I've worked with serious corporates for too long. What are we creating?",
+        "Haha nice one! Okay, business mode: what do you need designed?"
+      ];
+
+      const rudeResponses = [
+        "Ouch! 25 years in the game and I've heard worse. What do you actually need?",
+        "Well that's... direct. Let's channel that energy into a project instead?",
+        "I've survived design feedback from German engineers. I can handle this. What's up?",
+        "Bold opener! I respect it. Now what can I actually help you with?"
+      ];
+
+      const complimentResponses = [
+        "Thank you! 25 years and 4 continents of practice helps. What can I create for you?",
+        "That's so kind! Now let me earn that compliment – what are we building?",
+        "Appreciate it! Let's make something amazing together. What's the project?",
+        "Thanks! I've been fortunate to work with incredible brands. Want to add yours to the list?"
+      ];
+
+      const greetingResponses = [
+        "Hey! Nice to meet you. I've got some ideas brewing already... what brings you here?",
+        "Hello! Always exciting to meet someone new. What are you working on?",
+        "Hi there! I'm Chris – 25 years designing, still can't draw a straight line by hand. What can I help with?",
+        "Hey! Welcome! Let me guess... you need something designed? 😉"
+      ];
+
+      const generalFollowUps = [
+        "Interesting! Tell me more – who's this for?",
+        "Got it! What's the main problem we're solving?",
+        "Nice! How soon do you need this?",
+        "Cool! What makes your project unique?",
+        "I see! Who's the competition we're beating?"
+      ];
+
+      function detectIntent(text) {
+        const lower = text.toLowerCase().trim();
+
+        // Very short gibberish
+        if (lower.length <= 2) return 'funny';
+        if (!/[aeiou]/i.test(lower) && lower.length > 3) return 'funny';
+        if (/^[^a-z]*$/i.test(lower)) return 'funny';
+
+        // Check for low budget amount first
+        const lowAmount = detectLowBudgetAmount(text);
+        if (lowAmount !== null) return 'low_budget';
+
+        // Check keywords
+        if (rudeKeywords.some(k => lower.includes(k))) return 'rude';
+        if (complimentKeywords.some(k => lower.includes(k))) return 'compliment';
+        if (funnyKeywords.some(k => lower.includes(k))) return 'funny';
+        if (greetingKeywords.some(k => lower === k || lower.startsWith(k + ' ') || lower.startsWith(k + '!'))) return 'greeting';
+        if (budgetKeywords.some(k => lower.includes(k))) return 'budget';
+        if (lower.includes('brand')) return 'brand';
+        if (lower.includes('website') || lower.includes('web') || lower.includes('site')) return 'website';
+        if (lower.includes('app') || lower.includes('mobile')) return 'app';
+        if (lower.includes('?')) return 'question';
+
+        return 'general';
+      }
+
+      function getRandomResponse(arr) {
+        const available = arr.filter(r => !usedResponses.includes(r));
+        const options = available.length > 0 ? available : arr;
+        const response = options[Math.floor(Math.random() * options.length)];
+        usedResponses.push(response);
+        if (usedResponses.length > 8) usedResponses.shift();
+        return response;
+      }
+
+      function addMessage(text, type, isHtml = false) {
+        const msg = document.createElement('div');
+        msg.className = 'message ' + type + '-message';
+        if (type === 'bot') {
+          const avatar = document.createElement('img');
+          avatar.src = 'https://scar.lat/signature/chris-scarlat.gif';
+          avatar.alt = 'Chris';
+          avatar.className = 'bot-avatar';
+          msg.appendChild(avatar);
+        }
+        const content = document.createElement('div');
+        content.className = 'message-content';
+        content.innerHTML = isHtml ? text : '<p>' + text + '</p>';
+        msg.appendChild(content);
+        chatMessages.appendChild(msg);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+      }
+
+      function addMessageTyping(text, isHtml = false, callback = null) {
+        const typing = document.createElement('div');
+        typing.className = 'message bot-message typing-indicator';
+        typing.innerHTML = '<img src="https://scar.lat/signature/chris-scarlat.gif" alt="Chris" class="bot-avatar"><div class="message-content"><p>...</p></div>';
+        chatMessages.appendChild(typing);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+
+        setTimeout(() => {
+          typing.remove();
+          addMessage(text, 'bot', isHtml);
+          if (callback) callback();
+        }, 600 + Math.random() * 400);
+      }
+
+      function showProjectTypes() {
+        let btnsHtml = '<div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;">';
+        projectTypes.forEach(p => {
+          btnsHtml += `<button class="project-type-btn" data-type="${p.id}" style="padding:10px 14px;border:1px solid #ddd;border-radius:20px;background:#fff;cursor:pointer;font-size:13px;transition:all 0.2s;">${p.label}</button>`;
+        });
+        btnsHtml += '</div>';
+
+        const html = `<p>What are we building together?</p>${btnsHtml}`;
+        addMessageTyping(html, true, () => {
+          document.querySelectorAll('.project-type-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+              const typeId = this.dataset.type;
+              const type = projectTypes.find(p => p.id === typeId);
+              collectedInfo.projectType = type.label;
+              addMessage(type.label, 'user');
+              state = 'chatting';
+
+              if (typeId === 'other') {
+                setTimeout(() => addMessageTyping("Intriguing! I love unusual projects. Tell me what you have in mind."), 400);
+              } else {
+                const responses = [
+                  `${type.label.split(' ')[0]} Nice choice! Tell me a bit about it.`,
+                  `${type.label} – exciting! What's the story behind this project?`,
+                  `Love it! ${type.desc}. What's the vision?`,
+                  `Great pick! I've done quite a few of these. What makes yours special?`
+                ];
+                setTimeout(() => addMessageTyping(getRandomResponse(responses)), 400);
+              }
+            });
+
+            btn.addEventListener('mouseenter', function() {
+              this.style.borderColor = '#333';
+              this.style.background = '#f5f5f5';
+            });
+            btn.addEventListener('mouseleave', function() {
+              this.style.borderColor = '#ddd';
+              this.style.background = '#fff';
+            });
+          });
+        });
+      }
+
+      function showContactMethodToggle() {
+        const toggleHtml = `
+          <p>How do you prefer to be contacted?</p>
+          <div style="display:flex;gap:8px;margin-top:12px;">
+            <button class="contact-method-btn" data-method="email" style="flex:1;padding:12px 16px;border:1px solid #ddd;border-radius:20px;background:#fff;cursor:pointer;font-size:13px;transition:all 0.2s;">📧 Email</button>
+            <button class="contact-method-btn" data-method="mobile" style="flex:1;padding:12px 16px;border:1px solid #ddd;border-radius:20px;background:#fff;cursor:pointer;font-size:13px;transition:all 0.2s;">📱 Mobile</button>
+            <button class="contact-method-btn" data-method="linkedin" style="flex:1;padding:12px 16px;border:1px solid #ddd;border-radius:20px;background:#fff;cursor:pointer;font-size:13px;transition:all 0.2s;">💼 LinkedIn</button>
+          </div>
+        `;
+        addMessageTyping(toggleHtml, true, () => {
+          document.querySelectorAll('.contact-method-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+              const method = this.dataset.method;
+              collectedInfo.contactMethod = method;
+              addMessage(this.textContent, 'user');
+              state = 'asking_contact';
+
+              let prompt = '';
+              if (method === 'email') {
+                prompt = "Perfect! What's your email address?";
+              } else if (method === 'mobile') {
+                prompt = "Great! What's your phone number? (with country code)";
+              } else if (method === 'linkedin') {
+                prompt = "Nice! What's your LinkedIn URL or username?";
+              }
+              setTimeout(() => addMessageTyping(prompt), 400);
+            });
+
+            btn.addEventListener('mouseenter', function() {
+              this.style.borderColor = '#333';
+              this.style.background = '#f5f5f5';
+            });
+            btn.addEventListener('mouseleave', function() {
+              this.style.borderColor = '#ddd';
+              this.style.background = '#fff';
+            });
+          });
+        });
+      }
+
+      function addBudgetButtons() {
+        const checkStyle = 'color:#333;';
+        const uncheckStyle = 'color:#bbb;';
+
+        let cardsHtml = '';
+
+        if (mentionedSmallBudget) {
+          cardsHtml += `
+          <div class="chat-budget-btn" data-budget="Hourly (€100+VAT/hr)" style="padding:10px 12px;border:1px solid #ddd;border-radius:8px;background:#fff;cursor:pointer;transition:all 0.2s;margin-bottom:6px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+              <div style="font-size:15px;font-weight:700;color:#333;">€100/hr <span style="font-size:10px;font-weight:400;color:#666;">+VAT</span></div>
+              <div style="font-size:9px;color:#666;">Consulting</div>
+            </div>
+            <div style="font-size:10px;line-height:1.4;display:flex;flex-wrap:wrap;gap:2px 10px;">
+              <span style="${checkStyle}">✓ Strategy</span>
+              <span style="${checkStyle}">✓ Reviews</span>
+              <span style="${checkStyle}">✓ Quick fixes</span>
+              <span style="${uncheckStyle}">✗ Full brand</span>
+              <span style="${uncheckStyle}">✗ Website</span>
+            </div>
+          </div>`;
+        }
+
+        cardsHtml += `
+          <div class="chat-budget-btn" data-budget="€10k - Branding" style="padding:10px 12px;border:1px solid #ddd;border-radius:8px;background:#fff;cursor:pointer;transition:all 0.2s;margin-bottom:6px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+              <div><span style="font-size:10px;text-decoration:line-through;color:#999;">€20k</span> <span style="font-size:15px;font-weight:700;color:#e53935;">€10k</span></div>
+              <div style="font-size:9px;color:#e53935;font-weight:600;">50% OFF</div>
+            </div>
+            <div style="font-size:10px;line-height:1.4;display:flex;flex-wrap:wrap;gap:2px 10px;">
+              <span style="${checkStyle}">✓ Logo</span>
+              <span style="${checkStyle}">✓ Guidelines</span>
+              <span style="${checkStyle}">✓ Typography</span>
+              <span style="${checkStyle}">✓ Assets</span>
+              <span style="${uncheckStyle}">✗ Website</span>
+              <span style="${uncheckStyle}">✗ Photo/Video</span>
+            </div>
+          </div>
+
+          <div class="chat-budget-btn" data-budget="€20k - Brand + Web" style="padding:10px 12px;border:1px solid #ddd;border-radius:8px;background:#fff;cursor:pointer;transition:all 0.2s;margin-bottom:6px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+              <div><span style="font-size:10px;text-decoration:line-through;color:#999;">€40k</span> <span style="font-size:15px;font-weight:700;color:#e53935;">€20k</span></div>
+              <div style="font-size:9px;color:#e53935;font-weight:600;">50% OFF</div>
+            </div>
+            <div style="font-size:10px;line-height:1.4;display:flex;flex-wrap:wrap;gap:2px 10px;">
+              <span style="${checkStyle}">✓ Logo</span>
+              <span style="${checkStyle}">✓ Guidelines</span>
+              <span style="${checkStyle}">✓ Typography</span>
+              <span style="${checkStyle}">✓ Assets</span>
+              <span style="${checkStyle}">✓ Website</span>
+              <span style="${checkStyle}">✓ Responsive</span>
+              <span style="${uncheckStyle}">✗ Photo/Video</span>
+            </div>
+          </div>
+
+          <div class="chat-budget-btn" data-budget="€30k+ - Full Package" style="padding:10px 12px;border:1px solid #333;border-radius:8px;background:#f8f8f8;cursor:pointer;transition:all 0.2s;margin-bottom:6px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+              <div><span style="font-size:10px;text-decoration:line-through;color:#999;">€60k+</span> <span style="font-size:15px;font-weight:700;color:#e53935;">€30k+</span></div>
+              <div style="font-size:9px;color:#e53935;font-weight:600;">50% OFF</div>
+            </div>
+            <div style="font-size:10px;line-height:1.4;display:flex;flex-wrap:wrap;gap:2px 10px;">
+              <span style="${checkStyle}">✓ Logo</span>
+              <span style="${checkStyle}">✓ Guidelines</span>
+              <span style="${checkStyle}">✓ Assets</span>
+              <span style="${checkStyle}">✓ Website</span>
+              <span style="${checkStyle}">✓ Photo</span>
+              <span style="${checkStyle}">✓ Video/Motion</span>
+              <span style="${checkStyle}">✓ 3D</span>
+            </div>
+          </div>`;
+
+        const btnHtml = `
+          <p>Last question – what's your budget range?</p>
+          <p style="font-size:11px;color:#e53935;margin:8px 0 12px;font-weight:600;">🔥 LIMITED TIME: 50% OFF all packages!</p>
+          <div style="display:flex;flex-direction:column;">
+            ${cardsHtml}
+          </div>
+        `;
+        addMessageTyping(btnHtml, true, () => {
+          document.querySelectorAll('.chat-budget-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+              collectedInfo.budget = this.dataset.budget;
+              addMessage(this.dataset.budget, 'user');
+              state = 'done';
+              setTimeout(() => showInlineSummary(), 500);
+            });
+            btn.addEventListener('mouseenter', function() {
+              this.style.borderColor = '#333';
+              this.style.background = '#f5f5f5';
+            });
+            btn.addEventListener('mouseleave', function() {
+              if (this.dataset.budget.includes('30k')) {
+                this.style.borderColor = '#333';
+                this.style.background = '#fafafa';
+              } else {
+                this.style.borderColor = '#ddd';
+                this.style.background = '#fff';
+              }
+            });
+          });
+        });
+      }
+
+      function showInlineSummary() {
+        const contactLabel = collectedInfo.contactMethod === 'email' ? 'Email' :
+                            collectedInfo.contactMethod === 'mobile' ? 'Mobile' : 'LinkedIn';
+        let summary = `Hi Chris!\n\nName: ${collectedInfo.name}\nBrand: ${collectedInfo.brand || 'N/A'}\n${contactLabel}: ${collectedInfo.contact}\nProject: ${collectedInfo.projectType}\nBudget: ${collectedInfo.budget}\n\nDetails:\n${collectedInfo.projectDetails.join('\n')}`;
+
+        const summaryHtml = `
+          <p style="margin-bottom:10px;">Perfect! Here's your inquiry – feel free to edit:</p>
+          <textarea id="inline-summary" style="width:100%;height:140px;border:1px solid #ddd;border-radius:8px;padding:10px;font-size:12px;font-family:inherit;resize:none;margin-bottom:12px;">${summary}</textarea>
+          <div style="display:flex;gap:8px;">
+            <button id="btn-whatsapp" style="flex:1;padding:12px;background:#25D366;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;">📱 WhatsApp</button>
+            <button id="btn-email" style="flex:1;padding:12px;background:#333;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;">📧 Email</button>
+          </div>
+        `;
+        addMessageTyping(summaryHtml, true, () => {
+          document.getElementById('btn-whatsapp')?.addEventListener('click', () => {
+            const msg = document.getElementById('inline-summary').value;
+            window.open(`https://wa.me/491705958989?text=${encodeURIComponent(msg)}`, '_blank');
+            setTimeout(() => addMessageTyping("Sent! I'll reply within 24 hours. Talk soon! 🤙"), 300);
+          });
+
+          document.getElementById('btn-email')?.addEventListener('click', () => {
+            const msg = document.getElementById('inline-summary').value;
+            window.location.href = `mailto:chris@scar.lat?subject=Project Inquiry - ${collectedInfo.name}&body=${encodeURIComponent(msg)}`;
+            setTimeout(() => addMessageTyping("Email ready! Looking forward to connecting. ✌️"), 300);
+          });
+        });
+      }
+
+      function handleUserMessage() {
+        const text = chatInput.value.trim();
+        if (!text) return;
+
+        addMessage(text, 'user');
+        chatInput.value = '';
+
+        const lower = text.toLowerCase();
+        const intent = detectIntent(text);
+
+        // Check for small budget mention anytime
+        if (smallBudgetKeywords.some(k => lower.includes(k))) {
+          mentionedSmallBudget = true;
+        }
+
+        // State machine
+        if (state === 'intro') {
+          // Handle intro responses
+          if (intent === 'funny') {
+            setTimeout(() => {
+              addMessageTyping(getRandomResponse(funnyResponses), false, showProjectTypes);
+            }, 400);
+          } else if (intent === 'rude') {
+            setTimeout(() => {
+              addMessageTyping(getRandomResponse(rudeResponses), false, showProjectTypes);
+            }, 400);
+          } else if (intent === 'compliment') {
+            setTimeout(() => {
+              addMessageTyping(getRandomResponse(complimentResponses), false, showProjectTypes);
+            }, 400);
+          } else if (intent === 'greeting') {
+            setTimeout(() => {
+              addMessageTyping(getRandomResponse(greetingResponses), false, showProjectTypes);
+            }, 400);
+          } else {
+            collectedInfo.projectDetails.push(text);
+            state = 'chatting';
+            setTimeout(() => addMessageTyping("Interesting! " + getRandomResponse(generalFollowUps)), 400);
+          }
+          return;
+        }
+
+        if (state === 'select_project') {
+          collectedInfo.projectDetails.push(text);
+          state = 'chatting';
+          setTimeout(() => addMessageTyping(getRandomResponse(generalFollowUps)), 400);
+          return;
+        }
+
+        if (state === 'chatting') {
+          collectedInfo.projectDetails.push(text);
+          messageCount++;
+
+          if (intent === 'funny') {
+            setTimeout(() => addMessageTyping(getRandomResponse(funnyResponses)), 400);
+            return;
+          }
+
+          if (intent === 'low_budget') {
+            mentionedSmallBudget = true;
+            setTimeout(() => addMessageTyping(getRandomResponse(lowBudgetResponses)), 400);
+            return;
+          }
+
+          if (intent === 'budget') {
+            state = 'asking_name';
+            setTimeout(() => addMessageTyping("Good question! Quick – what's your name so I know who I'm talking to?"), 400);
+            return;
+          }
+
+          // After 2 messages, start collecting info
+          if (messageCount >= 2) {
+            state = 'asking_name';
+            setTimeout(() => addMessageTyping("Love it! Quick intro – what's your name?"), 400);
+            return;
+          }
+
+          setTimeout(() => addMessageTyping(getRandomResponse(generalFollowUps)), 400);
+          return;
+        }
+
+        if (state === 'asking_name') {
+          collectedInfo.name = text;
+          state = 'asking_brand';
+          const firstName = text.split(' ')[0];
+          setTimeout(() => addMessageTyping(`Great to meet you, ${firstName}! What's the brand or company called?`), 400);
+          return;
+        }
+
+        if (state === 'asking_brand') {
+          collectedInfo.brand = text;
+          state = 'asking_contact_method';
+          setTimeout(() => showContactMethodToggle(), 400);
+          return;
+        }
+
+        if (state === 'asking_contact') {
+          collectedInfo.contact = text;
+          state = 'asking_budget';
+          setTimeout(() => addBudgetButtons(), 400);
+          return;
+        }
+
+        // Default fallback
+        setTimeout(() => addMessageTyping("Hmm, tell me more about that!"), 400);
+      }
+
+      // Event listeners
+      if (chatSend) chatSend.addEventListener('click', handleUserMessage);
+      if (chatInput) chatInput.addEventListener('keypress', e => { if (e.key === 'Enter') handleUserMessage(); });
+
+      // Initialize with intro message
+      const initialMessage = document.querySelector('#initial-message .message-content');
+      if (initialMessage) {
+        initialMessage.innerHTML = `
+          <p style="margin-bottom:8px;"><strong>Hey! I'm Chris.</strong></p>
+          <p style="font-size:13px;line-height:1.5;color:#555;">Designer with 25+ years experience across 4 continents. I've branded some of the biggest projects and designed products used by millions.</p>
+          <p style="margin-top:10px;font-size:13px;">What brings you here today?</p>
+        `;
+      }
+
+      // Show project types after a short delay
+      setTimeout(() => {
+        state = 'select_project';
+        showProjectTypes();
+      }, 1500);
+    });
+  </script>
+  <style>
+    .country-selector { min-width: 90px !important; font-size: 14px !important; }
+    .country-code { font-size: 13px !important; }
+    .country-dropdown { min-width: 250px !important; }
+    .country-option { padding: 10px 12px !important; }
+    * { font-family: Helvetica, Arial, sans-serif !important; }
+    #images .item small .brand-name { font-size: 130% !important; font-weight: 600 !important; display: block; }
+    .typing-indicator .message-content p {
+      display: flex;
+      gap: 4px;
+      animation: typingPulse 1s ease-in-out infinite;
+    }
+    @keyframes typingPulse {
+      0%, 100% { opacity: 0.4; }
+      50% { opacity: 1; }
+    }
+    .chat-budget-btn:hover {
+      border-color: #333 !important;
+      background: #f5f5f5 !important;
+    }
+    /* Make chat scrollable on hover */
+    .chat-window:hover .chat-messages {
+      overflow-y: auto !important;
+    }
+    .chat-messages {
+      overflow-y: hidden;
+      scroll-behavior: smooth;
+    }
+    .chat-messages::-webkit-scrollbar {
+      width: 6px;
+    }
+    .chat-messages::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    .chat-messages::-webkit-scrollbar-thumb {
+      background: #ccc;
+      border-radius: 3px;
+    }
+    .chat-messages::-webkit-scrollbar-thumb:hover {
+      background: #999;
+    }
+  </style>
+</body>
+</html>
+
+
