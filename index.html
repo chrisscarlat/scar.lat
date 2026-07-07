@@ -800,75 +800,63 @@
       background: #999;
     }
 
-    /* ---- Case study detail (full-page) ---- */
+    /* ---- Case study detail (light side panel, à la draggable-grid) ---- */
     #hero #images .item { cursor: pointer; }
     #case-detail-overlay { position: fixed; inset: 0; z-index: 100000; visibility: hidden; }
     #case-detail-overlay.open { visibility: visible; }
-    .cd-page {
-      position: absolute; inset: 0; background: #0d0d10; color: #f4f4f6;
-      overflow-y: auto; overflow-x: hidden; -webkit-overflow-scrolling: touch;
-      opacity: 0; transition: opacity .4s ease;
+    .cd-backdrop { position: absolute; inset: 0; background: rgba(20,20,25,0); transition: background .45s ease; }
+    #case-detail-overlay.open .cd-backdrop { background: rgba(20,20,25,.30); }
+    .cd-panel {
+      position: absolute; top: 0; right: 0; height: 100%;
+      width: min(560px, 94vw);
+      background: #f1f1f1; color: #16161a;
+      overflow-y: auto; -webkit-overflow-scrolling: touch;
+      transform: translate3d(100%,0,0);
+      transition: transform .5s cubic-bezier(.33,1,.68,1);
+      box-shadow: -24px 0 70px rgba(0,0,0,.28);
     }
-    #case-detail-overlay.open .cd-page { opacity: 1; }
-    .cd-page::-webkit-scrollbar { width: 10px; }
-    .cd-page::-webkit-scrollbar-thumb { background: #33333c; border-radius: 5px; }
-
-    .cd-flip { position: fixed; top: 0; left: 0; z-index: 100002; object-fit: cover; pointer-events: none; display: none; will-change: transform, width, height; }
+    #case-detail-overlay.open .cd-panel { transform: translate3d(0,0,0); }
+    .cd-panel::-webkit-scrollbar { width: 8px; }
+    .cd-panel::-webkit-scrollbar-thumb { background: #cfcfca; border-radius: 4px; }
 
     .cd-close {
-      position: fixed; top: 20px; right: 22px; z-index: 100003;
-      width: 46px; height: 46px; border: none; border-radius: 50%;
-      background: rgba(255,255,255,.92); color: #111; font-size: 24px; line-height: 1;
-      cursor: pointer; display: flex; align-items: center; justify-content: center;
-      box-shadow: 0 4px 16px rgba(0,0,0,.3); transition: transform .25s ease, background .2s ease;
+      position: fixed; top: 22px; right: 22px; z-index: 100003;
+      width: 44px; height: 44px; border: none; border-radius: 50%;
+      background: #16161a; color: #fff; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0; transform: scale(.5); transition: opacity .35s ease .12s, transform .35s ease .12s, background .2s ease;
     }
-    .cd-close:hover { transform: scale(1.08) rotate(90deg); background: #fff; }
+    #case-detail-overlay.open .cd-close { opacity: 1; transform: scale(1); }
+    .cd-close:hover { background: #000; }
 
-    .cd-hero { position: relative; width: 100%; height: 68vh; min-height: 360px; overflow: hidden; background: #0a0a0c; }
+    .cd-hero { width: 100%; aspect-ratio: 16/11; overflow: hidden; background: #e6e6e1; }
     .cd-hero img { width: 100%; height: 100%; object-fit: cover; display: block; }
-    .cd-hero::after { content: ""; position: absolute; inset: 0; background: linear-gradient(to top, rgba(13,13,16,.94) 0%, rgba(13,13,16,.2) 45%, rgba(13,13,16,0) 78%); }
-    .cd-hero-cap { position: absolute; left: 0; right: 0; bottom: 0; z-index: 2; padding: 0 6vw 44px; }
-    .cd-hero-cap h1 { font-size: clamp(30px, 6vw, 66px); font-weight: 700; letter-spacing: -.02em; margin: 0; line-height: 1.03; }
 
-    .cd-meta {
-      display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px;
-      max-width: 1100px; margin: 0 auto; padding: 40px 6vw 14px;
-      border-bottom: 1px solid rgba(255,255,255,.1);
-    }
-    .cd-meta > div { display: flex; flex-direction: column; gap: 5px; }
-    .cd-meta span { font-size: 11px; text-transform: uppercase; letter-spacing: .14em; color: #8a8a95; }
-    .cd-meta strong { font-size: 16px; font-weight: 600; }
+    .cd-inner { padding: 34px 40px 56px; }
+    .cd-title { font-size: clamp(28px, 4.6vw, 42px); font-weight: 700; letter-spacing: -.02em; line-height: 1.04; margin: 0 0 18px; }
+    .cd-meta { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px 20px; padding: 18px 0 22px; border-top: 1px solid rgba(0,0,0,.12); border-bottom: 1px solid rgba(0,0,0,.12); margin-bottom: 26px; }
+    .cd-meta > div { display: flex; flex-direction: column; gap: 3px; }
+    .cd-meta span { font-size: 11px; text-transform: uppercase; letter-spacing: .12em; color: #8a8a85; }
+    .cd-meta strong { font-size: 15px; font-weight: 600; }
+    .cd-desc p { font-size: 16px; line-height: 1.62; color: #33332f; margin: 0 0 16px; }
 
-    .cd-body { max-width: 1100px; margin: 0 auto; padding: 8px 6vw 0; }
-    .cd-text { max-width: 720px; margin: 46px auto; }
-    .cd-text p { font-size: clamp(17px, 2.1vw, 21px); line-height: 1.62; color: #d9d9df; margin: 0; }
-    .cd-figure { margin: 40px 0; border-radius: 14px; overflow: hidden; background: #17171c; }
-    .cd-figure img { width: 100%; height: auto; display: block; }
+    .cd-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin: 28px 0 8px; }
+    .cd-grid figure { margin: 0; aspect-ratio: 1/1; overflow: hidden; border-radius: 10px; background: #e6e6e1; }
+    .cd-grid figure.wide { grid-column: 1 / -1; aspect-ratio: 16/10; }
+    .cd-grid img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .5s ease; }
+    .cd-grid figure:hover img { transform: scale(1.05); }
 
-    .cd-gallery { margin: 54px 0; }
-    .cd-gallery-hint { max-width: 1100px; margin: 0 auto 14px; padding: 0 6vw; font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: #7a7a85; }
-    .cd-gallery-track {
-      display: flex; gap: 18px; overflow-x: auto; padding: 0 6vw 16px;
-      scroll-snap-type: x proximity; cursor: grab; scrollbar-width: thin;
-    }
-    .cd-gallery-track.dragging { cursor: grabbing; scroll-snap-type: none; }
-    .cd-gallery-track::-webkit-scrollbar { height: 8px; }
-    .cd-gallery-track::-webkit-scrollbar-thumb { background: #33333c; border-radius: 4px; }
-    .cd-gallery-track figure { flex: 0 0 auto; width: min(72vw, 520px); height: 340px; margin: 0; border-radius: 12px; overflow: hidden; background: #17171c; scroll-snap-align: start; }
-    .cd-gallery-track figure img { width: 100%; height: 100%; object-fit: cover; display: block; pointer-events: none; }
+    .cd-cta { text-align: center; padding: 52px 0 8px; }
+    .cd-cta h2 { font-size: clamp(26px, 4.4vw, 38px); font-weight: 700; letter-spacing: -.02em; margin: 0 0 8px; }
+    .cd-cta p { font-size: 16px; color: #6a6a64; margin: 0 0 22px; }
+    .cd-cta-btn { display: inline-block; padding: 14px 30px; border: none; border-radius: 40px; background: #16161a; color: #fff; font-size: 15px; font-weight: 600; cursor: pointer; transition: transform .2s ease; }
+    .cd-cta-btn:hover { transform: translateY(-2px); }
+    .cd-cta-link { display: inline-block; margin-top: 16px; color: #8a8a85; font-size: 13px; text-decoration: none; }
+    .cd-cta-link:hover { color: #16161a; }
 
-    .cd-cta { text-align: center; padding: 96px 6vw 116px; }
-    .cd-cta h2 { font-size: clamp(34px, 6vw, 62px); font-weight: 700; letter-spacing: -.02em; margin: 0 0 10px; }
-    .cd-cta p { font-size: 20px; color: #b9b9c2; margin: 0 0 30px; }
-    .cd-cta-btn { display: inline-block; padding: 16px 34px; border: none; border-radius: 40px; background: #fff; color: #0d0d10; font-size: 16px; font-weight: 600; cursor: pointer; transition: transform .2s ease, box-shadow .2s ease; }
-    .cd-cta-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(255,255,255,.18); }
-    .cd-cta-link { display: inline-block; margin-top: 20px; color: #8a8a95; font-size: 14px; text-decoration: none; }
-    .cd-cta-link:hover { color: #fff; }
-
-    @media (max-width: 720px) {
-      .cd-meta { grid-template-columns: repeat(2, 1fr); }
-      .cd-hero { height: 56vh; }
-      .cd-text { margin: 34px auto; }
+    @media (max-width: 600px) {
+      .cd-inner { padding: 26px 22px 46px; }
+      .cd-close { top: 14px; right: 14px; }
     }
 
     /* ---- Chat window: equal gap top and bottom ---- */
@@ -888,11 +876,13 @@
     #google_translate_element { display: none !important; }
   </style>
 
-  <!-- Case study detail (full-page) -->
+  <!-- Case study detail (side panel) -->
   <div id="case-detail-overlay" aria-hidden="true">
-    <div class="cd-page" role="dialog" aria-modal="true" aria-labelledby="cd-title"></div>
-    <button class="cd-close" aria-label="Close case study">&times;</button>
-    <img class="cd-flip" alt="" />
+    <div class="cd-backdrop"></div>
+    <aside class="cd-panel" role="dialog" aria-modal="true" aria-labelledby="cd-title"></aside>
+    <button class="cd-close" aria-label="Close case study">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+    </button>
   </div>
 
   <script src="./assets/case-studies.js"></script>
@@ -901,103 +891,55 @@
       var DATA = window.CASE_STUDIES || {};
       var overlay = document.getElementById('case-detail-overlay');
       if (!overlay) return;
-      var page = overlay.querySelector('.cd-page');
-      var flip = overlay.querySelector('.cd-flip');
+      var panel = overlay.querySelector('.cd-panel');
 
       function esc(s) { var d = document.createElement('div'); d.textContent = (s == null ? '' : s); return d.innerHTML; }
       function metaCell(label, val, keep) { return '<div><span>' + esc(label) + '</span><strong' + (keep ? ' class="notranslate" translate="no"' : '') + '>' + esc(val || '—') + '</strong></div>'; }
-      function galleryHtml(list) {
-        return '<div class="cd-gallery"><p class="cd-gallery-hint">Drag to explore →</p><div class="cd-gallery-track">'
-          + list.map(function (u) { return '<figure><img loading="lazy" src="' + u + '" alt=""></figure>'; }).join('')
-          + '</div></div>';
-      }
 
       function build(d) {
-        var paras = d.paras || [], imgs = (d.images || []).slice(), ii = 0;
-        function nextImg() { return ii < imgs.length ? imgs[ii++] : null; }
-        function txt(p) { return p ? '<div class="cd-text"><p>' + esc(p) + '</p></div>' : ''; }
-        function fig(u) { return u ? '<figure class="cd-figure"><img loading="lazy" src="' + u + '" alt=""></figure>' : ''; }
-
+        var imgs = (d.images || []).slice(), paras = d.paras || [];
         var h = '';
-        h += '<div class="cd-hero"><img src="' + d.hero + '" alt="' + esc(d.title) + '"><div class="cd-hero-cap"><h1 id="cd-title" class="notranslate" translate="no">' + esc(d.title) + '</h1></div></div>';
+        h += '<div class="cd-hero"><img src="' + d.hero + '" alt="' + esc(d.title) + '"></div>';
+        h += '<div class="cd-inner">';
+        h += '<h1 class="cd-title notranslate" translate="no" id="cd-title">' + esc(d.title) + '</h1>';
         h += '<div class="cd-meta">' + metaCell('Client', d.client, true) + metaCell('City', d.city) + metaCell('Industry', d.industry) + metaCell('Year', d.year) + '</div>';
-
-        // text / image / text / image  ->  gallery  ->  text / image / text / image
-        h += '<div class="cd-body">';
-        h += txt(paras[0]) + fig(nextImg()) + txt(paras[1]) + fig(nextImg());
-        if (imgs.length - ii >= 4) {
-          var galEnd = imgs.length - 2;
-          var gal = imgs.slice(ii, galEnd); ii = galEnd;
-          h += '</div>' + galleryHtml(gal) + '<div class="cd-body">';
+        h += '<div class="cd-desc">' + paras.map(function (p) { return '<p>' + esc(p) + '</p>'; }).join('') + '</div>';
+        if (imgs.length) {
+          h += '<div class="cd-grid">' + imgs.map(function (u, i) {
+            var wide = (i % 5 === 0) ? ' class="wide"' : '';
+            return '<figure' + wide + '><img loading="lazy" src="' + u + '" alt=""></figure>';
+          }).join('') + '</div>';
         }
-        h += txt(paras[2]) + fig(nextImg()) + txt(paras[3]) + fig(nextImg());
-        h += '</div>';
-        if (ii < imgs.length) h += galleryHtml(imgs.slice(ii));
-
-        h += '<div class="cd-cta"><h2>Impressed?</h2><p>Let’s have a chat.</p>'
-          + '<button class="cd-cta-btn" type="button">Start a chat →</button>';
+        h += '<div class="cd-cta"><h2>Impressed?</h2><p>Let’s have a chat.</p><button class="cd-cta-btn" type="button">Start a chat →</button>';
         if (d.url) h += '<br><a class="cd-cta-link" href="' + d.url + '" target="_blank" rel="noopener">Or view the full case on cultural.design →</a>';
-        h += '</div>';
+        h += '</div></div>';
         return h;
       }
 
-      function initGalleries() {
-        page.querySelectorAll('.cd-gallery-track').forEach(function (tr) {
-          var down = false, sx = 0, sl = 0;
-          tr.addEventListener('pointerdown', function (e) { down = true; tr.classList.add('dragging'); sx = e.clientX; sl = tr.scrollLeft; try { tr.setPointerCapture(e.pointerId); } catch (x) {} });
-          tr.addEventListener('pointermove', function (e) { if (down) tr.scrollLeft = sl - (e.clientX - sx); });
-          function up() { down = false; tr.classList.remove('dragging'); }
-          tr.addEventListener('pointerup', up);
-          tr.addEventListener('pointercancel', up);
-          tr.addEventListener('wheel', function (e) { if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) { tr.scrollLeft += e.deltaY; e.preventDefault(); } }, { passive: false });
-        });
-      }
-
-      function openCase(key, originEl) {
+      function openCase(key) {
         var d = DATA[key];
         if (!d) return;
-        page.innerHTML = build(d);
-        page.scrollTop = 0;
-        var cta = page.querySelector('.cd-cta-btn');
+        panel.innerHTML = build(d);
+        panel.scrollTop = 0;
+        var cta = panel.querySelector('.cd-cta-btn');
         if (cta) cta.addEventListener('click', function () {
           closeCase();
           var t = document.querySelector('.chat-toggle');
-          if (t) setTimeout(function () { t.click(); }, 380);
+          if (t) setTimeout(function () { t.click(); }, 420);
         });
-        initGalleries();
         document.body.style.overflow = 'hidden';
         overlay.classList.add('open');
         overlay.setAttribute('aria-hidden', 'false');
-
-        // FLIP-style open: expand the clicked image into the hero.
-        if (originEl && originEl.getBoundingClientRect) {
-          var r = originEl.getBoundingClientRect();
-          var heroH = Math.max(360, window.innerHeight * 0.68);
-          flip.src = d.hero;
-          flip.style.transition = 'none';
-          flip.style.display = 'block';
-          flip.style.width = r.width + 'px';
-          flip.style.height = r.height + 'px';
-          flip.style.transform = 'translate(' + r.left + 'px,' + r.top + 'px)';
-          void flip.offsetWidth;
-          requestAnimationFrame(function () {
-            flip.style.transition = 'transform .55s cubic-bezier(.6,.02,.2,1), width .55s cubic-bezier(.6,.02,.2,1), height .55s cubic-bezier(.6,.02,.2,1)';
-            flip.style.width = window.innerWidth + 'px';
-            flip.style.height = heroH + 'px';
-            flip.style.transform = 'translate(0px,0px)';
-          });
-          setTimeout(function () { flip.style.display = 'none'; }, 640);
-        }
       }
 
       function closeCase() {
         overlay.classList.remove('open');
         overlay.setAttribute('aria-hidden', 'true');
         document.body.style.overflow = '';
-        flip.style.display = 'none';
       }
 
       overlay.querySelector('.cd-close').addEventListener('click', closeCase);
+      overlay.querySelector('.cd-backdrop').addEventListener('click', closeCase);
       document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && overlay.classList.contains('open')) closeCase(); });
 
       // Resolve a grid item to a case by its brand-name caption.
@@ -1020,7 +962,7 @@
         if (!key) return;
         e.preventDefault();
         e.stopPropagation();
-        openCase(key, item.querySelector('.item-image, img') || item);
+        openCase(key);
       }, true);
     })();
   </script>
