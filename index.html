@@ -799,6 +799,331 @@
     .chat-messages::-webkit-scrollbar-thumb:hover {
       background: #999;
     }
+
+    /* ---- Case study detail overlay ---- */
+    #hero #images .item { cursor: pointer; }
+    #case-detail-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 100000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity .35s ease, visibility .35s ease;
+    }
+    #case-detail-overlay.open { opacity: 1; visibility: visible; }
+    #case-detail-overlay .case-detail-backdrop {
+      position: absolute;
+      inset: 0;
+      background: rgba(15, 15, 17, 0.55);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+    }
+    #case-detail-overlay .case-detail-panel {
+      position: relative;
+      width: min(760px, 92vw);
+      max-height: 90vh;
+      background: #fff;
+      color: #14141a;
+      border-radius: 18px;
+      overflow: hidden;
+      box-shadow: 0 30px 80px rgba(0,0,0,.45);
+      transform: translateY(24px) scale(.985);
+      transition: transform .35s cubic-bezier(.2,.8,.2,1);
+      display: flex;
+      flex-direction: column;
+    }
+    #case-detail-overlay.open .case-detail-panel { transform: translateY(0) scale(1); }
+    #case-detail-overlay .case-detail-close {
+      position: absolute;
+      top: 14px;
+      right: 14px;
+      z-index: 3;
+      width: 40px;
+      height: 40px;
+      border: none;
+      border-radius: 50%;
+      background: rgba(255,255,255,.9);
+      color: #14141a;
+      font-size: 22px;
+      line-height: 1;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 2px 10px rgba(0,0,0,.2);
+      transition: background .2s ease, transform .2s ease;
+    }
+    #case-detail-overlay .case-detail-close:hover { background: #fff; transform: scale(1.06); }
+    #case-detail-overlay .case-detail-scroll {
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    #case-detail-overlay .case-detail-media {
+      width: 100%;
+      aspect-ratio: 16 / 10;
+      background: #f2f2f4;
+      overflow: hidden;
+    }
+    #case-detail-overlay .case-detail-media img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    #case-detail-overlay .case-detail-body {
+      padding: 30px 36px 40px;
+    }
+    #case-detail-overlay .case-detail-title {
+      font-size: 26px;
+      font-weight: 700;
+      letter-spacing: -.01em;
+      margin: 0 0 6px;
+    }
+    #case-detail-overlay .case-detail-meta {
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      color: #8a8a93;
+      margin: 0 0 20px;
+    }
+    #case-detail-overlay .case-detail-desc {
+      font-size: 16px;
+      line-height: 1.62;
+      color: #33333b;
+    }
+    #case-detail-overlay .case-detail-link {
+      display: inline-block;
+      margin-top: 24px;
+      padding: 12px 20px;
+      border-radius: 30px;
+      background: #14141a;
+      color: #fff !important;
+      font-size: 14px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: opacity .2s ease;
+    }
+    #case-detail-overlay .case-detail-link:hover { opacity: .82; }
+    @media (max-width: 600px) {
+      #case-detail-overlay .case-detail-body { padding: 24px 22px 32px; }
+      #case-detail-overlay .case-detail-title { font-size: 22px; }
+    }
   </style>
+
+  <!-- Case study detail overlay -->
+  <div id="case-detail-overlay" aria-hidden="true">
+    <div class="case-detail-backdrop"></div>
+    <div class="case-detail-panel" role="dialog" aria-modal="true" aria-labelledby="case-detail-title">
+      <button class="case-detail-close" aria-label="Close">&times;</button>
+      <div class="case-detail-scroll">
+        <div class="case-detail-media"><img alt="" /></div>
+        <div class="case-detail-body">
+          <h2 class="case-detail-title" id="case-detail-title"></h2>
+          <p class="case-detail-meta"></p>
+          <div class="case-detail-desc"></div>
+          <a class="case-detail-link" target="_blank" rel="noopener">View full case study on cultural.design &rarr;</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      // Case studies — descriptions sourced from cultural.design, imagery from local /img.
+      // Keyed by the image filename used in the homepage grid.
+      var CASES = {
+        'tiptrace.gif': {
+          img: './img/tiptrace.gif',
+          title: 'TipTrace',
+          meta: 'Branding & Web Design · Amsterdam · 2013',
+          desc: 'A rebrand of the Share2Reward ambassador platform into TipTrace — a mascot-driven identity built around a well-trained rooster that targets information only at genuinely interested people rather than broadcasting indiscriminately. The work spanned character design, a six-panel comic explaining targeted sharing, a farm-world environment, and a full website, positioning brand ambassadors as educated communicators rewarded for strategic, non-spam engagement.',
+          url: 'https://www.cultural.design/portfolio/tiptrace/'
+        },
+        '1618.gif': {
+          img: './img/1618.gif',
+          title: '1618 Jewelry™',
+          meta: 'Branding · Wrocław · 2016',
+          desc: 'A rebrand of Przemysław Wańczyk’s jewelry studio, moving from the initials-based pwitems.com to “1618 Jewelry” — a name drawn from the Golden Ratio (1.618) found throughout nature. The studio harvests metals from its mountain region and casts patterns and molds from the garden, so the identity ties the maker’s craft philosophy to universal mathematical harmony.',
+          url: 'https://www.cultural.design/portfolio/1618-jewelry/'
+        },
+        'coee.jpg': {
+          img: './img/coee.jpg',
+          title: 'The College of Extraordinary Experiences',
+          meta: 'Experience-Design Festival Branding · Czocha Castle, Poland · 2015–Present',
+          desc: 'A multi-year branding system for an immersive-education conference held in a 13th-century Polish castle. Each year gets its own evolving emblem — Owl of Knowledge, Hydra, Tower, Wolf — around consistent values (Flexible Focus, Co-Creation, Rapid Prototyping), supported by custom typefaces, collateral and physical artifacts like commemorative pins and illustrated cards. Created alongside Joe Pine (author of The Experience Economy), Mark Ordesky (producer, Lord of the Rings) and John Law (co-founder, Burning Man).',
+          url: 'https://www.cultural.design/portfolio/the-college-of-extraordinary-experiences/'
+        },
+        'detect.gif': {
+          img: './img/detect.gif',
+          title: 'Detect Classic Festival',
+          meta: 'Rebranding, Print & Digital · Berlin · 2018–19',
+          desc: 'A rebrand of a three-day festival blending classical and electronic music into one strategic visual identity. “Pomegranate Orange” carries the classical side and “Electric Violet” the electronic, unified by a D/C logo built from radar / detector imagery. The system runs across posters with augmented-reality layers, social assets with venue maps, and full print and digital materials.',
+          url: 'https://www.cultural.design/portfolio/detect-classic-festival/'
+        },
+        'grover.jpg': {
+          img: './img/grover.jpg',
+          title: 'Grover',
+          meta: 'Chief Creative Officer · Brand, Web, Product · Berlin · 2016–2018',
+          desc: 'Chief Creative Officer for the circular tech-rental platform Grover — a full brand refresh and digital transformation run live, without pausing a few hundred daily conversions. The work untangled 16,000+ lines of conflicting CSS into a coded, atomic component library; established purple as the fintech-distinct brand color and a “Rent with Grover” button pattern; and reworked sign-in, registration, checkout and dashboards. It also spun up MONTAG, a dystopian magazine, as a parallel cultural project.',
+          url: 'https://www.cultural.design/portfolio/grover/'
+        },
+        'hs-white500.gif': {
+          img: './img/hs-white500.gif',
+          title: 'HS White',
+          meta: 'Mobile Web Demo',
+          desc: 'A mobile-web demo exploring a clean, high-contrast product interface — focused on legible typography and a crisp, minimal layout system.'
+        },
+        'chris-scarlat.png': {
+          img: './img/chris-scarlat.png',
+          title: 'Chris Scarlat',
+          meta: 'Full-Stack Designer · CXO',
+          desc: 'Full-stack designer and Chief Experience Officer with 25+ years across four continents — spanning brand, product, service and experience design. Recent focus: AI branding and product design for companies such as Aleph Alpha, Vara AI, Empion AI and Neuroflash.',
+          url: 'https://linkedin.com/in/scarlat'
+        },
+        'moonbase2.gif': {
+          img: './img/moonbase2.gif',
+          title: 'Moonbase Social',
+          meta: 'Rebranding, Web Design & Code · Berlin · 2020',
+          desc: 'A rebrand plus website design and build for Moonbase Social — identity, web design and front-end code delivered end to end.'
+        },
+        'realfarm.gif': {
+          img: './img/realfarm.gif',
+          title: 'Real Farm Game',
+          meta: 'Game UI/UX Redesign & Launch Strategy · Seoul · 2013–2014',
+          desc: 'A redesign of the farming game Real Farm for European and US markets. The 2D-painted original was modernized into 3D assets inspired by Studio Ghibli while keeping its Asian cuteness — fixing a weird camera angle and heavy parallax code along the way. The work included a reworked UX architecture, thematic building packages researched at UNESCO heritage sites, and 3D elements prepared for future augmented-reality integration.',
+          url: 'https://www.cultural.design/portfolio/real-farm/'
+        },
+        'stegreif.png': {
+          img: './img/stegreif.png',
+          title: 'Stegreif Orchestra',
+          meta: 'Rebranding, Albums & Merch · Berlin · 2016–2018',
+          desc: 'A comprehensive rebrand for Berlin’s improvising, conductor-less orchestra. The identity reimagines the letter “S” as multiple sound waves emanating from a central point — an abstract picture of many musicians radiating from one source — replacing the earlier 2017 mark and carrying through albums, merch, print and event materials. The album covers are AR-enabled via the Artivive app.',
+          url: 'https://www.cultural.design/portfolio/stegreif/'
+        },
+        'tedx.jpg': {
+          img: './img/tedx.jpg',
+          title: 'TEDx Amsterdam',
+          meta: 'Print Design · Amsterdam · 2012',
+          desc: 'A cut-and-fold flyer for TEDx Amsterdam — print design as three-dimensional paper engineering. Creative folding turned the conference program into an interactive, tactile object, giving the Technology, Entertainment & Design event a memorable physical presence in the Dutch capital.',
+          url: 'https://www.cultural.design/portfolio/tedx-amsterdam/'
+        },
+        'amazon.gif': {
+          img: './img/amazon.gif',
+          title: 'Amazon Germany Credit Card App',
+          meta: 'Solo UX/UI Designer (Freelance) · Munich · 2018–2020',
+          desc: 'Solo UX/UI designer, on a freelance basis, for the Amazon Germany credit-card app used daily by around two million users. The work covered the end-to-end product experience — onboarding, account management and daily-use flows — at Amazon-scale reliability and polish.',
+          url: 'https://www.cultural.design/portfolio/amazon/'
+        },
+        'wwwdistrict.mp4': {
+          img: './img/district1.png',
+          title: 'DISTRICT VR',
+          meta: 'Branding, Game Design & Web Design · Berlin · 2024',
+          desc: 'Branding, game design and web design for DISTRICT — a VR, DJ and festival project. Immersive world-building that bridges club culture and virtual space, delivered as Chief Creative Officer.',
+          url: 'https://district.berlin'
+        },
+        'amorf.gif': {
+          img: './img/amorf.gif',
+          title: 'amorf band',
+          meta: 'Album Design · Bucharest · 2024',
+          desc: 'Album design for the band amorf — art direction and cover design translating the record’s mood into a bold, cohesive visual identity.'
+        },
+        'phoenix.gif': {
+          img: './img/phoenix.gif',
+          title: 'Transsylvania Phoenix',
+          meta: '50th-Anniversary Rebrand · Bucharest · 2024',
+          desc: 'A 50th-anniversary rebrand for Transsylvania Phoenix, one of Romania’s most storied rock bands — honoring five decades of legacy while refreshing the mark for a new era.'
+        }
+      };
+
+      var overlay = document.getElementById('case-detail-overlay');
+      if (!overlay) return;
+      var panelImg = overlay.querySelector('.case-detail-media img');
+      var elTitle = overlay.querySelector('.case-detail-title');
+      var elMeta = overlay.querySelector('.case-detail-meta');
+      var elDesc = overlay.querySelector('.case-detail-desc');
+      var elLink = overlay.querySelector('.case-detail-link');
+      var scroller = overlay.querySelector('.case-detail-scroll');
+
+      function openCase(key) {
+        var d = CASES[key];
+        if (!d) return;
+        panelImg.src = d.img;
+        panelImg.alt = d.title;
+        elTitle.textContent = d.title;
+        elMeta.textContent = d.meta || '';
+        elDesc.textContent = d.desc || '';
+        if (d.url) { elLink.href = d.url; elLink.style.display = 'inline-block'; }
+        else { elLink.style.display = 'none'; }
+        if (scroller) scroller.scrollTop = 0;
+        overlay.classList.add('open');
+        overlay.setAttribute('aria-hidden', 'false');
+        document.body.style.overflow = 'hidden';
+      }
+      function closeCase() {
+        overlay.classList.remove('open');
+        overlay.setAttribute('aria-hidden', 'true');
+        document.body.style.overflow = '';
+      }
+
+      overlay.querySelector('.case-detail-close').addEventListener('click', closeCase);
+      overlay.querySelector('.case-detail-backdrop').addEventListener('click', closeCase);
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && overlay.classList.contains('open')) closeCase();
+      });
+
+      // Map each grid caption's brand name to its case key.
+      // (Keyed by brand text, not media filename — the grid's video items
+      // misalign image/caption order, so filename matching is unreliable.)
+      var BRAND_TO_KEY = {
+        'TipTrace': 'tiptrace.gif',
+        '1618 Jewelry™': '1618.gif',
+        'The College of Extraordinary Experiences': 'coee.jpg',
+        'DETECT CLASSIC FESTIVAL 2019': 'detect.gif',
+        'Grover': 'grover.jpg',
+        'HS White Demo': 'hs-white500.gif',
+        'Chris Scarlat': 'chris-scarlat.png',
+        'Moonbase Social': 'moonbase2.gif',
+        'Real Farm Game': 'realfarm.gif',
+        'Stegreif Orchestra': 'stegreif.png',
+        'TEDx Amsterdam': 'tedx.jpg',
+        'Amazon Germany Credit Card App': 'amazon.gif',
+        'DISTRICT VR': 'wwwdistrict.mp4',
+        'amorf band': 'amorf.gif',
+        'Transsylvania Phoenix Rock Band': 'phoenix.gif'
+      };
+
+      // Resolve which case a grid item belongs to, by its brand-name caption.
+      function keyForItem(item) {
+        var bn = item.querySelector('.brand-name');
+        var brand = bn ? bn.textContent.trim() : '';
+        var key = BRAND_TO_KEY[brand];
+        return (key && CASES[key]) ? key : null;
+      }
+
+      // Delegated, drag-aware click handling on the infinite grid.
+      var grid = document.getElementById('images');
+      if (!grid) return;
+      var downX = 0, downY = 0, dragged = false;
+      grid.addEventListener('pointerdown', function (e) {
+        downX = e.clientX; downY = e.clientY; dragged = false;
+      }, true);
+      grid.addEventListener('pointermove', function (e) {
+        if (Math.abs(e.clientX - downX) > 8 || Math.abs(e.clientY - downY) > 8) dragged = true;
+      }, true);
+      grid.addEventListener('click', function (e) {
+        if (dragged) return;
+        var item = e.target.closest('.item');
+        if (!item) return;
+        var key = keyForItem(item);
+        if (!key) return;
+        e.preventDefault();
+        e.stopPropagation();
+        openCase(key);
+      }, true);
+    })();
+  </script>
 </body>
 </html>
