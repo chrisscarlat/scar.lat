@@ -870,6 +870,22 @@
       .cd-hero { height: 56vh; }
       .cd-text { margin: 34px auto; }
     }
+
+    /* ---- Chat window: equal gap top and bottom ---- */
+    .chat-widget .chat-window { top: 20px !important; }
+
+    /* ---- Logos: never crop, add breathing room ---- */
+    #hero #images .item-image.logo-item img {
+      object-fit: contain !important;
+      padding: 15% !important;
+      box-sizing: border-box !important;
+    }
+
+    /* ---- Google Translate: hide banner & keep layout stable ---- */
+    .goog-te-banner-frame, .skiptranslate iframe, #goog-gt-tt, .goog-te-balloon-frame { display: none !important; }
+    body { top: 0 !important; }
+    .goog-text-highlight { background: none !important; box-shadow: none !important; }
+    #google_translate_element { display: none !important; }
   </style>
 
   <!-- Case study detail (full-page) -->
@@ -889,7 +905,7 @@
       var flip = overlay.querySelector('.cd-flip');
 
       function esc(s) { var d = document.createElement('div'); d.textContent = (s == null ? '' : s); return d.innerHTML; }
-      function metaCell(label, val) { return '<div><span>' + esc(label) + '</span><strong>' + esc(val || '—') + '</strong></div>'; }
+      function metaCell(label, val, keep) { return '<div><span>' + esc(label) + '</span><strong' + (keep ? ' class="notranslate" translate="no"' : '') + '>' + esc(val || '—') + '</strong></div>'; }
       function galleryHtml(list) {
         return '<div class="cd-gallery"><p class="cd-gallery-hint">Drag to explore →</p><div class="cd-gallery-track">'
           + list.map(function (u) { return '<figure><img loading="lazy" src="' + u + '" alt=""></figure>'; }).join('')
@@ -903,8 +919,8 @@
         function fig(u) { return u ? '<figure class="cd-figure"><img loading="lazy" src="' + u + '" alt=""></figure>' : ''; }
 
         var h = '';
-        h += '<div class="cd-hero"><img src="' + d.hero + '" alt="' + esc(d.title) + '"><div class="cd-hero-cap"><h1 id="cd-title">' + esc(d.title) + '</h1></div></div>';
-        h += '<div class="cd-meta">' + metaCell('Client', d.client) + metaCell('City', d.city) + metaCell('Industry', d.industry) + metaCell('Year', d.year) + '</div>';
+        h += '<div class="cd-hero"><img src="' + d.hero + '" alt="' + esc(d.title) + '"><div class="cd-hero-cap"><h1 id="cd-title" class="notranslate" translate="no">' + esc(d.title) + '</h1></div></div>';
+        h += '<div class="cd-meta">' + metaCell('Client', d.client, true) + metaCell('City', d.city) + metaCell('Industry', d.industry) + metaCell('Year', d.year) + '</div>';
 
         // text / image / text / image  ->  gallery  ->  text / image / text / image
         h += '<div class="cd-body">';
@@ -1006,6 +1022,70 @@
         e.stopPropagation();
         openCase(key, item.querySelector('.item-image, img') || item);
       }, true);
+    })();
+  </script>
+
+  <!-- Instant whole-page translation (brand names excluded) -->
+  <div id="google_translate_element"></div>
+  <script>
+    function googleTranslateElementInit() {
+      new google.translate.TranslateElement({
+        pageLanguage: 'en',
+        includedLanguages: 'en,de,ko,ja,es',
+        autoDisplay: false
+      }, 'google_translate_element');
+    }
+  </script>
+  <script src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+  <script>
+    (function () {
+      // scar.lat UI code -> Google Translate language codes
+      var LANG = { en: 'en', de: 'de', kr: 'ko', jp: 'ja', es: 'es' };
+
+      // Keep brand names / proper nouns out of translation.
+      function markNoTranslate() {
+        var sels = ['.brand-name', '.frame-left h1', '.frame-left h1 a', '.nav-linkedin'];
+        sels.forEach(function (s) {
+          document.querySelectorAll(s).forEach(function (el) {
+            el.classList.add('notranslate');
+            el.setAttribute('translate', 'no');
+          });
+        });
+      }
+      // Grid captions render slightly after load; mark a few times, then watch.
+      var passes = 0;
+      var iv = setInterval(function () { markNoTranslate(); if (++passes > 12) clearInterval(iv); }, 400);
+      if (window.MutationObserver) {
+        var grid = document.getElementById('images');
+        if (grid) new MutationObserver(markNoTranslate).observe(grid, { childList: true, subtree: true });
+      }
+
+      // Drive the (hidden) Google widget's language <select>.
+      function setGoogLang(code) {
+        var tries = 0;
+        var t = setInterval(function () {
+          var sel = document.querySelector('select.goog-te-combo');
+          if (sel) {
+            clearInterval(t);
+            markNoTranslate();
+            sel.value = code;
+            sel.dispatchEvent(new Event('change'));
+          } else if (++tries > 25) {
+            clearInterval(t);
+          }
+        }, 200);
+      }
+
+      // Hijack the existing EN/DE/KR/JP/ES buttons (capture phase beats the
+      // bundle's own dictionary handler, so Google Translate drives everything).
+      document.querySelectorAll('.lang-btn').forEach(function (btn) {
+        btn.addEventListener('click', function (e) {
+          e.stopImmediatePropagation();
+          document.querySelectorAll('.lang-btn').forEach(function (b) { b.classList.remove('active'); });
+          btn.classList.add('active');
+          setGoogLang(LANG[btn.dataset.lang] || 'en');
+        }, true);
+      });
     })();
   </script>
 </body>
