@@ -924,6 +924,17 @@
     .cd-cta-btn { padding: 12px 26px; font-size: 14px; }
     .cd-close { top: 34px; right: 34px; width: 40px; height: 40px; }
 
+    /* ---- Mobile: open the case study full screen, not as a floating modal ---- */
+    @media (max-width: 768px) {
+      .cd-panel {
+        top: 0 !important; right: 0 !important; bottom: 0 !important; left: 0 !important;
+        width: 100vw !important; height: 100% !important; border-radius: 0 !important;
+        box-shadow: none;
+      }
+      #case-detail-overlay:not(.open) .cd-panel { transform: translate3d(0, 100%, 0); }
+      .cd-close { top: 14px; right: 14px; }
+    }
+
     /* ==== Header right cluster: language switcher + two-dot menu ==== */
     .frame .frame-right { display: flex; align-items: center; gap: 14px; }
     .frame .frame-right .header-lang { order: -1; }
