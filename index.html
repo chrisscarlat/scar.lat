@@ -32,8 +32,10 @@
 					<circle cx="12" cy="16" r="2" fill="currentColor"/>
 				</svg>
 				<svg class="close-icon" viewBox="0 0 24 24" width="24" height="24">
-					<line x1="6" y1="6" x2="18" y2="18" stroke="currentColor" stroke-width="2"/>
-					<line x1="18" y1="6" x2="6" y2="18" stroke="currentColor" stroke-width="2"/>
+					<circle cx="8" cy="8" r="2" fill="currentColor"/>
+					<circle cx="16" cy="8" r="2" fill="currentColor"/>
+					<circle cx="8" cy="16" r="2" fill="currentColor"/>
+					<circle cx="16" cy="16" r="2" fill="currentColor"/>
 				</svg>
 			</button>
 				<div class="header-lang notranslate" translate="no" id="headerLang">
@@ -785,8 +787,8 @@
     @media (max-width: 1024px) {
       .frame { font-size: 19.2px !important; }
     }
-    #hero #images .item small { font-size: 9.6rem !important; }
-    #hero #images .item small .brand-name { font-size: 156% !important; font-weight: 600 !important; display: block; }
+    #hero #images .item small { font-size: 8rem !important; line-height: 1.2 !important; margin-top: 8rem !important; }
+    #hero #images .item small .brand-name { font-size: 122% !important; font-weight: 600 !important; display: block; margin-bottom: 2rem; }
     .typing-indicator .message-content p {
       display: flex;
       gap: 4px;
@@ -954,6 +956,10 @@
     .frame { color: #fff; mix-blend-mode: difference; }
     .frame.menu-open { mix-blend-mode: normal; }
     .frame:has(.header-lang:hover), .frame:has(.header-lang:focus-within) { mix-blend-mode: normal; }
+    /* Menu open: the right-side controls sit over the solid panel, so give them
+       a readable colour (blend is off here). CHRIS SCARLAT stays over the dark overlay. */
+    .frame.menu-open .frame-right { color: #16161a; }
+    html.dark .frame.menu-open .frame-right { color: #f0f0f2; }
     .theme-toggle { color: #fff !important; mix-blend-mode: difference; }
 
     /* ==== Desktop: two-dot menu opens a floating right-side aside ==== */
@@ -1008,8 +1014,8 @@
     .header-lang-list button.active { background: rgba(0,0,0,.9); color: #fff; }
 
     /* ==== Language list inside the slide-in menu (under the last item) ==== */
-    .menu-lang { display: flex; flex-wrap: wrap; gap: 10px; width: 100%; margin-top: 10px; padding-top: 22px; border-top: 1px solid rgba(0,0,0,.14); }
-    .menu-lang button { background: none; border: 1px solid rgba(0,0,0,.22); border-radius: 22px; padding: 7px 16px; font: inherit; font-size: 16px; line-height: 1; cursor: pointer; color: #000; transition: background .2s ease, color .2s ease, border-color .2s ease; }
+    .menu-lang { display: flex; flex-wrap: nowrap; gap: 6px; width: 100%; margin-top: 10px; padding-top: 22px; border-top: 1px solid rgba(0,0,0,.14); }
+    .menu-lang button { background: none; border: 1px solid rgba(0,0,0,.22); border-radius: 22px; padding: 6px 11px; font: inherit; font-size: 13px; line-height: 1; cursor: pointer; color: #000; white-space: nowrap; transition: background .2s ease, color .2s ease, border-color .2s ease; }
     .menu-lang button:hover { background: rgba(0,0,0,.07); }
     .menu-lang button.active { background: rgba(0,0,0,.9); color: #fff; border-color: rgba(0,0,0,.9); }
     html.dark .menu-lang { border-top-color: rgba(255,255,255,.16); }
@@ -1048,6 +1054,29 @@
       0%,100% { opacity: .38; transform: translateX(-50%) scale(1); }
       50%     { opacity: .62; transform: translateX(-50%) scale(1.12); }
     }
+    /* ==== Zoomed-image lightbox (project click) ==== */
+    #img-lightbox { position: fixed; inset: 0; z-index: 100000; visibility: hidden; }
+    #img-lightbox.open { visibility: visible; }
+    #img-lightbox .lb-backdrop { position: absolute; inset: 0; background: rgba(12,12,16,0); transition: background .4s ease; }
+    #img-lightbox.open .lb-backdrop { background: rgba(12,12,16,.88); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); }
+    #img-lightbox .lb-img {
+      position: absolute; top: 50%; left: 50%;
+      max-width: 88vw; max-height: 88vh; object-fit: contain;
+      border-radius: 12px; box-shadow: 0 30px 90px rgba(0,0,0,.5); cursor: zoom-out;
+      transform: translate(-50%, -50%) scale(.86); opacity: 0;
+      transition: transform .55s cubic-bezier(.22,1,.36,1), opacity .4s ease;
+    }
+    #img-lightbox.open .lb-img { transform: translate(-50%, -50%) scale(1.06); opacity: 1; }
+    #img-lightbox .lb-close {
+      position: fixed; top: 22px; right: 24px; z-index: 2;
+      width: 46px; height: 46px; border: none; border-radius: 50%;
+      background: rgba(255,255,255,.16); color: #fff; font-size: 26px; line-height: 1;
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      opacity: 0; transition: opacity .35s ease .1s, background .2s ease;
+    }
+    #img-lightbox.open .lb-close { opacity: 1; }
+    #img-lightbox .lb-close:hover { background: rgba(255,255,255,.3); }
+
     /* Accent-colour picker button removed from the UI */
     .glow-orb { display: none !important; }
 
@@ -1148,6 +1177,31 @@
         return DATA[brand] ? brand : null;
       }
 
+      // --- Simple zoomed-image lightbox (used instead of the side panel) ---
+      var lb = document.createElement('div');
+      lb.id = 'img-lightbox';
+      lb.setAttribute('aria-hidden', 'true');
+      lb.innerHTML = '<div class="lb-backdrop"></div><img class="lb-img" alt=""><button class="lb-close" type="button" aria-label="Close">×</button>';
+      document.body.appendChild(lb);
+      var lbImg = lb.querySelector('.lb-img');
+      function openLightbox(src) {
+        if (!src) return;
+        lbImg.src = src;
+        lb.classList.add('open');
+        lb.setAttribute('aria-hidden', 'false');
+      }
+      function closeLightbox() {
+        lb.classList.remove('open');
+        lb.setAttribute('aria-hidden', 'true');
+      }
+      lb.querySelector('.lb-backdrop').addEventListener('click', closeLightbox);
+      lb.querySelector('.lb-close').addEventListener('click', closeLightbox);
+      lbImg.addEventListener('click', closeLightbox);
+      document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && lb.classList.contains('open')) closeLightbox(); });
+      ['wheel', 'touchstart', 'touchmove', 'mousedown', 'pointerdown', 'mousemove'].forEach(function (type) {
+        lb.addEventListener(type, function (e) { if (lb.classList.contains('open')) e.stopPropagation(); }, { capture: true, passive: true });
+      });
+
       var grid = document.getElementById('images');
       if (!grid) return;
       var dX = 0, dY = 0, dragged = false;
@@ -1157,11 +1211,14 @@
         if (dragged) return;
         var item = e.target.closest('.item');
         if (!item) return;
+        if (item.classList.contains('logo-item')) return;
         var key = keyForItem(item);
-        if (!key) return;
+        var src = key && DATA[key] ? DATA[key].hero : null;
+        if (!src) { var im = item.querySelector('img'); src = im ? (im.currentSrc || im.getAttribute('src')) : null; }
+        if (!src) return;
         e.preventDefault();
         e.stopPropagation();
-        openCase(key);
+        openLightbox(src);
       }, true);
     })();
   </script>
