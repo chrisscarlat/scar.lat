@@ -1054,12 +1054,34 @@
       0%,100% { opacity: .38; transform: translateX(-50%) scale(1); }
       50%     { opacity: .62; transform: translateX(-50%) scale(1.12); }
     }
-    /* ==== In-place project zoom + image carousel ==== */
-    #hero #images .item .item-image { position: relative; transition: transform .55s cubic-bezier(.22,1,.36,1); transform-origin: center center; }
-    #hero #images .item.zoomed { z-index: 200 !important; }
-    #hero #images .item.zoomed .item-image { transform: scale(1.16) !important; }
-    .carousel-layer { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
-    .carousel-layer .cs-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 1; transition: opacity .34s ease; }
+    /* ==== Click a project: camera-zoom the whole scene into it (no backdrop) ==== */
+    #hero.zoomed { transition: transform 1.15s cubic-bezier(.22,1,.36,1); will-change: transform; }
+    #hero #images .item.zoomed-item { z-index: 500 !important; }
+    #hero #images .item .item-image { position: relative; }
+    .carousel-layer { position: absolute; inset: 0; overflow: hidden; }
+    .carousel-layer .cs-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
+
+    /* Hide the native cursor while zoomed; a zoom-out cursor follows the pointer. */
+    body.zoom-mode, body.zoom-mode * { cursor: none !important; }
+    .zoom-cursor {
+      position: fixed; left: 0; top: 0; z-index: 100001; pointer-events: none;
+      width: 44px; height: 44px; margin: 0; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center; color: #16161a;
+      background: rgba(255,255,255,.9); box-shadow: 0 6px 22px rgba(0,0,0,.25);
+      transform: translate(-50%, -50%); opacity: 0; transition: opacity .25s ease, background .2s ease, color .2s ease, width .2s ease, height .2s ease;
+    }
+    body.zoom-mode .zoom-cursor { opacity: 1; animation: zcPulse 1.8s ease-in-out infinite; }
+    .zoom-cursor.locked { background: #16161a; color: #fff; width: 38px; height: 38px; }
+    @keyframes zcPulse { 0%,100% { box-shadow: 0 0 0 0 rgba(255,255,255,.5); } 50% { box-shadow: 0 0 0 10px rgba(255,255,255,0); } }
+    .zoom-tip {
+      position: fixed; left: 0; top: 0; z-index: 100002; pointer-events: none;
+      background: rgba(22,22,26,.96); color: #fff; padding: 10px 13px; border-radius: 10px;
+      font-size: 12px; line-height: 1.4; max-width: 240px; box-shadow: 0 10px 30px rgba(0,0,0,.3);
+      opacity: 0; transform: translateY(6px); transition: opacity .25s ease, transform .25s ease;
+    }
+    .zoom-tip.show { opacity: 1; transform: translateY(0); }
+    .zoom-tip strong { display: block; font-weight: 600; font-size: 13px; margin-bottom: 2px; }
+    .zoom-tip span { opacity: .7; }
 
     /* Accent-colour picker button removed from the UI */
     .glow-orb { display: none !important; }
@@ -1161,78 +1183,179 @@
         return DATA[brand] ? brand : null;
       }
 
-      // --- In-place zoom + image carousel (click a project to zoom into it) ---
-      // Build the list of images to cycle through for a given item. For now this
-      // is just the item's own image repeated a few times — add more URLs to the
-      // returned array (or to a case study's `images`) to grow the carousel.
-      function carouselSlides(item, key) {
-        var im = item.querySelector('img');
-        var src = im ? (im.currentSrc || im.getAttribute('src')) : null;
+      // --- Click a project: camera-zoom the whole scene into it (slow), centring
+      // the item + its caption. Then moving the cursor scrubs its images (faster
+      // cursor = faster changes). Click the image to lock it + show an info
+      // tooltip; click outside to zoom back out. A zoom-out cursor follows the
+      // pointer the whole time. ---
+      // Slides are easy to extend: add URLs to a case study's `images`, or to the
+      // placeholder array below (non-case items reuse their own image a few times).
+      function carouselSlides(item, key, thumb) {
+        var list;
         if (key && DATA[key] && DATA[key].images && DATA[key].images.length > 1) {
-          return DATA[key].images.slice(0, 6);
+          list = DATA[key].images.slice(0, 8);
+        } else if (thumb) {
+          list = [thumb, thumb, thumb];
+        } else {
+          list = [];
         }
-        if (!src) return [];
-        return [src, src, src]; // same image a few times (placeholder slides)
+        if (thumb && list[0] !== thumb) list = [thumb].concat(list);
+        return list;
       }
 
-      var zoomedItem = null;
+      var hero = document.getElementById('hero');
+      var zoom = { active: false, item: null, box: null, slides: [], i: 0, locked: false, acc: 0, layer: null, img: null, key: null };
+      var lastX = 0, lastY = 0;
 
-      function startCarousel(item, slides) {
-        var box = item.querySelector('.item-image');
-        if (!box || slides.length === 0) return;
+      // Custom zoom-out cursor + info tooltip
+      var cur = document.createElement('div');
+      cur.className = 'zoom-cursor';
+      cur.innerHTML = '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="10.5" cy="10.5" r="6.5"/><line x1="15.5" y1="15.5" x2="21" y2="21"/><line x1="7.5" y1="10.5" x2="13.5" y2="10.5"/></svg>';
+      document.body.appendChild(cur);
+      var tip = document.createElement('div');
+      tip.className = 'zoom-tip notranslate';
+      tip.setAttribute('translate', 'no');
+      document.body.appendChild(tip);
+
+      function setSlide(idx) {
+        if (!zoom.slides.length || !zoom.img) return;
+        zoom.i = ((idx % zoom.slides.length) + zoom.slides.length) % zoom.slides.length;
+        zoom.img.src = zoom.slides[zoom.i];
+      }
+
+      // Apply the camera transform (base zoom Z × the user's pinch scale).
+      function applyHero(fast) {
+        hero.style.transition = fast ? 'transform .14s ease-out' : '';
+        hero.style.transform = 'translate(' + (zoom.vw / 2) + 'px,' + (zoom.vh / 2) + 'px) scale(' + (zoom.Z * zoom.userScale) + ') translate(' + (-zoom.Px) + 'px,' + (-zoom.Py) + 'px)';
+      }
+
+      function zoomInto(item, key) {
+        if (zoom.active) return;
+        var img = item.querySelector('img'), box = item.querySelector('.item-image');
+        if (!img || !box) return;
+        var thumb = img.currentSrc || img.getAttribute('src');
+        zoom.slides = carouselSlides(item, key, thumb);
+
         var layer = document.createElement('div');
         layer.className = 'carousel-layer';
         var cimg = document.createElement('img');
         cimg.className = 'cs-img';
-        cimg.src = slides[0];
+        cimg.src = zoom.slides[0] || thumb;
         layer.appendChild(cimg);
         box.appendChild(layer);
-        var i = 0;
-        item._csLayer = layer;
-        item._csTimer = setInterval(function () {
-          i = (i + 1) % slides.length;
-          cimg.style.opacity = '0';
-          setTimeout(function () { cimg.src = slides[i]; cimg.style.opacity = '1'; }, 320);
-        }, 2000);
+
+        zoom.active = true; zoom.item = item; zoom.box = box; zoom.layer = layer;
+        zoom.img = cimg; zoom.i = 0; zoom.locked = false; zoom.acc = 0; zoom.key = key;
+        zoom.userScale = 1;
+        item.classList.add('zoomed-item');
+        document.body.classList.add('zoom-mode');
+
+        var r = item.getBoundingClientRect();
+        zoom.vw = window.innerWidth; zoom.vh = window.innerHeight;
+        zoom.Z = Math.min((zoom.vw * 0.82) / r.width, (zoom.vh * 0.86) / r.height);
+        zoom.Z = Math.max(1.8, Math.min(zoom.Z, 6));
+        zoom.Px = r.left + r.width / 2; zoom.Py = r.top + r.height / 2;
+        hero.style.transformOrigin = '0 0';
+        requestAnimationFrame(function () {
+          hero.classList.add('zoomed');
+          applyHero(false); // slow settle via the .zoomed transition
+        });
       }
 
-      function unzoom() {
-        if (!zoomedItem) return;
-        var item = zoomedItem;
-        zoomedItem = null;
-        item.classList.remove('zoomed');
-        if (item._csTimer) { clearInterval(item._csTimer); item._csTimer = null; }
-        if (item._csLayer) { item._csLayer.remove(); item._csLayer = null; }
+      function zoomOut() {
+        if (!zoom.active) return;
+        hero.style.transition = ''; // slow settle back via the .zoomed transition
+        hero.style.transform = '';
+        tip.classList.remove('show');
+        cur.classList.remove('locked');
+        document.body.classList.remove('zoom-mode');
+        var item = zoom.item, layer = zoom.layer;
+        zoom.active = false; zoom.item = null; zoom.box = null; zoom.locked = false;
+        zoom.layer = null; zoom.img = null; zoom.slides = [];
+        setTimeout(function () {
+          hero.classList.remove('zoomed');
+          if (item) item.classList.remove('zoomed-item');
+          if (layer && layer.parentNode) layer.remove();
+        }, 1200);
       }
 
-      function zoomInto(item, key) {
-        if (zoomedItem === item) { unzoom(); return; }
-        unzoom();
-        var slides = carouselSlides(item, key);
-        item.classList.add('zoomed');
-        zoomedItem = item;
-        startCarousel(item, slides);
+      function overImage(x, y) {
+        if (!zoom.box) return false;
+        var b = zoom.box.getBoundingClientRect();
+        return x >= b.left && x <= b.right && y >= b.top && y <= b.bottom;
       }
+
+      // Move: follow with the custom cursor and scrub the carousel by distance moved.
+      window.addEventListener('mousemove', function (e) {
+        if (!zoom.active) return;
+        var dx = e.clientX - lastX, dy = e.clientY - lastY;
+        lastX = e.clientX; lastY = e.clientY;
+        cur.style.left = e.clientX + 'px'; cur.style.top = e.clientY + 'px';
+        if (zoom.locked) {
+          tip.style.left = (e.clientX + 16) + 'px'; tip.style.top = (e.clientY + 18) + 'px';
+        } else {
+          zoom.acc += Math.hypot(dx, dy);
+          while (zoom.acc >= 45) { zoom.acc -= 45; setSlide(zoom.i + 1); } // faster cursor -> faster changes
+        }
+        e.stopImmediatePropagation(); // freeze the grid's own mouse handling
+      }, true);
+
+      // Wheel / trackpad pinch while zoomed: zoom further into the photo (1×–4×).
+      window.addEventListener('wheel', function (e) {
+        if (!zoom.active) return;
+        e.stopImmediatePropagation(); e.preventDefault();
+        var factor = Math.exp(-e.deltaY * (e.ctrlKey ? 0.012 : 0.0016)); // pinch is finer-grained
+        zoom.userScale = Math.min(4, Math.max(1, zoom.userScale * factor));
+        applyHero(true);
+      }, { capture: true, passive: false });
+      window.addEventListener('pointermove', function (e) { if (zoom.active) e.stopImmediatePropagation(); }, true);
+      window.addEventListener('mousedown', function (e) { if (zoom.active) e.stopImmediatePropagation(); }, true);
+      window.addEventListener('pointerdown', function (e) { if (zoom.active) e.stopImmediatePropagation(); }, true);
+
+      // Click while zoomed: on the image -> lock/unlock + tooltip; outside -> zoom out.
+      window.addEventListener('click', function (e) {
+        if (!zoom.active) return;
+        e.stopImmediatePropagation(); e.preventDefault();
+        // If the user has pinched in, the first click steps back to base framing
+        // (so there's always an "outside" to click for the full zoom-out).
+        if (zoom.userScale > 1.02) {
+          zoom.userScale = 1; zoom.locked = false;
+          tip.classList.remove('show'); cur.classList.remove('locked');
+          applyHero(true);
+          return;
+        }
+        if (overImage(e.clientX, e.clientY)) {
+          zoom.locked = !zoom.locked;
+          if (zoom.locked) {
+            var bn = zoom.item.querySelector('.brand-name');
+            var title = (zoom.key && DATA[zoom.key]) ? zoom.key : (bn ? bn.textContent.trim() : 'Image');
+            tip.innerHTML = '<strong>' + esc(title) + '</strong><span>' + (zoom.i + 1) + ' / ' + zoom.slides.length + ' · click to unlock</span>';
+            tip.style.left = (e.clientX + 16) + 'px'; tip.style.top = (e.clientY + 18) + 'px';
+            tip.classList.add('show'); cur.classList.add('locked');
+          } else {
+            tip.classList.remove('show'); cur.classList.remove('locked');
+          }
+        } else {
+          zoomOut();
+        }
+      }, true);
 
       var grid = document.getElementById('images');
       if (!grid) return;
       var dX = 0, dY = 0, dragged = false;
       grid.addEventListener('pointerdown', function (e) { dX = e.clientX; dY = e.clientY; dragged = false; }, true);
-      grid.addEventListener('pointermove', function (e) {
-        if (Math.abs(e.clientX - dX) > 8 || Math.abs(e.clientY - dY) > 8) { dragged = true; unzoom(); }
-      }, true);
+      grid.addEventListener('pointermove', function (e) { if (Math.abs(e.clientX - dX) > 8 || Math.abs(e.clientY - dY) > 8) dragged = true; }, true);
       grid.addEventListener('click', function (e) {
-        if (dragged) return;
+        if (dragged || zoom.active) return;
         var item = e.target.closest('.item');
-        if (!item) return;
-        if (item.classList.contains('logo-item')) return;
+        if (!item || item.classList.contains('logo-item')) return;
         e.preventDefault();
         e.stopPropagation();
+        lastX = e.clientX; lastY = e.clientY;
         zoomInto(item, keyForItem(item));
       }, true);
 
-      // Scrolling / panning the grid zooms back out.
-      window.addEventListener('wheel', unzoom, { passive: true });
+      document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && zoom.active) zoomOut(); });
     })();
   </script>
 
