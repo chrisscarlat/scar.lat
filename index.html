@@ -54,6 +54,7 @@
 				<a href="https://linkedin.com/in/scarlat" class="nav-linkedin" target="_blank" rel="noopener">LinkedIn</a>
 				<a href="tel:+491705958989">+49 170 595 8989</a>
 				<a href="https://calendar.scar.lat" class="nav-book-call">BOOK CALL</a>
+				<a href="./gallery/" class="nav-gallery">GALLERY</a>
 				<a href="#" class="chat-menu-link nav-chat">CHAT</a>
 				<div class="menu-lang notranslate" translate="no">
 					<button type="button" data-lang="en" class="active">EN</button>
@@ -1083,6 +1084,22 @@
     .zoom-tip strong { display: block; font-weight: 600; font-size: 13px; margin-bottom: 2px; }
     .zoom-tip span { opacity: .7; }
 
+    /* Sticky, readable caption at the bottom of the screen (no background box —
+       a text halo keeps it legible over any image, and the image is framed above it). */
+    .zoom-cap {
+      position: fixed; left: 0; right: 0; bottom: 0; z-index: 100002; pointer-events: none;
+      text-align: center; padding: 18px 24px calc(20px + env(safe-area-inset-bottom, 0px));
+      opacity: 0; transform: translateY(10px); transition: opacity .5s ease .2s, transform .5s ease .2s;
+    }
+    body.zoom-mode .zoom-cap { opacity: 1; transform: translateY(0); }
+    .zoom-cap .zc-inner {
+      display: inline-block; color: #fff; font-size: 15px; line-height: 1.5;
+      text-shadow: 0 1px 3px rgba(0,0,0,.95), 0 0 14px rgba(0,0,0,.85), 0 0 2px rgba(0,0,0,.9);
+    }
+    .zoom-cap .brand-name { display: block; font-weight: 700; font-size: 21px; margin-bottom: 3px; }
+    /* Hide the zoomed item's in-scene caption; the sticky one replaces it. */
+    body.zoom-mode .zoomed-item small { visibility: hidden !important; }
+
     /* Accent-colour picker button removed from the UI */
     .glow-orb { display: none !important; }
 
@@ -1216,6 +1233,11 @@
       tip.className = 'zoom-tip notranslate';
       tip.setAttribute('translate', 'no');
       document.body.appendChild(tip);
+      // Sticky, readable caption pinned to the bottom of the screen.
+      var zcap = document.createElement('div');
+      zcap.className = 'zoom-cap notranslate';
+      zcap.setAttribute('translate', 'no');
+      document.body.appendChild(zcap);
 
       function setSlide(idx) {
         if (!zoom.slides.length || !zoom.img) return;
@@ -1223,11 +1245,15 @@
         zoom.img.src = zoom.slides[zoom.i];
       }
 
-      // Apply the camera transform (base zoom Z × the user's pinch scale).
+      // Apply the camera transform (base zoom Z × the user's pinch scale). The
+      // item is centred in the area *above* the sticky caption so the image
+      // never covers the text.
       function applyHero(fast) {
         hero.style.transition = fast ? 'transform .14s ease-out' : '';
-        hero.style.transform = 'translate(' + (zoom.vw / 2) + 'px,' + (zoom.vh / 2) + 'px) scale(' + (zoom.Z * zoom.userScale) + ') translate(' + (-zoom.Px) + 'px,' + (-zoom.Py) + 'px)';
+        hero.style.transform = 'translate(' + zoom.Cx + 'px,' + zoom.Cy + 'px) scale(' + (zoom.Z * zoom.userScale) + ') translate(' + (-zoom.Px) + 'px,' + (-zoom.Py) + 'px)';
       }
+
+      var CAP_RESERVE = 128; // px kept clear at the bottom for the sticky caption
 
       function zoomInto(item, key) {
         if (zoom.active) return;
@@ -1235,6 +1261,17 @@
         if (!img || !box) return;
         var thumb = img.currentSrc || img.getAttribute('src');
         zoom.slides = carouselSlides(item, key, thumb);
+
+        // Read the caption text before entering zoom-mode (visibility:hidden
+        // would blank innerText), then pin it to the bottom of the screen.
+        var small = item.querySelector('small');
+        var lines = ((small ? (small.innerText || small.textContent) : '') || '').split('\n').map(function (s) { return s.trim(); }).filter(Boolean);
+        var capHtml = '';
+        if (lines.length) {
+          capHtml = '<span class="brand-name">' + esc(lines[0]) + '</span>';
+          if (lines.length > 1) capHtml += lines.slice(1).map(esc).join('<br>');
+        }
+        zcap.innerHTML = '<span class="zc-inner">' + capHtml + '</span>';
 
         var layer = document.createElement('div');
         layer.className = 'carousel-layer';
@@ -1246,16 +1283,19 @@
 
         zoom.active = true; zoom.item = item; zoom.box = box; zoom.layer = layer;
         zoom.img = cimg; zoom.i = 0; zoom.locked = false; zoom.acc = 0; zoom.key = key;
-        zoom.userScale = 1;
+        zoom.userScale = 1; zoom.settling = true;
         item.classList.add('zoomed-item');
         document.body.classList.add('zoom-mode');
 
         var r = item.getBoundingClientRect();
         zoom.vw = window.innerWidth; zoom.vh = window.innerHeight;
-        zoom.Z = Math.min((zoom.vw * 0.82) / r.width, (zoom.vh * 0.86) / r.height);
+        zoom.Z = Math.min((zoom.vw * 0.82) / r.width, ((zoom.vh - CAP_RESERVE) * 0.9) / r.height);
         zoom.Z = Math.max(1.8, Math.min(zoom.Z, 6));
         zoom.Px = r.left + r.width / 2; zoom.Py = r.top + r.height / 2;
+        zoom.Cx = zoom.vw / 2; zoom.Cy = (zoom.vh - CAP_RESERVE) / 2;
         hero.style.transformOrigin = '0 0';
+        // Ignore hover-out while the open animation is still settling.
+        setTimeout(function () { zoom.settling = false; }, 1150);
         requestAnimationFrame(function () {
           hero.classList.add('zoomed');
           applyHero(false); // slow settle via the .zoomed transition
@@ -1291,13 +1331,19 @@
         var dx = e.clientX - lastX, dy = e.clientY - lastY;
         lastX = e.clientX; lastY = e.clientY;
         cur.style.left = e.clientX + 'px'; cur.style.top = e.clientY + 'px';
+        e.stopImmediatePropagation(); // freeze the grid's own mouse handling
+        // Moving the cursor off the image zooms back out (once it has settled and
+        // isn't locked or pinched-in, where the image can fill the screen).
+        if (!zoom.settling && !zoom.locked && zoom.userScale <= 1.02 && !overImage(e.clientX, e.clientY)) {
+          zoomOut();
+          return;
+        }
         if (zoom.locked) {
           tip.style.left = (e.clientX + 16) + 'px'; tip.style.top = (e.clientY + 18) + 'px';
         } else {
           zoom.acc += Math.hypot(dx, dy);
           while (zoom.acc >= 45) { zoom.acc -= 45; setSlide(zoom.i + 1); } // faster cursor -> faster changes
         }
-        e.stopImmediatePropagation(); // freeze the grid's own mouse handling
       }, true);
 
       // Wheel / trackpad pinch while zoomed: zoom further into the photo (1×–4×).
