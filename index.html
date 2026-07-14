@@ -1002,10 +1002,11 @@
       background: none; backdrop-filter: none; -webkit-backdrop-filter: none;
       border-radius: 0; box-shadow: none; opacity: 1; visibility: visible;
     }
-    /* Plain text, no stroke/box — items adapt via the header's difference blend. */
+    /* Plain text, no stroke/box — items adapt via the header's difference blend.
+       line-height/padding leave room for descenders (e.g. the "g" in English). */
     .header-lang-list button {
       background: none; border: none; cursor: pointer; font: inherit;
-      text-align: center; font-size: 13px; line-height: 1; font-weight: 600;
+      text-align: center; font-size: 13px; line-height: 1.5; padding: 1px 0; font-weight: 600;
       color: inherit; white-space: nowrap; overflow: hidden;
       max-width: 0; margin-left: -16px; opacity: 0;
       transition: max-width .35s cubic-bezier(.33,1,.68,1), margin-left .35s cubic-bezier(.33,1,.68,1), opacity .25s ease;
@@ -1014,10 +1015,12 @@
     .header-lang-list button.active,
     .header-lang:hover .header-lang-list button,
     .header-lang:focus-within .header-lang-list button {
-      max-width: 120px; margin-left: 0; opacity: .5;
+      max-width: 120px; margin-left: 0; opacity: .38;
     }
-    .header-lang-list button:hover { opacity: 1; }
-    .header-lang-list button.active { opacity: 1; }
+    .header-lang-list button:hover { opacity: .75; }
+    /* The selected language stays full-strength (reads as solid black over the
+       light header via the difference blend) so the current choice is obvious. */
+    .header-lang-list button.active { opacity: 1; font-weight: 700; }
 
     /* Celebratory words that splash out from the cursor when a language is picked. */
     .lang-splash {
@@ -1087,6 +1090,26 @@
     body.zoom-mode .zoom-cursor { opacity: 1; animation: zcPulse 1.8s ease-in-out infinite; }
     .zoom-cursor.locked { background: #16161a; color: #fff; width: 38px; height: 38px; }
     @keyframes zcPulse { 0%,100% { box-shadow: 0 0 0 0 rgba(255,255,255,.5); } 50% { box-shadow: 0 0 0 10px rgba(255,255,255,0); } }
+    /* ‹ › scrub indicators flanking the cursor — bumped on every image change. */
+    .zoom-cursor .zc-arrow {
+      position: absolute; top: 50%; transform: translateY(-50%);
+      font-size: 26px; line-height: 1; font-weight: 400; color: #fff;
+      text-shadow: 0 1px 6px rgba(0,0,0,.55); opacity: .9; pointer-events: none;
+    }
+    .zoom-cursor .zc-left { right: 100%; margin-right: 8px; }
+    .zoom-cursor .zc-right { left: 100%; margin-left: 8px; }
+    .zoom-cursor.locked .zc-arrow, .zoom-cursor.closing .zc-arrow { opacity: 0; }
+    /* Close affordance: outside the card the cursor becomes an ×, ringed by a
+       countdown that empties over 5s before auto-closing. */
+    .zoom-cursor .zc-x { display: none; }
+    .zoom-cursor .zc-ring { position: absolute; inset: -6px; width: 56px; height: 56px; opacity: 0; transition: opacity .2s ease; transform: rotate(-90deg); }
+    .zoom-cursor .zc-ring-bg { fill: rgba(255,255,255,.92); }
+    .zoom-cursor .zc-ring-trk { fill: none; stroke: rgba(0,0,0,.14); stroke-width: 3; }
+    .zoom-cursor .zc-ring-prog { fill: none; stroke: #16161a; stroke-width: 3; stroke-linecap: round; stroke-dasharray: 150.8; stroke-dashoffset: 0; }
+    .zoom-cursor.closing { animation: none; background: none; box-shadow: none; }
+    .zoom-cursor.closing .zc-mag { display: none; }
+    .zoom-cursor.closing .zc-x { display: block; }
+    .zoom-cursor.closing .zc-ring { opacity: 1; }
     .zoom-tip {
       position: fixed; left: 0; top: 0; z-index: 100002; pointer-events: none;
       background: rgba(22,22,26,.96); color: #fff; padding: 10px 13px; border-radius: 10px;
@@ -1117,6 +1140,11 @@
     #hero #images .item { transition: opacity .55s ease; }
     body.zoom-mode #hero #images .item:not(.zoomed-item) { opacity: 0 !important; pointer-events: none; }
     body.zoom-mode .zoomed-item .item-image > img { visibility: hidden; }
+    /* #hero clips to the viewport in its own local space (before the zoom
+       transform), which would cut off the part of a clicked item that was
+       off-screen. While zoomed, every other item is faded out, so lift the clip
+       and let the focused image show in full. */
+    body.zoom-mode #hero { overflow: visible !important; }
 
     /* Accent-colour picker button removed from the UI */
     .glow-orb { display: none !important; }
@@ -1245,8 +1273,19 @@
       // Custom zoom-out cursor + info tooltip
       var cur = document.createElement('div');
       cur.className = 'zoom-cursor';
-      cur.innerHTML = '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="10.5" cy="10.5" r="6.5"/><line x1="15.5" y1="15.5" x2="21" y2="21"/><line x1="7.5" y1="10.5" x2="13.5" y2="10.5"/></svg>';
+      cur.innerHTML =
+        '<svg class="zc-ring" viewBox="0 0 56 56" width="56" height="56" aria-hidden="true">' +
+          '<circle class="zc-ring-bg" cx="28" cy="28" r="25"/>' +
+          '<circle class="zc-ring-trk" cx="28" cy="28" r="24"/>' +
+          '<circle class="zc-ring-prog" cx="28" cy="28" r="24"/></svg>' +
+        '<span class="zc-arrow zc-left" aria-hidden="true">‹</span>' +
+        '<svg class="zc-mag" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="10.5" cy="10.5" r="6.5"/><line x1="15.5" y1="15.5" x2="21" y2="21"/><line x1="7.5" y1="10.5" x2="13.5" y2="10.5"/></svg>' +
+        '<svg class="zc-x" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>' +
+        '<span class="zc-arrow zc-right" aria-hidden="true">›</span>';
       document.body.appendChild(cur);
+      var arrowL = cur.querySelector('.zc-left'), arrowR = cur.querySelector('.zc-right');
+      var ringProg = cur.querySelector('.zc-ring-prog');
+      var RING_C = 2 * Math.PI * 24, CLOSE_MS = 5000;
       var tip = document.createElement('div');
       tip.className = 'zoom-tip notranslate';
       tip.setAttribute('translate', 'no');
@@ -1257,10 +1296,24 @@
       zcap.setAttribute('translate', 'no');
       document.body.appendChild(zcap);
 
+      // Bump the ‹ › arrows outward each time the image changes, so it reads as
+      // "scrubbing through images". dir: +1 forward, -1 back.
+      function bumpArrows(dir) {
+        var a = dir < 0 ? arrowL : arrowR;
+        var off = (dir < 0 ? -1 : 1) * 5;
+        if (!a || !a.animate) return;
+        a.animate([
+          { transform: 'translateY(-50%) translateX(0) scale(1)' },
+          { transform: 'translateY(-50%) translateX(' + off + 'px) scale(1.45)', offset: .45 },
+          { transform: 'translateY(-50%) translateX(0) scale(1)' }
+        ], { duration: 240, easing: 'cubic-bezier(.34,1.56,.64,1)' });
+      }
       function setSlide(idx) {
         if (!zoom.slides.length || !zoom.img) return;
+        var dir = idx >= zoom.i ? 1 : -1;
         zoom.i = ((idx % zoom.slides.length) + zoom.slides.length) % zoom.slides.length;
         zoom.img.src = zoom.slides[zoom.i];
+        bumpArrows(dir);
       }
 
       // Apply the camera transform (base zoom Z × the user's pinch scale). The
@@ -1279,24 +1332,32 @@
       // parallax, which otherwise slides the picture off-centre — and, on entry,
       // for items clicked while partly/entirely off-screen. This keeps the image
       // dead-centre and fully on screen from the very first frame, never cut.
-      function centerBox() {
+      // Land the image's centre exactly on a target screen point (correcting for
+      // the grid's own parallax). Two-pass: apply the current scale, then measure
+      // and nudge the camera so the box centre sits on (tx, ty).
+      function centerBoxTo(tx, ty) {
         if (!zoom.box) return;
+        setHeroT();
         var b = zoom.box.getBoundingClientRect();
-        zoom.Cx += zoom.vw / 2 - (b.left + b.width / 2);
-        zoom.Cy += zoom.vh / 2 - (b.top + b.height / 2);
+        zoom.Cx += tx - (b.left + b.width / 2);
+        zoom.Cy += ty - (b.top + b.height / 2);
       }
-      var ENTER_MS = 620;
+      var ENTER_MS = 760;
       function pinLoop() {
         if (!zoom.active) { zoom.raf = 0; return; }
-        // Entrance: grow the image in place at centre (never flies in from an
-        // off-screen edge, so it can't appear cut).
+        var cx = zoom.vw / 2, cy = zoom.vh / 2, tx = cx, ty = cy;
+        // Entrance: ease scale (natural → target) and position (where it was
+        // clicked → centre) together for a smooth camera-zoom. The clip is lifted
+        // in zoom-mode, so the full image shows throughout — never cut.
         if (zoom.enter < 1) {
           var p = Math.min(1, (performance.now() - zoom.t0) / ENTER_MS);
           var e = 1 - Math.pow(1 - p, 3); // ease-out cubic
           zoom.enter = zoom.enterFrom + (1 - zoom.enterFrom) * e;
+          tx = zoom.B0x + (cx - zoom.B0x) * e;
+          ty = zoom.B0y + (cy - zoom.B0y) * e;
         }
-        centerBox();
         hero.style.transition = 'none';
+        centerBoxTo(tx, ty);
         setHeroT();
         zoom.raf = requestAnimationFrame(pinLoop);
       }
@@ -1352,10 +1413,12 @@
         // knock the image off-centre. Offset the target centre by the same origin.
         zoom.Px = (r.left - hr.left) + r.width / 2; zoom.Py = (r.top - hr.top) + r.height / 2;
         zoom.Cx = zoom.vw / 2 - hr.left; zoom.Cy = zoom.vh / 2 - hr.top;
+        // Where the image sits on screen at click time — the entrance eases from
+        // here to the centre.
+        zoom.B0x = r.left + r.width / 2; zoom.B0y = r.top + r.height / 2;
         hero.style.transformOrigin = '0 0';
-        // Entrance grows the image from its natural on-screen size up to the target
-        // zoom, pinned to centre the whole time (see pinLoop) — so it's centred and
-        // fully visible from the first frame regardless of where it was clicked.
+        // Entrance eases the image from its clicked position/size to the centred
+        // target zoom (see pinLoop) — smooth, and never cut now the clip is lifted.
         zoom.enterFrom = Math.min(1, 1 / zoom.Z);
         zoom.enter = zoom.enterFrom;
         zoom.t0 = performance.now();
@@ -1365,8 +1428,31 @@
         zoom.raf = requestAnimationFrame(pinLoop);
       }
 
+      // Outside-the-card close affordance: cursor → ×, a ring around it empties
+      // over CLOSE_MS, then auto-closes. Cancelled the moment you re-enter.
+      var closeAnim = null;
+      function enterClosing() {
+        if (cur.classList.contains('closing')) return;
+        cur.classList.add('closing');
+        if (ringProg && ringProg.animate) {
+          closeAnim = ringProg.animate(
+            [{ strokeDashoffset: '0px' }, { strokeDashoffset: RING_C + 'px' }],
+            { duration: CLOSE_MS, easing: 'linear', fill: 'forwards' });
+          closeAnim.onfinish = function () { if (zoom.active) zoomOut(); };
+        } else {
+          zoom.outTimer = setTimeout(function () { if (zoom.active) zoomOut(); }, CLOSE_MS);
+        }
+      }
+      function exitClosing() {
+        if (!cur.classList.contains('closing')) return;
+        cur.classList.remove('closing');
+        if (closeAnim) { closeAnim.cancel(); closeAnim = null; }
+        if (zoom.outTimer) { clearTimeout(zoom.outTimer); zoom.outTimer = 0; }
+      }
+
       function zoomOut() {
         if (!zoom.active) return;
+        exitClosing();
         if (zoom.raf) { cancelAnimationFrame(zoom.raf); zoom.raf = 0; }
         hero.style.transition = ''; // slow settle back via the .zoomed transition
         hero.style.transform = '';
@@ -1396,11 +1482,12 @@
         lastX = e.clientX; lastY = e.clientY;
         cur.style.left = e.clientX + 'px'; cur.style.top = e.clientY + 'px';
         e.stopImmediatePropagation(); // freeze the grid's own mouse handling
-        // Moving the cursor off the image zooms back out (once it has settled and
-        // isn't locked or pinched-in, where the image can fill the screen).
-        if (!zoom.settling && !zoom.locked && zoom.userScale <= 1.02 && !overImage(e.clientX, e.clientY)) {
-          zoomOut();
-          return;
+        if (zoom.settling) return;
+        // Off the card (and not locked / pinched-in): show the × + countdown ring
+        // instead of closing straight away. Re-entering the card cancels it.
+        if (!zoom.locked && zoom.userScale <= 1.02) {
+          if (overImage(e.clientX, e.clientY)) { exitClosing(); }
+          else { enterClosing(); return; }
         }
         if (zoom.locked) {
           tip.style.left = (e.clientX + 16) + 'px'; tip.style.top = (e.clientY + 18) + 'px';
