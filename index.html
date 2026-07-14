@@ -992,27 +992,27 @@
       .frame.menu-open .menu-toggle .close-icon { display: block; }
     }
 
-    /* ==== Language switcher beside the two dots ==== */
+    /* ==== Language switcher beside the two dots: always-visible pill row,
+       same style as the list inside the slide-in menu ==== */
     .header-lang { position: relative; display: none; }
-    .header-lang-current {
-      background: none; border: none; cursor: pointer; font: inherit; color: inherit;
-      font-size: 12px; font-weight: 600; text-transform: uppercase;
-      padding: 3px 6px; border-radius: 8px; display: inline-flex; align-items: center; gap: 4px;
-    }
-    .header-lang-current::after { content: "\25BE"; font-size: 9px; opacity: .5; }
+    .header-lang-current { display: none; }
     .header-lang-list {
-      position: absolute; top: 100%; right: 0; left: auto; margin-top: 6px;
-      display: flex; flex-direction: column; gap: 2px;
-      background: rgba(255,255,255,.96); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
-      border-radius: 12px; padding: 6px; min-width: 120px;
-      box-shadow: 0 12px 36px rgba(0,0,0,.16);
-      opacity: 0; visibility: hidden; transform: translateY(-6px);
-      transition: opacity .25s ease, transform .25s ease, visibility .25s; z-index: 1100;
+      position: static; margin: 0; padding: 0; min-width: 0;
+      display: flex; flex-direction: row; gap: 6px;
+      background: none; backdrop-filter: none; -webkit-backdrop-filter: none;
+      border-radius: 0; box-shadow: none;
+      opacity: 1; visibility: visible; transform: none;
     }
-    .header-lang:hover .header-lang-list, .header-lang:focus-within .header-lang-list { opacity: 1; visibility: visible; transform: translateY(0); }
-    .header-lang-list button { background: none; border: none; cursor: pointer; font: inherit; text-align: left; padding: 8px 12px; border-radius: 8px; font-size: 14.4rem; font-weight: 600; text-transform: uppercase; color: #16161a; white-space: nowrap; }
-    .header-lang-list button:hover { background: rgba(0,0,0,.06); }
-    .header-lang-list button.active { background: rgba(0,0,0,.9); color: #fff; }
+    .header-lang-list button {
+      background: none; border: 1px solid currentColor; cursor: pointer; font: inherit;
+      text-align: center; padding: 6px 11px; border-radius: 22px;
+      font-size: 13px; line-height: 1; font-weight: 600; text-transform: uppercase;
+      color: inherit; white-space: nowrap; opacity: .85;
+      transition: background .2s ease, color .2s ease, opacity .2s ease;
+    }
+    .header-lang-list button:hover { opacity: 1; }
+    .header-lang-list button.active { background: #16161a; color: #fff; border-color: #16161a; opacity: 1; }
+    html.dark .header-lang-list button.active { background: #f0f0f2; color: #16161a; border-color: #f0f0f2; }
 
     /* ==== Language list inside the slide-in menu (under the last item) ==== */
     .menu-lang { display: flex; flex-wrap: nowrap; gap: 6px; width: 100%; margin-top: 10px; padding-top: 22px; border-top: 1px solid rgba(0,0,0,.14); }
@@ -1024,18 +1024,18 @@
     html.dark .menu-lang button:hover { background: rgba(255,255,255,.1); }
     html.dark .menu-lang button.active { background: #f0f0f2; color: #16161a; border-color: #f0f0f2; }
 
-    /* ==== Theme toggle (bottom-left) ==== */
+    /* ==== Theme toggle (top-centre, compact) ==== */
     @property --glow-color { syntax: '<color>'; inherits: true; initial-value: #2ec4b6; }
     :root { --glow-color: #2ec4b6; }
     .theme-toggle {
-      position: fixed; left: 20px; bottom: 20px; z-index: 1001;
-      width: 44px; height: 44px; border: none; background: none; box-shadow: none; padding: 0;
+      position: fixed; left: 50%; top: 16px; bottom: auto; transform: translateX(-50%); z-index: 1001;
+      width: 32px; height: 32px; border: none; background: none; box-shadow: none; padding: 0;
       cursor: pointer; display: flex; align-items: center; justify-content: center; color: #16161a;
       transition: transform .45s cubic-bezier(.34,1.56,.64,1), color .3s ease;
     }
-    .theme-toggle:hover { transform: scale(1.22) rotate(-14deg); }
-    .theme-toggle:active { transform: scale(.85) rotate(6deg); }
-    .theme-toggle svg { width: 24px; height: 24px; position: absolute; transition: opacity .4s ease, transform .6s cubic-bezier(.34,1.56,.64,1); }
+    .theme-toggle:hover { transform: translateX(-50%) scale(1.22) rotate(-14deg); }
+    .theme-toggle:active { transform: translateX(-50%) scale(.85) rotate(6deg); }
+    .theme-toggle svg { width: 18px; height: 18px; position: absolute; transition: opacity .4s ease, transform .6s cubic-bezier(.34,1.56,.64,1); }
     .theme-toggle .icon-moon { opacity: 0; transform: rotate(-120deg) scale(.2); }
     .theme-toggle .icon-sun { opacity: 1; transform: rotate(0) scale(1); }
     html.dark .theme-toggle .icon-sun { opacity: 0; transform: rotate(120deg) scale(.2); }
@@ -1087,17 +1087,23 @@
     /* Sticky, readable caption at the bottom of the screen (no background box —
        a text halo keeps it legible over any image, and the image is framed above it). */
     .zoom-cap {
-      position: fixed; left: 0; right: 0; bottom: 0; z-index: 100002; pointer-events: none;
-      text-align: center; padding: 18px 24px calc(20px + env(safe-area-inset-bottom, 0px));
+      position: fixed; left: 0; bottom: 0; z-index: 100002; pointer-events: none;
+      text-align: left; padding: 18px 24px calc(20px + env(safe-area-inset-bottom, 0px));
       opacity: 0; transform: translateY(10px); transition: opacity .5s ease .2s, transform .5s ease .2s;
     }
     body.zoom-mode .zoom-cap { opacity: 1; transform: translateY(0); }
     .zoom-cap .zc-inner {
-      display: inline-block; color: #fff; font-size: 15px; line-height: 1.5;
+      display: inline-block; color: #16161a; font-size: 12px; line-height: 1.4; text-align: left;
     }
-    .zoom-cap .brand-name { display: block; font-weight: 700; font-size: 21px; margin-bottom: 3px; }
+    html.dark .zoom-cap .zc-inner { color: #f0f0f2; }
+    .zoom-cap .brand-name { display: block; font-weight: 600; font-size: 12px; margin-bottom: 2px; text-transform: uppercase; letter-spacing: .01em; }
     /* Hide the zoomed item's in-scene caption; the sticky one replaces it. */
     body.zoom-mode .zoomed-item small { visibility: hidden !important; }
+    /* Keep only the focused image on screen: fade the rest out smoothly and hide
+       the item's original underlying image so the carousel layer isn't doubled. */
+    #hero #images .item { transition: opacity .55s ease; }
+    body.zoom-mode #hero #images .item:not(.zoomed-item) { opacity: 0 !important; pointer-events: none; }
+    body.zoom-mode .zoomed-item .item-image > img { visibility: hidden; }
 
     /* Accent-colour picker button removed from the UI */
     .glow-orb { display: none !important; }
