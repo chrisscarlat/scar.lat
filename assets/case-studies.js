@@ -292,19 +292,23 @@ window.CASE_STUDIES = {
       "A rebrand plus website design and build for Moonbase Social — identity, web design and front-end code delivered end to end."
     ]
   },
-  "DISTRICT VR": {
-    "title": "DISTRICT VR",
+  "DISTRICT BERLIN": {
+    "title": "DISTRICT BERLIN",
     "client": "DISTRICT",
     "city": "Berlin",
     "industry": "VR / Music & Festival",
     "year": "2024",
-    "hero": "./img/district1.png",
+    "hero": "./img/district-home.jpg",
     "images": [
-      "./img/district2.png"
+      "./img/district-home.jpg",
+      "./img/district-vision.jpg",
+      "./img/district1.png",
+      "./img/district2.png",
+      "./img/districtwww.gif"
     ],
     "paras": [
-      "Branding, game design and web design for DISTRICT — a VR, DJ and festival project.",
-      "Immersive world-building that bridges club culture and virtual space, delivered as Chief Creative Officer."
+      "DISTRICT BERLIN — a DJ VR Simulator built together with Denyo from Beginner.",
+      "Branding, game design and web design for an immersive experience that bridges Berlin club culture and virtual space, delivered as Chief Creative Officer."
     ],
     "url": "https://district.berlin"
   },
