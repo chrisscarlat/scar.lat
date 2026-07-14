@@ -1267,7 +1267,8 @@
       // item is centred in the area *above* the sticky caption so the image
       // never covers the text.
       function setHeroT() {
-        hero.style.transform = 'translate(' + zoom.Cx + 'px,' + zoom.Cy + 'px) scale(' + (zoom.Z * zoom.userScale) + ') translate(' + (-zoom.Px) + 'px,' + (-zoom.Py) + 'px)';
+        var s = zoom.Z * zoom.userScale * (zoom.enter || 1);
+        hero.style.transform = 'translate(' + zoom.Cx + 'px,' + zoom.Cy + 'px) scale(' + s + ') translate(' + (-zoom.Px) + 'px,' + (-zoom.Py) + 'px)';
       }
       function applyHero(fast) {
         hero.style.transition = fast ? 'transform .14s ease-out' : '';
@@ -1275,15 +1276,25 @@
       }
       // Nudge the camera so the zoomed image's centre lands exactly on the
       // target screen point (both axes). Corrects for the grid's own per-item
-      // parallax, which otherwise slides the picture off-centre as the mouse moves.
+      // parallax, which otherwise slides the picture off-centre — and, on entry,
+      // for items clicked while partly/entirely off-screen. This keeps the image
+      // dead-centre and fully on screen from the very first frame, never cut.
       function centerBox() {
         if (!zoom.box) return;
         var b = zoom.box.getBoundingClientRect();
         zoom.Cx += zoom.vw / 2 - (b.left + b.width / 2);
         zoom.Cy += zoom.vh / 2 - (b.top + b.height / 2);
       }
+      var ENTER_MS = 620;
       function pinLoop() {
         if (!zoom.active) { zoom.raf = 0; return; }
+        // Entrance: grow the image in place at centre (never flies in from an
+        // off-screen edge, so it can't appear cut).
+        if (zoom.enter < 1) {
+          var p = Math.min(1, (performance.now() - zoom.t0) / ENTER_MS);
+          var e = 1 - Math.pow(1 - p, 3); // ease-out cubic
+          zoom.enter = zoom.enterFrom + (1 - zoom.enterFrom) * e;
+        }
         centerBox();
         hero.style.transition = 'none';
         setHeroT();
@@ -1342,20 +1353,16 @@
         zoom.Px = (r.left - hr.left) + r.width / 2; zoom.Py = (r.top - hr.top) + r.height / 2;
         zoom.Cx = zoom.vw / 2 - hr.left; zoom.Cy = zoom.vh / 2 - hr.top;
         hero.style.transformOrigin = '0 0';
-        // Ignore hover-out while the open animation is still settling.
-        setTimeout(function () { zoom.settling = false; }, 1150);
-        requestAnimationFrame(function () {
-          hero.classList.add('zoomed');
-          applyHero(false); // slow settle via the .zoomed transition
-        });
-        // After the entrance, smoothly catch the image to dead-centre, then pin it
-        // there every frame so it can never drift up/out of the screen.
-        setTimeout(function () {
-          if (!zoom.active) return;
-          centerBox();
-          applyHero(true);
-          setTimeout(function () { if (zoom.active && !zoom.raf) zoom.raf = requestAnimationFrame(pinLoop); }, 220);
-        }, 1200);
+        // Entrance grows the image from its natural on-screen size up to the target
+        // zoom, pinned to centre the whole time (see pinLoop) — so it's centred and
+        // fully visible from the first frame regardless of where it was clicked.
+        zoom.enterFrom = Math.min(1, 1 / zoom.Z);
+        zoom.enter = zoom.enterFrom;
+        zoom.t0 = performance.now();
+        hero.classList.add('zoomed');
+        // Ignore hover-out while the entrance animation is still running.
+        setTimeout(function () { zoom.settling = false; }, ENTER_MS + 120);
+        zoom.raf = requestAnimationFrame(pinLoop);
       }
 
       function zoomOut() {
