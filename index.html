@@ -1139,7 +1139,8 @@
        the item's original underlying image so the carousel layer isn't doubled. */
     #hero #images .item { transition: opacity .55s ease; }
     body.zoom-mode #hero #images .item:not(.zoomed-item) { opacity: 0 !important; pointer-events: none; }
-    body.zoom-mode .zoomed-item .item-image > img { visibility: hidden; }
+    body.zoom-mode .zoomed-item .item-image > img,
+    body.zoom-mode .zoomed-item .item-image > video { visibility: hidden; }
     /* #hero clips to the viewport in its own local space (before the zoom
        transform), which would cut off the part of a clicked item that was
        off-screen. While zoomed, every other item is faded out, so lift the clip
@@ -1367,8 +1368,13 @@
       function zoomInto(item, key) {
         if (zoom.active) return;
         var img = item.querySelector('img'), box = item.querySelector('.item-image');
-        if (!img || !box) return;
-        var thumb = img.currentSrc || img.getAttribute('src');
+        if (!box) return;
+        // Video-backed items (e.g. DISTRICT) have no <img>; use the case study's
+        // first image / hero as the still so they zoom like any other project.
+        var d = key && DATA[key];
+        var thumb = img ? (img.currentSrc || img.getAttribute('src'))
+          : ((d && d.images && d.images[0]) || (d && d.hero) || '');
+        if (!thumb) return;
         zoom.slides = carouselSlides(item, key, thumb);
 
         // Read the caption text before entering zoom-mode (visibility:hidden
