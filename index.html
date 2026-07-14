@@ -1019,6 +1019,14 @@
     .header-lang-list button:hover { opacity: 1; }
     .header-lang-list button.active { opacity: 1; }
 
+    /* Celebratory words that splash out from the cursor when a language is picked. */
+    .lang-splash {
+      position: fixed; z-index: 100050; pointer-events: none; white-space: nowrap;
+      font-weight: 800; font-size: 20px; letter-spacing: .01em;
+      transform: translate(-50%, -50%); will-change: transform, opacity;
+      text-shadow: 0 2px 12px rgba(0,0,0,.28);
+    }
+
     /* ==== Language list inside the slide-in menu (under the last item) ==== */
     .menu-lang { display: flex; flex-wrap: nowrap; gap: 6px; width: 100%; margin-top: 10px; padding-top: 22px; border-top: 1px solid rgba(0,0,0,.14); }
     .menu-lang button { background: none; border: 1px solid rgba(0,0,0,.22); border-radius: 22px; padding: 6px 11px; font: inherit; font-size: 13px; line-height: 1; cursor: pointer; color: #000; white-space: nowrap; transition: background .2s ease, color .2s ease, border-color .2s ease; }
@@ -1231,7 +1239,7 @@
       }
 
       var hero = document.getElementById('hero');
-      var zoom = { active: false, item: null, box: null, slides: [], i: 0, locked: false, acc: 0, layer: null, img: null, key: null };
+      var zoom = { active: false, item: null, box: null, slides: [], i: 0, locked: false, acc: 0, layer: null, img: null, key: null, raf: 0 };
       var lastX = 0, lastY = 0;
 
       // Custom zoom-out cursor + info tooltip
@@ -1258,9 +1266,28 @@
       // Apply the camera transform (base zoom Z × the user's pinch scale). The
       // item is centred in the area *above* the sticky caption so the image
       // never covers the text.
+      function setHeroT() {
+        hero.style.transform = 'translate(' + zoom.Cx + 'px,' + zoom.Cy + 'px) scale(' + (zoom.Z * zoom.userScale) + ') translate(' + (-zoom.Px) + 'px,' + (-zoom.Py) + 'px)';
+      }
       function applyHero(fast) {
         hero.style.transition = fast ? 'transform .14s ease-out' : '';
-        hero.style.transform = 'translate(' + zoom.Cx + 'px,' + zoom.Cy + 'px) scale(' + (zoom.Z * zoom.userScale) + ') translate(' + (-zoom.Px) + 'px,' + (-zoom.Py) + 'px)';
+        setHeroT();
+      }
+      // Nudge the camera so the zoomed image's centre lands exactly on the
+      // target screen point (both axes). Corrects for the grid's own per-item
+      // parallax, which otherwise slides the picture off-centre as the mouse moves.
+      function centerBox() {
+        if (!zoom.box) return;
+        var b = zoom.box.getBoundingClientRect();
+        zoom.Cx += zoom.vw / 2 - (b.left + b.width / 2);
+        zoom.Cy += zoom.vh / 2 - (b.top + b.height / 2);
+      }
+      function pinLoop() {
+        if (!zoom.active) { zoom.raf = 0; return; }
+        centerBox();
+        hero.style.transition = 'none';
+        setHeroT();
+        zoom.raf = requestAnimationFrame(pinLoop);
       }
 
       var CAP_RESERVE = 128; // px kept clear at the bottom for the sticky caption
@@ -1297,12 +1324,23 @@
         item.classList.add('zoomed-item');
         document.body.classList.add('zoom-mode');
 
-        var r = item.getBoundingClientRect();
+        // Centre + scale on the IMAGE box (not the whole item, which includes the
+        // caption text) so the picture sits dead-centre of the screen — both axes —
+        // and is never cut off or pushed up/off-screen. Sized to clear the small
+        // bottom-left caption so nothing overlaps.
+        var r = box.getBoundingClientRect();
+        var hr = hero.getBoundingClientRect(); // hero's untransformed origin
         zoom.vw = window.innerWidth; zoom.vh = window.innerHeight;
-        zoom.Z = Math.min((zoom.vw * 0.82) / r.width, ((zoom.vh - CAP_RESERVE) * 0.9) / r.height);
-        zoom.Z = Math.max(1.8, Math.min(zoom.Z, 6));
-        zoom.Px = r.left + r.width / 2; zoom.Py = r.top + r.height / 2;
-        zoom.Cx = zoom.vw / 2; zoom.Cy = (zoom.vh - CAP_RESERVE) / 2;
+        // Height budget is symmetric around the centre so a centred image still
+        // clears the caption band at the bottom.
+        var maxH = Math.min(zoom.vh - 2 * CAP_RESERVE, zoom.vh - 32);
+        zoom.Z = Math.min((zoom.vw * 0.86) / r.width, maxH / r.height);
+        zoom.Z = Math.max(1.2, Math.min(zoom.Z, 6));
+        // Work in hero-local coordinates (relative to the hero's own top-left) so
+        // the transform doesn't multiply the hero's screen offset by the scale and
+        // knock the image off-centre. Offset the target centre by the same origin.
+        zoom.Px = (r.left - hr.left) + r.width / 2; zoom.Py = (r.top - hr.top) + r.height / 2;
+        zoom.Cx = zoom.vw / 2 - hr.left; zoom.Cy = zoom.vh / 2 - hr.top;
         hero.style.transformOrigin = '0 0';
         // Ignore hover-out while the open animation is still settling.
         setTimeout(function () { zoom.settling = false; }, 1150);
@@ -1310,10 +1348,19 @@
           hero.classList.add('zoomed');
           applyHero(false); // slow settle via the .zoomed transition
         });
+        // After the entrance, smoothly catch the image to dead-centre, then pin it
+        // there every frame so it can never drift up/out of the screen.
+        setTimeout(function () {
+          if (!zoom.active) return;
+          centerBox();
+          applyHero(true);
+          setTimeout(function () { if (zoom.active && !zoom.raf) zoom.raf = requestAnimationFrame(pinLoop); }, 220);
+        }, 1200);
       }
 
       function zoomOut() {
         if (!zoom.active) return;
+        if (zoom.raf) { cancelAnimationFrame(zoom.raf); zoom.raf = 0; }
         hero.style.transition = ''; // slow settle back via the .zoomed transition
         hero.style.transform = '';
         tip.classList.remove('show');
@@ -1511,7 +1558,53 @@
       // Central language switch — keeps the chat pill, the header switcher and
       // the translated page in sync. Capture phase beats the bundle's own handler.
       var LABELS = { en: 'English', de: 'Deutsch', es: 'Español', kr: '한국어', jp: '日本語' };
-      function applyLang(code) {
+
+      // Playful reaction words per language — a little burst of hype in the
+      // language you just picked, splashing out from the cursor.
+      var SPLASH = {
+        en: ['Wow!', 'Yes!', 'Haha', 'Cool', 'Nice one!', 'Sweet!', 'Yeah!', 'Boom!'],
+        de: ['Wow!', 'Ja!', 'Haha', 'Cool', 'Super!', 'Toll!', 'Geil!', 'Yeah!'],
+        es: ['¡Wow!', '¡Sí!', 'Jaja', '¡Guay!', '¡Genial!', '¡Qué bien!', '¡Olé!', '¡Bien!'],
+        kr: ['와!', '좋아!', 'ㅋㅋㅋ', '대박!', '최고!', '멋져!', '좋다!', '굿!'],
+        jp: ['わあ！', 'いいね！', 'ハハ', 'かっこいい！', '最高！', 'すごい！', 'やった！', '神！']
+      };
+      function evPoint(e, el) {
+        if (e && e.clientX) return { x: e.clientX, y: e.clientY };
+        var r = el.getBoundingClientRect();
+        return { x: r.left + r.width / 2, y: r.top + r.height / 2 };
+      }
+      function splashWords(x, y, code) {
+        var words = (SPLASH[code] || SPLASH.en).slice();
+        // shuffle so the burst feels fresh each time
+        for (var s = words.length - 1; s > 0; s--) { var j = Math.floor(Math.random() * (s + 1)); var t = words[s]; words[s] = words[j]; words[j] = t; }
+        var n = Math.min(words.length, 8);
+        for (var i = 0; i < n; i++) {
+          var el = document.createElement('span');
+          el.className = 'lang-splash notranslate';
+          el.setAttribute('translate', 'no');
+          el.textContent = words[i];
+          el.style.left = x + 'px';
+          el.style.top = y + 'px';
+          el.style.color = 'hsl(' + Math.round(Math.random() * 360) + ' 88% 56%)';
+          el.style.fontSize = (16 + Math.random() * 12) + 'px';
+          document.body.appendChild(el);
+          var ang = Math.random() * Math.PI * 2;
+          var dist = 70 + Math.random() * 130;
+          var dx = Math.cos(ang) * dist;
+          var dy = Math.sin(ang) * dist - 45; // bias upward so they "fly away"
+          var rot = Math.random() * 70 - 35;
+          (function (node) {
+            node.animate([
+              { transform: 'translate(-50%,-50%) translate(0,0) scale(.35) rotate(0deg)', opacity: 0 },
+              { transform: 'translate(-50%,-50%) translate(' + (dx * .35) + 'px,' + (dy * .35) + 'px) scale(1.15) rotate(' + (rot * .5) + 'deg)', opacity: 1, offset: .28 },
+              { transform: 'translate(-50%,-50%) translate(' + dx + 'px,' + dy + 'px) scale(1) rotate(' + rot + 'deg)', opacity: 0 }
+            ], { duration: 950 + Math.random() * 550, delay: i * 35, easing: 'cubic-bezier(.22,1,.36,1)', fill: 'forwards' })
+              .onfinish = function () { node.remove(); };
+          })(el);
+        }
+      }
+
+      function applyLang(code, pt) {
         document.querySelectorAll('.language-selector .lang-btn').forEach(function (b) { b.classList.toggle('active', b.dataset.lang === code); });
         moveIndicator();
         var cur = document.querySelector('.header-lang-current');
@@ -1519,16 +1612,17 @@
         document.querySelectorAll('.header-lang-list button').forEach(function (b) { b.classList.toggle('active', b.dataset.lang === code); });
         document.querySelectorAll('.menu-lang button').forEach(function (b) { b.classList.toggle('active', b.dataset.lang === code); });
         setGoogLang(LANG[code] || 'en');
+        if (pt) splashWords(pt.x, pt.y, code);
       }
 
       document.querySelectorAll('.language-selector .lang-btn').forEach(function (btn) {
-        btn.addEventListener('click', function (e) { e.stopImmediatePropagation(); applyLang(btn.dataset.lang); }, true);
+        btn.addEventListener('click', function (e) { e.stopImmediatePropagation(); applyLang(btn.dataset.lang, evPoint(e, btn)); }, true);
       });
       document.querySelectorAll('.header-lang-list button').forEach(function (btn) {
-        btn.addEventListener('click', function () { applyLang(btn.dataset.lang); });
+        btn.addEventListener('click', function (e) { applyLang(btn.dataset.lang, evPoint(e, btn)); });
       });
       document.querySelectorAll('.menu-lang button').forEach(function (btn) {
-        btn.addEventListener('click', function () { applyLang(btn.dataset.lang); });
+        btn.addEventListener('click', function (e) { applyLang(btn.dataset.lang, evPoint(e, btn)); });
       });
     })();
   </script>
