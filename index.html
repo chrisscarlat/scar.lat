@@ -889,12 +889,20 @@
     /* ---- Chat window: equal gap top and bottom ---- */
     .chat-widget .chat-window { top: 20px !important; }
 
-    /* ---- Logos: never crop, add breathing room ---- */
+    /* ---- Logos: never crop, a little breathing room ---- */
     #hero #images .item-image.logo-item img {
       object-fit: contain !important;
-      padding: 15% !important;
+      padding: 8% !important;
       box-sizing: border-box !important;
     }
+    /* Logos are interactive for hover only (clicks/drag still pass through to the
+       grid via bubbling); zoom each one up a touch on hover. render() never
+       transforms .item-image, so this hover transform is safe. */
+    #hero #images .item-image.logo-item {
+      pointer-events: auto !important;
+      transition: transform .35s cubic-bezier(.34,1.56,.64,1);
+    }
+    #hero #images .item-image.logo-item:hover { transform: scale(1.35); }
 
     /* ---- Google Translate: hide banner & keep layout stable ---- */
     .goog-te-banner-frame, .skiptranslate iframe, #goog-gt-tt, .goog-te-balloon-frame { display: none !important; }
