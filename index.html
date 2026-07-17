@@ -15,7 +15,7 @@
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 	<style>* { font-family: 'Inter', Helvetica, Arial, sans-serif !important; }</style>
-  <script type="module" crossorigin src="./assets/index-v2.js?v=20260717"></script>
+  <script type="module" crossorigin src="./assets/index-v2.js?v=20260717b"></script>
   <link rel="stylesheet" href="./assets/index-89f78340.css">
 </head>
 <body>
@@ -889,10 +889,17 @@
     /* ---- Chat window: equal gap top and bottom ---- */
     .chat-widget .chat-window { top: 20px !important; }
 
-    /* ---- Logos: never crop, a little breathing room ---- */
+    /* ---- Logos: never crop or cram ----
+       render() scales every image 1.2x and parallax-translates it; for logos
+       that would clip inside the box, so let the box overflow (with generous
+       grid spacing there's room) and keep padding so each mark sits clear. */
+    #hero #images .item-image.logo-item {
+      overflow: visible !important;
+      background: none !important;
+    }
     #hero #images .item-image.logo-item img {
       object-fit: contain !important;
-      padding: 8% !important;
+      padding: 14% !important;
       box-sizing: border-box !important;
     }
     /* Logos are interactive for hover only (clicks/drag still pass through to the
@@ -902,7 +909,7 @@
       pointer-events: auto !important;
       transition: transform .35s cubic-bezier(.34,1.56,.64,1);
     }
-    #hero #images .item-image.logo-item:hover { transform: scale(1.35); }
+    #hero #images .item-image.logo-item:hover { transform: scale(1.28); }
 
     /* ---- Google Translate: hide banner & keep layout stable ---- */
     .goog-te-banner-frame, .skiptranslate iframe, #goog-gt-tt, .goog-te-balloon-frame { display: none !important; }
@@ -1182,7 +1189,7 @@
     </button>
   </div>
 
-  <script src="./assets/case-studies.js?v=20260717"></script>
+  <script src="./assets/case-studies.js?v=20260717b"></script>
   <script>
     (function () {
       var DATA = window.CASE_STUDIES || {};
