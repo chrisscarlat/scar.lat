@@ -15,7 +15,7 @@
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 	<style>* { font-family: 'Inter', Helvetica, Arial, sans-serif !important; }</style>
-  <script type="module" crossorigin src="./assets/index-v2.js?v=20260717c"></script>
+  <script type="module" crossorigin src="./assets/index-v2.js?v=20260717d"></script>
   <link rel="stylesheet" href="./assets/index-89f78340.css">
 </head>
 <body>
@@ -1201,7 +1201,7 @@
     </button>
   </div>
 
-  <script src="./assets/case-studies.js?v=20260717c"></script>
+  <script src="./assets/case-studies.js?v=20260717d"></script>
   <script>
     (function () {
       var DATA = window.CASE_STUDIES || {};
@@ -1429,15 +1429,13 @@
         layer.className = 'carousel-layer';
         var cimg;
         if (zoom.isVideo) {
-          // Paused video the cursor scrubs; start mid-way so it reads both directions.
+          // Just play the video (muted, looping) — no cursor scrubbing.
           var cvid = document.createElement('video');
           cvid.className = 'cs-img'; cvid.src = videoSrc;
-          cvid.muted = true; cvid.playsInline = true; cvid.preload = 'auto'; cvid.controls = false;
-          cvid.addEventListener('loadedmetadata', function () {
-            if (cvid.duration) try { cvid.currentTime = cvid.duration / 2; } catch (e) {}
-          });
-          cvid.pause();
+          cvid.muted = true; cvid.playsInline = true; cvid.loop = true; cvid.autoplay = true;
+          cvid.preload = 'auto'; cvid.controls = false;
           layer.appendChild(cvid);
+          cvid.play().catch(function () {});
           zoom.video = cvid; cimg = cvid;
         } else {
           cimg = document.createElement('img');
@@ -1549,11 +1547,6 @@
         }
         if (zoom.locked) {
           tip.style.left = (e.clientX + 16) + 'px'; tip.style.top = (e.clientY + 18) + 'px';
-        } else if (zoom.isVideo && zoom.video && zoom.video.duration) {
-          // Scrub the video without restarting: right/up = forward, left/down = back.
-          var v = zoom.video;
-          var t = v.currentTime + (dx - dy) / zoom.vw * v.duration * 0.6;
-          v.currentTime = Math.max(0, Math.min(v.duration - 0.05, t));
         } else if (!zoom.isVideo) {
           zoom.acc += Math.hypot(dx, dy);
           while (zoom.acc >= 45) { zoom.acc -= 45; setSlide(zoom.i + 1); } // faster cursor -> faster changes
