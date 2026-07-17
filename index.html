@@ -15,7 +15,7 @@
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 	<style>* { font-family: 'Inter', Helvetica, Arial, sans-serif !important; }</style>
-  <script type="module" crossorigin src="./assets/index-v2.js?v=20260717b"></script>
+  <script type="module" crossorigin src="./assets/index-v2.js?v=20260717c"></script>
   <link rel="stylesheet" href="./assets/index-89f78340.css">
 </head>
 <body>
@@ -57,9 +57,9 @@
 				<a href="./gallery/" class="nav-gallery">GALLERY</a>
 				<a href="#" class="chat-menu-link nav-chat">CHAT</a>
 				<div class="menu-lang notranslate" translate="no">
-					<button type="button" data-lang="en" class="active">EN</button>
-					<button type="button" data-lang="de">DE</button>
-					<button type="button" data-lang="es">ES</button>
+					<button type="button" data-lang="en" class="active">English</button>
+					<button type="button" data-lang="de">Deutsch</button>
+					<button type="button" data-lang="es">Español</button>
 					<button type="button" data-lang="kr" lang="ko">한국어</button>
 					<button type="button" data-lang="jp" lang="ja">日本語</button>
 				</div>
@@ -1045,15 +1045,27 @@
       text-shadow: 0 2px 12px rgba(0,0,0,.28);
     }
 
-    /* ==== Language list inside the slide-in menu (under the last item) ==== */
-    .menu-lang { display: flex; flex-wrap: nowrap; gap: 6px; width: 100%; margin-top: 10px; padding-top: 22px; border-top: 1px solid rgba(0,0,0,.14); }
-    .menu-lang button { background: none; border: 1px solid rgba(0,0,0,.22); border-radius: 22px; padding: 6px 11px; font: inherit; font-size: 13px; line-height: 1; cursor: pointer; color: #000; white-space: nowrap; transition: background .2s ease, color .2s ease, border-color .2s ease; }
-    .menu-lang button:hover { background: rgba(0,0,0,.07); }
-    .menu-lang button.active { background: rgba(0,0,0,.9); color: #fff; border-color: rgba(0,0,0,.9); }
+    /* ==== Language switcher inside the slide-in menu ====
+       Same size/style as the other menu links; collapsed to the selected
+       language and expands DOWNWARD on hover (like the header, but vertical). */
+    .menu-lang { position: relative; display: flex; flex-direction: column; align-items: flex-start; gap: 0; width: 100%; margin-top: 18px; padding-top: 22px; border-top: 1px solid rgba(0,0,0,.14); }
+    .menu-lang button {
+      background: none; border: none; padding: 0; margin: 0; cursor: pointer;
+      font: inherit; font-size: 26px; line-height: 1.25; text-align: left; color: #000; white-space: nowrap;
+      max-height: 0; opacity: 0; overflow: hidden;
+      transition: max-height .32s cubic-bezier(.33,1,.68,1), opacity .25s ease, margin .32s ease;
+    }
+    /* Selected language always shows; hover/focus reveals the rest below it. */
+    .menu-lang button.active,
+    .menu-lang:hover button,
+    .menu-lang:focus-within button {
+      max-height: 44px; opacity: 1; margin-bottom: 14px;
+    }
+    .menu-lang button:not(.active) { opacity: .45; }
+    .menu-lang button:not(.active):hover { opacity: 1; }
+    .menu-lang button.active { opacity: 1; font-weight: 700; }
     html.dark .menu-lang { border-top-color: rgba(255,255,255,.16); }
-    html.dark .menu-lang button { color: #f0f0f2; border-color: rgba(255,255,255,.26); }
-    html.dark .menu-lang button:hover { background: rgba(255,255,255,.1); }
-    html.dark .menu-lang button.active { background: #f0f0f2; color: #16161a; border-color: #f0f0f2; }
+    html.dark .menu-lang button { color: #f0f0f2; }
 
     /* ==== Theme toggle (top-centre, compact) ==== */
     @property --glow-color { syntax: '<color>'; inherits: true; initial-value: #2ec4b6; }
@@ -1189,7 +1201,7 @@
     </button>
   </div>
 
-  <script src="./assets/case-studies.js?v=20260717b"></script>
+  <script src="./assets/case-studies.js?v=20260717c"></script>
   <script>
     (function () {
       var DATA = window.CASE_STUDIES || {};
@@ -1283,7 +1295,7 @@
       }
 
       var hero = document.getElementById('hero');
-      var zoom = { active: false, item: null, box: null, slides: [], i: 0, locked: false, acc: 0, layer: null, img: null, key: null, raf: 0 };
+      var zoom = { active: false, item: null, box: null, slides: [], i: 0, locked: false, acc: 0, layer: null, img: null, key: null, raf: 0, isVideo: false, video: null };
       var lastX = 0, lastY = 0;
 
       // Custom zoom-out cursor + info tooltip
@@ -1382,15 +1394,25 @@
 
       function zoomInto(item, key) {
         if (zoom.active) return;
+        var vidEl = item.querySelector('video');
         var img = item.querySelector('img'), box = item.querySelector('.item-image');
         if (!box) return;
-        // Video-backed items (e.g. DISTRICT) have no <img>; use the case study's
-        // first image / hero as the still so they zoom like any other project.
-        var d = key && DATA[key];
-        var thumb = img ? (img.currentSrc || img.getAttribute('src'))
-          : ((d && d.images && d.images[0]) || (d && d.hero) || '');
-        if (!thumb) return;
-        zoom.slides = carouselSlides(item, key, thumb);
+        // Video-backed items (e.g. DISTRICT) zoom into the video itself, which the
+        // cursor scrubs (see mousemove). Other items use the carousel of stills.
+        zoom.isVideo = !!vidEl;
+        var videoSrc = '';
+        if (zoom.isVideo) {
+          var srcEl = vidEl.querySelector('source');
+          videoSrc = vidEl.currentSrc || (srcEl && srcEl.src) || vidEl.src || '';
+          if (!videoSrc) return;
+          zoom.slides = [];
+        } else {
+          var d = key && DATA[key];
+          var thumb = img ? (img.currentSrc || img.getAttribute('src'))
+            : ((d && d.images && d.images[0]) || (d && d.hero) || '');
+          if (!thumb) return;
+          zoom.slides = carouselSlides(item, key, thumb);
+        }
 
         // Read the caption text before entering zoom-mode (visibility:hidden
         // would blank innerText), then pin it to the bottom of the screen.
@@ -1405,10 +1427,25 @@
 
         var layer = document.createElement('div');
         layer.className = 'carousel-layer';
-        var cimg = document.createElement('img');
-        cimg.className = 'cs-img';
-        cimg.src = zoom.slides[0] || thumb;
-        layer.appendChild(cimg);
+        var cimg;
+        if (zoom.isVideo) {
+          // Paused video the cursor scrubs; start mid-way so it reads both directions.
+          var cvid = document.createElement('video');
+          cvid.className = 'cs-img'; cvid.src = videoSrc;
+          cvid.muted = true; cvid.playsInline = true; cvid.preload = 'auto'; cvid.controls = false;
+          cvid.addEventListener('loadedmetadata', function () {
+            if (cvid.duration) try { cvid.currentTime = cvid.duration / 2; } catch (e) {}
+          });
+          cvid.pause();
+          layer.appendChild(cvid);
+          zoom.video = cvid; cimg = cvid;
+        } else {
+          cimg = document.createElement('img');
+          cimg.className = 'cs-img';
+          cimg.src = zoom.slides[0] || thumb;
+          layer.appendChild(cimg);
+          zoom.video = null;
+        }
         box.appendChild(layer);
 
         zoom.active = true; zoom.item = item; zoom.box = box; zoom.layer = layer;
@@ -1482,7 +1519,7 @@
         document.body.classList.remove('zoom-mode');
         var item = zoom.item, layer = zoom.layer;
         zoom.active = false; zoom.item = null; zoom.box = null; zoom.locked = false;
-        zoom.layer = null; zoom.img = null; zoom.slides = [];
+        zoom.layer = null; zoom.img = null; zoom.slides = []; zoom.isVideo = false; zoom.video = null;
         setTimeout(function () {
           hero.classList.remove('zoomed');
           if (item) item.classList.remove('zoomed-item');
@@ -1512,7 +1549,12 @@
         }
         if (zoom.locked) {
           tip.style.left = (e.clientX + 16) + 'px'; tip.style.top = (e.clientY + 18) + 'px';
-        } else {
+        } else if (zoom.isVideo && zoom.video && zoom.video.duration) {
+          // Scrub the video without restarting: right/up = forward, left/down = back.
+          var v = zoom.video;
+          var t = v.currentTime + (dx - dy) / zoom.vw * v.duration * 0.6;
+          v.currentTime = Math.max(0, Math.min(v.duration - 0.05, t));
+        } else if (!zoom.isVideo) {
           zoom.acc += Math.hypot(dx, dy);
           while (zoom.acc >= 45) { zoom.acc -= 45; setSlide(zoom.i + 1); } // faster cursor -> faster changes
         }
