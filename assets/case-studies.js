@@ -102,6 +102,7 @@ window.CASE_STUDIES = {
     "year": "2018–19",
     "hero": "https://www.cultural.design/wp-content/uploads/2019/12/new-Detect-Classic-Festival.jpg",
     "images": [
+      "./img/detect-classic-festival-logo.svg",
       "https://www.cultural.design/wp-content/uploads/2019/12/photo-1504680177321-2e6a879aac86-scaled.jpeg",
       "https://www.cultural.design/wp-content/uploads/2019/12/photo-1465847899084-d164df4dedc6-scaled.jpeg",
       "https://www.cultural.design/wp-content/uploads/2019/12/Nalepastr_Polyhymnia01.jpg",
@@ -109,8 +110,6 @@ window.CASE_STUDIES = {
       "https://www.cultural.design/wp-content/uploads/2019/12/2020-EVOLUTION.jpg",
       "https://www.cultural.design/wp-content/uploads/2019/12/2020-dcf-1-2.jpg",
       "https://www.cultural.design/wp-content/uploads/2019/12/2020-dcf-2-1.jpg",
-      "https://www.cultural.design/wp-content/uploads/2019/12/SVGDCF-WHITE-50.jpg",
-      "https://www.cultural.design/wp-content/uploads/2019/12/SVGDCF-SQ-WHITE-50.jpg",
       "https://www.cultural.design/wp-content/uploads/2019/12/w1000-14923515173S5D4.jpg",
       "https://www.cultural.design/wp-content/uploads/2019/12/2020-dcf.jpg",
       "https://www.cultural.design/wp-content/uploads/2019/12/SVGDCF-BRAC-ORANGE-50.jpg",

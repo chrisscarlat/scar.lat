@@ -1096,6 +1096,11 @@
     #hero #images .item .item-image { position: relative; }
     .carousel-layer { position: absolute; inset: 0; overflow: hidden; }
     .carousel-layer .cs-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; display: block; }
+    /* Zoom view: each slide gets a frame sized to ITS proportions (set in JS),
+       as big as fits on screen — wide shots open wide, nothing is cropped.
+       (The ID selector beats the bundle's "item-image img { object-fit: cover }".) */
+    #hero #images .item .item-image .carousel-layer .cs-img { object-fit: contain; transform: none; }
+    body.zoom-mode #hero #images .zoomed-item .item-image { overflow: visible; }
 
     /* Hide the native cursor while zoomed; a zoom-out cursor follows the pointer. */
     body.zoom-mode, body.zoom-mode * { cursor: none !important; }
@@ -1246,7 +1251,7 @@
     </button>
   </div>
 
-  <script src="./assets/case-studies.js?v=20261116b"></script>
+  <script src="./assets/case-studies.js?v=20261116c"></script>
   <script>
     (function () {
       var DATA = window.CASE_STUDIES || {};
@@ -1395,6 +1400,19 @@
           { transform: 'translateY(-50%) translateX(0) scale(1)' }
         ], { duration: 240, easing: 'cubic-bezier(.34,1.56,.64,1)' });
       }
+      // Size the carousel frame to the current slide's own aspect ratio, centred on
+      // the card and as large as the screen allows (in the card's local units).
+      function fitLayer() {
+        if (!zoom.layer || !zoom.img || !zoom.box) return;
+        var m = zoom.img, nw = m.naturalWidth || m.videoWidth, nh = m.naturalHeight || m.videoHeight;
+        if (!nw || !nh) return;
+        var a = nw / nh, bw = zoom.box.offsetWidth, bh = zoom.box.offsetHeight, Z = zoom.Z || 1;
+        var aw = (zoom.vw * 0.9) / Z, ah = Math.min(zoom.vh - 2 * CAP_RESERVE, zoom.vh - 32) / Z;
+        var w = Math.min(aw, ah * a), h = w / a;
+        var L = zoom.layer.style;
+        L.inset = 'auto'; L.width = w + 'px'; L.height = h + 'px';
+        L.left = ((bw - w) / 2) + 'px'; L.top = ((bh - h) / 2) + 'px';
+      }
       function canNext() { return !zoom.isVideo && zoom.slides.length > 1; }
       function updateCount() { countEl.textContent = (zoom.i + 1) + ' / ' + zoom.slides.length; }
       function setSlide(idx) {
@@ -1507,12 +1525,14 @@
           cvid.className = 'cs-img'; cvid.src = videoSrc;
           cvid.muted = true; cvid.playsInline = true; cvid.loop = true; cvid.autoplay = true;
           cvid.preload = 'auto'; cvid.controls = false;
+          cvid.addEventListener('loadedmetadata', fitLayer);
           layer.appendChild(cvid);
           cvid.play().catch(function () {});
           zoom.video = cvid; cimg = cvid;
         } else {
           cimg = document.createElement('img');
           cimg.className = 'cs-img';
+          cimg.addEventListener('load', fitLayer);
           cimg.src = zoom.slides[0] || thumb;
           layer.appendChild(cimg);
           zoom.video = null;
@@ -1553,6 +1573,7 @@
         zoom.enter = zoom.enterFrom;
         zoom.t0 = performance.now();
         hero.classList.add('zoomed');
+        fitLayer(); // first slide already loaded (it's the card's own image)
         // Ignore hover-out while the entrance animation is still running.
         setTimeout(function () { zoom.settling = false; }, ENTER_MS + 120);
         zoom.raf = requestAnimationFrame(pinLoop);
@@ -1602,7 +1623,7 @@
 
       function overImage(x, y) {
         if (!zoom.box) return false;
-        var b = zoom.box.getBoundingClientRect();
+        var b = (zoom.layer || zoom.box).getBoundingClientRect(); // the visible, slide-sized frame
         return x >= b.left && x <= b.right && y >= b.top && y <= b.bottom;
       }
 
