@@ -208,7 +208,7 @@ window.CASE_STUDIES = {
       "Stegreif is Berlin's improvising, conductor-less orchestra — musicians who play from memory, moving through the audience. The identity had to feel as alive and radiant as the performances.",
       "We reimagined the letter S as multiple sound waves emanating from a single central point: many musicians, one source. It replaced the earlier 2017 mark and gave the ensemble a symbol with real acoustic logic.",
       "The system carries across albums, merchandise, print and event materials — a flexible mark that behaves like sound itself, expanding and contracting to fit.",
-      "The album covers are augmented-reality enabled through the Artivive app: point your phone at the sleeve and the artwork comes to life, extending the music beyond the record."
+      "The album covers are augmented-reality enabled through a dedicated AR Web Player (https://ar.front.style, built by FRONT STYLE™): point your phone at the sleeve and the artwork comes to life, extending the music beyond the record."
     ],
     "url": "https://www.cultural.design/portfolio/stegreif/"
   },
