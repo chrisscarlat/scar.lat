@@ -55,14 +55,6 @@
 				<a href="tel:+491705958989">+49 170 595 8989</a>
 				<a href="https://calendar.scar.lat" class="nav-book-call">BOOK CALL</a>
 				<a href="./gallery/" class="nav-gallery">GALLERY</a>
-				<a href="#" class="chat-menu-link nav-chat">CHAT</a>
-				<div class="menu-lang notranslate" translate="no">
-					<button type="button" data-lang="en" class="active">English</button>
-					<button type="button" data-lang="de">Deutsch</button>
-					<button type="button" data-lang="es">Español</button>
-					<button type="button" data-lang="kr" lang="ko">한국어</button>
-					<button type="button" data-lang="jp" lang="ja">日本語</button>
-				</div>
 			</div>
 
 			<div class="menu-overlay"></div>
@@ -1216,7 +1208,13 @@
        first letter shows. Hover → the selected one spells out in full and the
        other languages appear as first letters; hovering one of those spells it
        out too. Mouse away → back to the single letter. ==== */
-    .header-lang { min-width: 16px; }
+    .header-lang { min-width: 16px; display: block !important; } /* also on mobile, now that the menu has no language list */
+    /* Round chat photo stays bottom-right above everything (menu card included);
+       it's the only way into the chat now that the menu has no CHAT link. */
+    .chat-widget { z-index: 100012 !important; }
+    @media (max-width: 768px) { .chat-widget .chat-toggle { display: flex !important; width: 56px; height: 56px; } .chat-widget .chat-window { top: 68px !important; } }
+    /* desktop menu card stops above the photo instead of covering it */
+    @media (min-width: 1025px) { .frame .cdawrap { bottom: 112px !important; } }
     .header-lang-list { gap: 12px; }
     .header-lang-list button { margin-left: -12px; max-width: 0; opacity: 0; }
     .header-lang-list button.active,
