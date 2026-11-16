@@ -1900,6 +1900,29 @@
       });
     })();
   </script>
+<script>
+  // Desktop: name, light toggle, language and menu dots sit on one line,
+  // all vertically centred on the menu button (the bundle's padding scales with width).
+  (function () {
+    function align() {
+      var menu = document.querySelector('.frame .menu-toggle');
+      var tog = document.querySelector('.theme-toggle');
+      var h1 = document.querySelector('.frame .frame-left h1');
+      if (!menu) return;
+      var desk = window.innerWidth > 768;
+      if (h1) h1.style.transform = '';
+      if (tog) tog.style.top = '';
+      if (!desk) return;
+      var m = menu.getBoundingClientRect(), cy = m.top + m.height / 2;
+      if (tog) tog.style.top = Math.round(cy - tog.offsetHeight / 2) + 'px';
+      if (h1) { var b = h1.getBoundingClientRect(); h1.style.transform = 'translateY(' + Math.round(cy - (b.top + b.height / 2)) + 'px)'; }
+    }
+    window.addEventListener('resize', align);
+    window.addEventListener('load', align);
+    if (document.fonts) document.fonts.ready.then(align);
+    align();
+  })();
+</script>
 </body>
 
 </html>
