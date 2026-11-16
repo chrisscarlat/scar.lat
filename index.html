@@ -1202,6 +1202,41 @@
     html.dark .header-lang-list button { color: #f0f0f2; }
     html.dark .header-lang-list button.active { background: #f0f0f2; color: #16161a; }
     html.dark .theme-toggle { background: none; color: #f0f0f2; border: none; box-shadow: none; }
+
+    /* ==== Top bar always on top (above case card, chat and image zoom) ==== */
+    .frame { z-index: 100010 !important; pointer-events: none; }
+    .frame .frame-left, .frame .frame-right, .frame .cdawrap { pointer-events: auto; }
+    .frame .frame-right { position: relative; z-index: 1002; }
+    .theme-toggle { z-index: 100011 !important; }
+    /* keep the card's × and the chat clear of the top bar */
+    #case-detail-overlay .cd-close { top: 78px !important; }
+    @media (min-width: 769px) { .chat-widget .chat-window { top: 76px !important; } }
+
+    /* ==== Language switcher, front.style-style: only the selected language's
+       first letter shows. Hover → the selected one spells out in full and the
+       other languages appear as first letters; hovering one of those spells it
+       out too. Mouse away → back to the single letter. ==== */
+    .header-lang { min-width: 16px; }
+    .header-lang-list { gap: 12px; }
+    .header-lang-list button { margin-left: -12px; max-width: 0; opacity: 0; }
+    .header-lang-list button.active,
+    .header-lang:hover .header-lang-list button,
+    .header-lang:focus-within .header-lang-list button { max-width: 140px; margin-left: 0; }
+    .header-lang:hover .header-lang-list button:not(.active),
+    .header-lang:focus-within .header-lang-list button:not(.active) { opacity: .55; }
+    .header-lang-list button:not(.active):hover { opacity: 1 !important; }
+    .header-lang .header-lang-list button.active { opacity: 1 !important; font-weight: 700; }
+    .lang-l1, .lang-lr { display: inline-block; vertical-align: bottom; }
+    .lang-lr {
+      max-width: 0; overflow: hidden; white-space: nowrap; opacity: 0;
+      transition: max-width .38s cubic-bezier(.33,1,.68,1), opacity .25s ease;
+    }
+    .header-lang:hover .header-lang-list button.active .lang-lr,
+    .header-lang:focus-within .header-lang-list button.active .lang-lr,
+    .header-lang-list button:hover .lang-lr,
+    .menu-lang:hover button.active .lang-lr,
+    .menu-lang:focus-within button.active .lang-lr,
+    .menu-lang button:hover .lang-lr { max-width: 220px; opacity: 1; }
   </style>
 
   <!-- Case study detail (side panel) -->
@@ -1714,6 +1749,15 @@
       // Central language switch — keeps the chat pill, the header switcher and
       // the translated page in sync. Capture phase beats the bundle's own handler.
       var LABELS = { en: 'English', de: 'Deutsch', es: 'Español', kr: '한국어', jp: '日本語' };
+
+      // Split each switcher label into first letter + rest so CSS can show just
+      // the initial (한 / 日 for Korean / Japanese) and spell the rest out on hover.
+      document.querySelectorAll('.header-lang-list button, .menu-lang button').forEach(function (b) {
+        var full = LABELS[b.dataset.lang] || b.textContent.trim();
+        var chars = Array.from(full);
+        b.setAttribute('aria-label', full);
+        b.innerHTML = '<span class="lang-l1">' + chars[0] + '</span><span class="lang-lr">' + chars.slice(1).join('') + '</span>';
+      });
 
       // Playful reaction words per language — a little burst of hype in the
       // language you just picked, splashing out from the cursor.
