@@ -84,7 +84,7 @@
 
     const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 400)
 
-    const TEX_VARIANTS = 114  // ./img/1..114.webp — site grid + case-study images
+    const TEX_VARIANTS = 113  // ./img/1..113.webp — site grid + case-study images
     const textureLoader = new THREE.TextureLoader()
     const aspectListeners = Array.from({ length: TEX_VARIANTS }, () => [])
     const textures = loadTextureVariants(TEX_VARIANTS, textureLoader)

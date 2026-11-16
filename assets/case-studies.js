@@ -132,7 +132,6 @@ window.CASE_STUDIES = {
     "year": "2016–2018",
     "hero": "https://www.cultural.design/wp-content/uploads/2020/01/home-grover-1160x1160-copy.jpg",
     "images": [
-      "https://www.cultural.design/wp-content/uploads/2024/05/danielle-suijkerbuijk-ntnkDuf-tH8-unsplash-scaled-1.webp",
       "https://www.cultural.design/media/2020/02/cover-10.png",
       "https://www.cultural.design/wp-content/uploads/2020/02/cover-20.png",
       "https://www.cultural.design/wp-content/uploads/2020/01/home-1-1.jpg",

@@ -1251,7 +1251,7 @@
     </button>
   </div>
 
-  <script src="./assets/case-studies.js?v=20261116c"></script>
+  <script src="./assets/case-studies.js?v=20261116d"></script>
   <script>
     (function () {
       var DATA = window.CASE_STUDIES || {};
@@ -1670,8 +1670,8 @@
           return;
         }
         if (overImage(e.clientX, e.clientY)) {
-          if (canNext()) setSlide(zoom.i + 1);
-          return;
+          if (canNext()) { setSlide(zoom.i + 1); return; }
+          // only one image: a click closes it, same as clicking outside
         }
         zoomOut(); // outside the image: close straight away
       }, true);
