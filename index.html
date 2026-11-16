@@ -15,7 +15,7 @@
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 	<style>* { font-family: 'Inter', Helvetica, Arial, sans-serif !important; }</style>
-  <script type="module" crossorigin src="./assets/index-v2.js?v=20261116c"></script>
+  <script type="module" crossorigin src="./assets/index-v2.js?v=20261116e"></script>
   <link rel="stylesheet" href="./assets/index-89f78340.css">
 </head>
 <body>
@@ -1103,7 +1103,7 @@
     #hero #images .item.zoomed-item { z-index: 500 !important; }
     #hero #images .item .item-image { position: relative; }
     .carousel-layer { position: absolute; inset: 0; overflow: hidden; }
-    .carousel-layer .cs-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
+    .carousel-layer .cs-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; display: block; }
 
     /* Hide the native cursor while zoomed; a zoom-out cursor follows the pointer. */
     body.zoom-mode, body.zoom-mode * { cursor: none !important; }
@@ -1126,6 +1126,18 @@
     .zoom-cursor .zc-left { right: 100%; margin-right: 8px; }
     .zoom-cursor .zc-right { left: 100%; margin-left: 8px; }
     .zoom-cursor.locked .zc-arrow, .zoom-cursor.closing .zc-arrow { opacity: 0; }
+    /* Over the image: dark "next" cursor + counter — click anywhere = next image. */
+    .zoom-cursor .zc-arrow { display: none; }
+    .zoom-cursor .zc-next { display: none; }
+    .zoom-cursor .zc-count {
+      position: absolute; top: 100%; left: 50%; transform: translateX(-50%); margin-top: 8px;
+      font-size: 11px; line-height: 1; font-weight: 600; white-space: nowrap; letter-spacing: .02em;
+      color: #fff; background: rgba(22,22,26,.9); padding: 4px 7px; border-radius: 999px; display: none;
+    }
+    .zoom-cursor.next { background: #16161a; color: #fff; animation: none; }
+    .zoom-cursor.next .zc-mag { display: none; }
+    .zoom-cursor.next .zc-next, .zoom-cursor.next .zc-count { display: block; }
+    .zoom-cursor.closing .zc-next, .zoom-cursor.closing .zc-count { display: none !important; }
     /* Close affordance: outside the card the cursor becomes an ×, ringed by a
        countdown that empties over 5s before auto-closing. */
     .zoom-cursor .zc-x { display: none; }
@@ -1286,12 +1298,12 @@
         if (key && DATA[key] && DATA[key].images && DATA[key].images.length > 1) {
           list = DATA[key].images.slice(0, 8);
         } else if (thumb) {
-          list = [thumb, thumb, thumb];
+          list = [thumb];
         } else {
           list = [];
         }
         if (thumb && list[0] !== thumb) list = [thumb].concat(list);
-        return list;
+        return list.filter(function (u, i) { return list.indexOf(u) === i; });
       }
 
       var hero = document.getElementById('hero');
@@ -1308,12 +1320,14 @@
           '<circle class="zc-ring-prog" cx="28" cy="28" r="24"/></svg>' +
         '<span class="zc-arrow zc-left" aria-hidden="true">‹</span>' +
         '<svg class="zc-mag" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="10.5" cy="10.5" r="6.5"/><line x1="15.5" y1="15.5" x2="21" y2="21"/><line x1="7.5" y1="10.5" x2="13.5" y2="10.5"/></svg>' +
+        '<svg class="zc-next" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg>' +
+        '<span class="zc-count"></span>' +
         '<svg class="zc-x" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>' +
         '<span class="zc-arrow zc-right" aria-hidden="true">›</span>';
       document.body.appendChild(cur);
       var arrowL = cur.querySelector('.zc-left'), arrowR = cur.querySelector('.zc-right');
-      var ringProg = cur.querySelector('.zc-ring-prog');
-      var RING_C = 2 * Math.PI * 24, CLOSE_MS = 5000;
+      var ringProg = cur.querySelector('.zc-ring-prog'), countEl = cur.querySelector('.zc-count');
+      var RING_C = 2 * Math.PI * 24, CLOSE_MS = 3000;
       var tip = document.createElement('div');
       tip.className = 'zoom-tip notranslate';
       tip.setAttribute('translate', 'no');
@@ -1336,12 +1350,16 @@
           { transform: 'translateY(-50%) translateX(0) scale(1)' }
         ], { duration: 240, easing: 'cubic-bezier(.34,1.56,.64,1)' });
       }
+      function canNext() { return !zoom.isVideo && zoom.slides.length > 1; }
+      function updateCount() { countEl.textContent = (zoom.i + 1) + ' / ' + zoom.slides.length; }
       function setSlide(idx) {
         if (!zoom.slides.length || !zoom.img) return;
         var dir = idx >= zoom.i ? 1 : -1;
         zoom.i = ((idx % zoom.slides.length) + zoom.slides.length) % zoom.slides.length;
         zoom.img.src = zoom.slides[zoom.i];
-        bumpArrows(dir);
+        if (zoom.img.animate) zoom.img.animate([{ opacity: .35 }, { opacity: 1 }], { duration: 260, easing: 'ease-out' });
+        if (cur.animate) cur.animate([{ transform: 'translate(-50%,-50%) scale(1)' }, { transform: 'translate(-50%,-50%) scale(.82)' }, { transform: 'translate(-50%,-50%) scale(1)' }], { duration: 220, easing: 'ease-out' });
+        updateCount();
       }
 
       // Apply the camera transform (base zoom Z × the user's pinch scale). The
@@ -1449,6 +1467,7 @@
         zoom.active = true; zoom.item = item; zoom.box = box; zoom.layer = layer;
         zoom.img = cimg; zoom.i = 0; zoom.locked = false; zoom.acc = 0; zoom.key = key;
         zoom.userScale = 1; zoom.settling = true;
+        updateCount(); cur.classList.toggle('next', canNext());
         item.classList.add('zoomed-item');
         document.body.classList.add('zoom-mode');
 
@@ -1513,7 +1532,7 @@
         hero.style.transition = ''; // slow settle back via the .zoomed transition
         hero.style.transform = '';
         tip.classList.remove('show');
-        cur.classList.remove('locked');
+        cur.classList.remove('locked'); cur.classList.remove('next');
         document.body.classList.remove('zoom-mode');
         var item = zoom.item, layer = zoom.layer;
         zoom.active = false; zoom.item = null; zoom.box = null; zoom.locked = false;
@@ -1541,15 +1560,11 @@
         if (zoom.settling) return;
         // Off the card (and not locked / pinched-in): show the × + countdown ring
         // instead of closing straight away. Re-entering the card cancels it.
-        if (!zoom.locked && zoom.userScale <= 1.02) {
-          if (overImage(e.clientX, e.clientY)) { exitClosing(); }
+        var over = overImage(e.clientX, e.clientY);
+        cur.classList.toggle('next', over && canNext());
+        if (zoom.userScale <= 1.02) {
+          if (over) { exitClosing(); }
           else { enterClosing(); return; }
-        }
-        if (zoom.locked) {
-          tip.style.left = (e.clientX + 16) + 'px'; tip.style.top = (e.clientY + 18) + 'px';
-        } else if (!zoom.isVideo) {
-          zoom.acc += Math.hypot(dx, dy);
-          while (zoom.acc >= 45) { zoom.acc -= 45; setSlide(zoom.i + 1); } // faster cursor -> faster changes
         }
       }, true);
 
@@ -1565,7 +1580,7 @@
       window.addEventListener('mousedown', function (e) { if (zoom.active) e.stopImmediatePropagation(); }, true);
       window.addEventListener('pointerdown', function (e) { if (zoom.active) e.stopImmediatePropagation(); }, true);
 
-      // Click while zoomed: on the image -> lock/unlock + tooltip; outside -> zoom out.
+      // Click while zoomed: on the image -> next image; outside -> zoom out now.
       window.addEventListener('click', function (e) {
         if (!zoom.active) return;
         e.stopImmediatePropagation(); e.preventDefault();
@@ -1578,19 +1593,10 @@
           return;
         }
         if (overImage(e.clientX, e.clientY)) {
-          zoom.locked = !zoom.locked;
-          if (zoom.locked) {
-            var bn = zoom.item.querySelector('.brand-name');
-            var title = (zoom.key && DATA[zoom.key]) ? zoom.key : (bn ? bn.textContent.trim() : 'Image');
-            tip.innerHTML = '<strong>' + esc(title) + '</strong><span>' + (zoom.i + 1) + ' / ' + zoom.slides.length + ' · click to unlock</span>';
-            tip.style.left = (e.clientX + 16) + 'px'; tip.style.top = (e.clientY + 18) + 'px';
-            tip.classList.add('show'); cur.classList.add('locked');
-          } else {
-            tip.classList.remove('show'); cur.classList.remove('locked');
-          }
-        } else {
-          zoomOut();
+          if (canNext()) setSlide(zoom.i + 1);
+          return;
         }
+        zoomOut(); // outside the image: close straight away
       }, true);
 
       var grid = document.getElementById('images');
