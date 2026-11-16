@@ -1335,8 +1335,20 @@
         } else {
           list = [];
         }
-        if (thumb && list[0] !== thumb) list = [thumb].concat(list);
+        if (thumb) list = [thumb].concat(list);
+        // same file under a relative vs absolute URL counts once
+        list = list.map(function (u) { try { return new URL(u, location.href).href; } catch (e) { return u; } });
         return list.filter(function (u, i) { return list.indexOf(u) === i; });
+      }
+      // Only offer "next" for images that really load (some case links are dead).
+      var IMG_OK = {};
+      function checkImg(u, cb) {
+        if (u in IMG_OK) { if (IMG_OK[u] !== 'pending') cb(IMG_OK[u]); else IMG_OK[u + '#cb'].push(cb); return; }
+        IMG_OK[u] = 'pending'; IMG_OK[u + '#cb'] = [cb];
+        var im = new Image();
+        im.onload = function () { IMG_OK[u] = im.naturalWidth > 0; IMG_OK[u + '#cb'].forEach(function (f) { f(IMG_OK[u]); }); };
+        im.onerror = function () { IMG_OK[u] = false; IMG_OK[u + '#cb'].forEach(function (f) { f(false); }); };
+        im.src = u;
       }
 
       var hero = document.getElementById('hero');
@@ -1462,7 +1474,17 @@
           var thumb = img ? (img.currentSrc || img.getAttribute('src'))
             : ((d && d.images && d.images[0]) || (d && d.hero) || '');
           if (!thumb) return;
-          zoom.slides = carouselSlides(item, key, thumb);
+          var cand = carouselSlides(item, key, thumb), sess = (zoom.session = (zoom.session || 0) + 1);
+          zoom.slides = cand.filter(function (v, i) { return i === 0 || IMG_OK[v] === true; });
+          cand.slice(1).forEach(function (u) {
+            checkImg(u, function (ok) {
+              if (!ok || zoom.session !== sess) return;
+              // keep the case-study order while loaded images trickle in
+              zoom.slides = cand.filter(function (v, i) { return i === 0 || IMG_OK[v] === true; });
+              updateCount();
+              cur.classList.toggle('next', canNext() && overImage(lastX, lastY));
+            });
+          });
         }
 
         // Read the caption text before entering zoom-mode (visibility:hidden
@@ -1568,6 +1590,7 @@
         cur.classList.remove('locked'); cur.classList.remove('next');
         document.body.classList.remove('zoom-mode');
         var item = zoom.item, layer = zoom.layer;
+        zoom.session = (zoom.session || 0) + 1; // ignore late image checks
         zoom.active = false; zoom.item = null; zoom.box = null; zoom.locked = false;
         zoom.layer = null; zoom.img = null; zoom.slides = []; zoom.isVideo = false; zoom.video = null;
         setTimeout(function () {

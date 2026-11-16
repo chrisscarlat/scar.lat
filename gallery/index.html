@@ -3,13 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Scarlat — Gallery</title>
-  <meta name="description" content="A WebGL curve gallery — scroll along a curve of images.">
+  <title>Chris Scarlat — Gallery</title>
+  <meta name="description" content="Chris Scarlat's work, laid out along the word Scarlat in script — scroll to glide across it.">
   <link rel="icon" href="../fav/fav.ico" sizes="any">
   <link rel="icon" href="../fav/fav.svg">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Mrs+Saint+Delafield&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     html, body { width: 100%; height: 100%; overflow: hidden; background: #fff; }
@@ -27,11 +27,6 @@
     }
     .cg-top a { color: inherit; text-decoration: none; }
     .cg-top a:hover { opacity: .7; }
-    .cg-top .cg-name {
-      font-family: 'Mrs Saint Delafield', 'Snell Roundhand', 'Apple Chancery', cursive;
-      font-size: 46px; font-weight: 400; line-height: 1; text-transform: none; letter-spacing: 0;
-      display: inline-block; padding: 4px 6px 0 0;
-    }
 
     /* --- Auto/scroll toggle (bottom centre) --- */
     .scroll-toggle {
@@ -65,12 +60,12 @@
   <div id="canvas-container"></div>
 
   <header class="cg-top notranslate" translate="no">
-    <a href="https://scar.lat" class="cg-name" aria-label="Scarlat — back to scar.lat">Scarlat</a>
+    <a href="https://scar.lat" class="cg-name">Chris Scarlat</a>
   </header>
 
   <button id="scroll-toggle" class="scroll-toggle" type="button">Scroll</button>
 
-  <div class="cg-hint">Scroll / drag to move along the curve</div>
+  <div class="cg-hint">Scroll / drag to glide across</div>
 
   <script type="module">
     import * as THREE from 'three'
@@ -86,31 +81,24 @@
 
     const scene = new THREE.Scene()
     scene.background = new THREE.Color(0xffffff)
-    scene.fog = new THREE.Fog(0xffffff, 10, 40)
+    scene.fog = new THREE.Fog(0xffffff, 60, 160)
 
     const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 200)
 
-    const SCALE = 16          // the curve is defined in Blender units; scale it for the scene
     const TEX_VARIANTS = 114  // ./img/1..114.webp — site grid + case-study images
     const textureLoader = new THREE.TextureLoader()
     const aspectListeners = Array.from({ length: TEX_VARIANTS }, () => [])
     const textures = loadTextureVariants(TEX_VARIANTS, textureLoader)
 
-    const TOTAL = 500         // total number of planes along the curve
-    const CAM_Z = 10          // camera offset along Z
-    const FOCUS_DIST = 5.5    // distance at which planes start to scale up
-    const MAX_SCALE = 14      // max scale factor for focused planes
-    const Z_GATE = 11         // depth cull to avoid needless work
-
-    const LATERAL_OFFSET_RANGE = [-1, 1]
-    const DEPTH_OFFSET_RANGE = [-0.75, 0.75]
-    const SIZE_RANGE = [0.18, 0.4]
+    const TOTAL = 1100        // images laid along the outline of "Scarlat"
+    const FOCUS_DIST = 6      // planes this close to the screen centre grow
+    const MAX_SCALE = 16      // how big the centre image gets
+    const FOCUS_LIFT = 0.4   // focused planes come forward so nothing covers them
+    const JITTER = 0.18       // keep the letters crisp: only a little scatter
+    const DEPTH_RANGE = [-0.35, 0.35]
+    const SIZE_RANGE = [0.42, 0.72]
 
     function randomBetween(min, max) { return min + Math.random() * (max - min) }
-
-    function toScaledVector3([x, y, z], scale) {
-      return new THREE.Vector3(x * scale, y * scale, z * scale)
-    }
 
     function loadTextureVariants(count, loader) {
       return Array.from({ length: count }, (_, i) => {
@@ -124,49 +112,37 @@
       })
     }
 
-    // reconstruct a curve from the exported Blender points
-    function buildCurve(raw) {
-      const points = raw.map(p => toScaledVector3(p, SCALE))
-      return new THREE.CatmullRomCurve3(points, true, 'catmullrom', 0.5)
-    }
-
-    // returns position and local normal (nx, ny) at a given point on the curve
-    function getCurveFrame(curve, t) {
-      const pos = curve.getPoint(t)
-      const tangent = curve.getTangent(t)
-      return { pos, nx: -tangent.y, ny: tangent.x }
+    // pull the camera back so the whole word fits on wide screens; on narrow
+    // (portrait) screens cap it and glide across instead
+    const VIEW_K = () => 2 * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2))
+    function camDistance() {
+      const k = VIEW_K()
+      return Math.max(20 / k, Math.min(64 / (k * camera.aspect), 62 / k))
     }
 
     async function init() {
-      const raw = await fetch('./paths/path1.json').then(r => r.json())
-      const curve = buildCurve(raw)
+      // ./paths/scarlat.json: evenly spaced points on the outline of "Scarlat"
+      // set in Mrs Saint Delafield (56 units wide, centred on the origin)
+      const word = await fetch('./paths/scarlat.json').then(r => r.json())
+      const xs = word.map(p => p[0])
+      const halfW = (Math.max(...xs) - Math.min(...xs)) / 2
 
-      // convert the focus distance to a t-based threshold relative to the curve length
-      const focusTGate = (FOCUS_DIST * 1.5) / curve.getLength()
-
-      function createScaleAnimator(mesh) {
-        const proxy = { value: 1 }
-        return gsap.quickTo(proxy, 'value', {
-          duration: 0.4,
-          ease: 'power3.out',
-          onUpdate: () => mesh.scale.setScalar(proxy.value),
-        })
+      // the camera glides left→right across the word and loops back along a flat ellipse
+      const camPoint = (t) => {
+        // only travel as far as needed to bring the word's ends into view
+        const visHalf = camDistance() * VIEW_K() * camera.aspect / 2
+        const rx = Math.max(4, halfW + 3 - visHalf)
+        const a = Math.PI - t * Math.PI * 2
+        return { x: rx * Math.cos(a), y: -1.8 + 1.6 * Math.sin(a) } // through the letters' body
       }
 
       const planes = []
-
-      // spread the images evenly (shuffled) so each one appears a few times
       const order = Array.from({ length: TOTAL }, (_, i) => i % TEX_VARIANTS)
       for (let i = order.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [order[i], order[j]] = [order[j], order[i]] }
 
       for (let i = 0; i < TOTAL; i++) {
-        const t = i / TOTAL // distribute planes evenly along the curve
-        const { pos, nx, ny } = getCurveFrame(curve, t)
-
-        const lateralOffset = randomBetween(...LATERAL_OFFSET_RANGE)
-        const depthOffset = randomBetween(...DEPTH_OFFSET_RANGE)
+        const [px, py] = word[Math.floor(i * word.length / TOTAL)]
         const size = randomBetween(...SIZE_RANGE)
-
         const texIndex = order[i]
         const mesh = new THREE.Mesh(
           new THREE.PlaneGeometry(size, size),
@@ -180,49 +156,44 @@
         const known = textures[texIndex].userData.aspect
         known ? fitAspect(known) : aspectListeners[texIndex].push(fitAspect)
 
-        mesh.position.set(
-          pos.x + nx * lateralOffset,
-          pos.y + ny * lateralOffset,
-          pos.z + depthOffset
-        )
+        const baseZ = randomBetween(...DEPTH_RANGE)
+        mesh.position.set(px + randomBetween(-JITTER, JITTER), py + randomBetween(-JITTER, JITTER), baseZ)
 
-        mesh.userData.t = t
-        mesh.userData.lateralOffset = lateralOffset
-        mesh.userData.depthOffset = depthOffset
-        mesh.userData.setScale = createScaleAnimator(mesh)
-
+        const proxy = { value: 1 }
+        mesh.userData.setScale = gsap.quickTo(proxy, 'value', {
+          duration: 0.45,
+          ease: 'power3.out',
+          onUpdate: () => {
+            mesh.scale.setScalar(proxy.value)
+            mesh.position.z = baseZ + (proxy.value - 1) * FOCUS_LIFT
+          },
+        })
         planes.push(mesh)
         scene.add(mesh)
       }
 
-      function computeFocusScale(distance, maxDistance, maxScale) {
-        const f = 1 - distance / maxDistance
-        return 1 + f ** 3 * (maxScale - 1)
+      function computeFocusScale(distance) {
+        const f = 1 - distance / FOCUS_DIST
+        return 1 + f ** 2.4 * (MAX_SCALE - 1)
       }
 
-      // proxy object to let GSAP animate the camera's t position
       const camProxy = { t: 0 }
       const setCamT = gsap.quickTo(camProxy, 't', { duration: 1, ease: 'power3.out' })
-
       let targetT = 0
-      const SENSITIVITY = 0.8 / (window.innerHeight * 4)
+      const SENSITIVITY = 0.5 / (window.innerHeight * 4)
 
       Observer.create({
         target: window,
         type: 'wheel,touch,pointer',
         onChange: (self) => {
           if (autoScroll) return
-          targetT += self.deltaY * SENSITIVITY
+          targetT += (self.deltaY + self.deltaX) * SENSITIVITY
           setCamT(targetT)
         },
       })
 
-      const AUTO_SCROLL_DURATION = 10
-      const AUTO_T_PER_SEC = 1 / AUTO_SCROLL_DURATION
+      const AUTO_T_PER_SEC = 1 / 40
       let autoScroll = false
-
-      const camPos = { x: 0, y: 0, z: 0 }
-
       const scrollToggleBtn = document.getElementById('scroll-toggle')
       scrollToggleBtn.addEventListener('click', () => {
         autoScroll = !autoScroll
@@ -231,47 +202,24 @@
       })
 
       let lastTime = performance.now()
-
       function animate() {
         requestAnimationFrame(animate)
-
         const now = performance.now()
         const delta = (now - lastTime) / 1000
         lastTime = now
+        if (autoScroll) { targetT += AUTO_T_PER_SEC * delta; setCamT(targetT) }
 
-        if (autoScroll) {
-          targetT += AUTO_T_PER_SEC * delta
-          setCamT(targetT)
-        }
-
-        const t = ((1 - camProxy.t) % 1 + 1) % 1
-
-        const pathPos = curve.getPoint(t)
-        if (!gsap.isTweening(camPos)) {
-          camPos.x = pathPos.x
-          camPos.y = pathPos.y
-          camPos.z = pathPos.z + CAM_Z
-        }
-        camera.position.set(camPos.x, camPos.y, camPos.z)
+        const t = ((camProxy.t % 1) + 1) % 1
+        const c = camPoint(t)
+        camera.position.set(c.x, c.y, camDistance())
+        camera.lookAt(c.x, c.y, 0)
 
         for (const plane of planes) {
-          const dx = camera.position.x - plane.position.x
-          const dy = camera.position.y - plane.position.y
-          const dz = Math.abs(camera.position.z - plane.position.z)
-          const distXY = Math.sqrt(dx * dx + dy * dy)
-
-          let dt = Math.abs(plane.userData.t - t)
-          if (dt > 0.5) dt = 1 - dt
-
-          const isInFocusZone = dt < focusTGate && dz < Z_GATE && distXY < FOCUS_DIST
-          const targetScale = isInFocusZone ? computeFocusScale(distXY, FOCUS_DIST, MAX_SCALE) : 1
-
-          plane.userData.setScale(targetScale)
+          const d = Math.hypot(camera.position.x - plane.position.x, camera.position.y - plane.position.y)
+          plane.userData.setScale(d < FOCUS_DIST ? computeFocusScale(d) : 1)
         }
-
         renderer.render(scene, camera)
       }
-
       animate()
     }
 
