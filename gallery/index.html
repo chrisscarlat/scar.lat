@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Chris Scarlat — Gallery</title>
-  <meta name="description" content="Chris Scarlat's work, laid out along the word Scarlat in script — scroll to glide across it.">
+  <meta name="description" content="27 years of Chris Scarlat's work, laid out as the words themselves — scroll to travel through them.">
   <link rel="icon" href="../fav/fav.ico" sizes="any">
   <link rel="icon" href="../fav/fav.svg">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -65,7 +65,7 @@
 
   <button id="scroll-toggle" class="scroll-toggle" type="button">Scroll</button>
 
-  <div class="cg-hint">Scroll / drag to glide across</div>
+  <div class="cg-hint">Scroll / drag to travel through the years</div>
 
   <script type="module">
     import * as THREE from 'three'
@@ -81,22 +81,21 @@
 
     const scene = new THREE.Scene()
     scene.background = new THREE.Color(0xffffff)
-    scene.fog = new THREE.Fog(0xffffff, 60, 160)
 
-    const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 200)
+    const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 400)
 
     const TEX_VARIANTS = 114  // ./img/1..114.webp — site grid + case-study images
     const textureLoader = new THREE.TextureLoader()
     const aspectListeners = Array.from({ length: TEX_VARIANTS }, () => [])
     const textures = loadTextureVariants(TEX_VARIANTS, textureLoader)
 
-    const TOTAL = 1100        // images laid along the outline of "Scarlat"
-    const FOCUS_DIST = 6      // planes this close to the screen centre grow
-    const MAX_SCALE = 16      // how big the centre image gets
-    const FOCUS_LIFT = 0.4   // focused planes come forward so nothing covers them
-    const JITTER = 0.18       // keep the letters crisp: only a little scatter
-    const DEPTH_RANGE = [-0.35, 0.35]
-    const SIZE_RANGE = [0.42, 0.72]
+    const CLOSE_Z = 9         // camera distance once zoomed into the letters
+    const FOCUS_DIST = 3.2    // planes this close to the screen centre grow
+    const MAX_SCALE = 9       // how big the centre image gets
+    const FOCUS_LIFT = 0.35   // focused planes come forward so nothing covers them
+    const JITTER = 0.15
+    const DEPTH_RANGE = [-0.3, 0.3]
+    const SIZE_RANGE = [0.5, 0.82]
 
     function randomBetween(min, max) { return min + Math.random() * (max - min) }
 
@@ -112,36 +111,48 @@
       })
     }
 
-    // pull the camera back so the whole word fits on wide screens; on narrow
-    // (portrait) screens cap it and glide across instead
-    const VIEW_K = () => 2 * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2))
-    function camDistance() {
-      const k = VIEW_K()
-      return Math.max(20 / k, Math.min(64 / (k * camera.aspect), 62 / k))
+    // Language picked on scar.lat (saved by the site, or Google Translate's cookie)
+    function siteLang() {
+      try { const l = localStorage.getItem('scarlat-lang'); if (l) return l } catch (e) {}
+      const m = document.cookie.match(/googtrans=\/[a-z-]+\/([a-z-]+)/i)
+      const g = m ? m[1].toLowerCase() : 'en'
+      return ({ ko: 'kr', ja: 'jp', de: 'de', es: 'es' })[g] || 'en'
     }
 
-    async function init() {
-      // ./paths/scarlat.json: evenly spaced points on the outline of "Scarlat"
-      // set in Mrs Saint Delafield (56 units wide, centred on the origin)
-      const word = await fetch('./paths/scarlat.json').then(r => r.json())
-      const xs = word.map(p => p[0])
-      const halfW = (Math.max(...xs) - Math.min(...xs)) / 2
+    const VIEW_K = () => 2 * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2))
 
-      // the camera glides left→right across the word and loops back along a flat ellipse
-      const camPoint = (t) => {
-        // only travel as far as needed to bring the word's ends into view
-        const visHalf = camDistance() * VIEW_K() * camera.aspect / 2
-        const rx = Math.max(4, halfW + 3 - visHalf)
-        const a = Math.PI - t * Math.PI * 2
-        return { x: rx * Math.cos(a), y: -1.8 + 1.6 * Math.sin(a) } // through the letters' body
+    async function init() {
+      // ./paths/years-<lang>.json: evenly spaced points on the outline of
+      // "27 years" (Inter / Noto Sans), traced letter by letter, left → right
+      let lang = siteLang()
+      let data = await fetch(`./paths/years-${lang}.json`).then(r => r.ok ? r.json() : null).catch(() => null)
+      if (!data) data = await fetch('./paths/years-en.json').then(r => r.json())
+      const word = data.points
+      document.documentElement.lang = ({ kr: 'ko', jp: 'ja' })[lang] || lang
+
+      // the camera's route: the outline itself, parameterised by distance travelled
+      const cum = [0]
+      for (let i = 1; i < word.length; i++) cum.push(cum[i - 1] + Math.hypot(word[i][0] - word[i - 1][0], word[i][1] - word[i - 1][1]))
+      const total = cum[cum.length - 1] + Math.hypot(word[0][0] - word.at(-1)[0], word[0][1] - word.at(-1)[1])
+      function routePoint(t) {
+        const d = (((t % 1) + 1) % 1) * total
+        let lo = 0, hi = cum.length - 1
+        while (lo < hi) { const mid = (lo + hi + 1) >> 1; cum[mid] <= d ? (lo = mid) : (hi = mid - 1) }
+        const a = word[lo], b = word[(lo + 1) % word.length]
+        const seg = (lo + 1 < cum.length ? cum[lo + 1] : total) - cum[lo]
+        const f = seg > 0 ? (d - cum[lo]) / seg : 0
+        return { x: a[0] + (b[0] - a[0]) * f, y: a[1] + (b[1] - a[1]) * f }
       }
+      // overview distance: the whole phrase fits on screen
+      const overviewZ = () => Math.max((data.width * 1.25) / (VIEW_K() * camera.aspect), (data.height * 1.7) / VIEW_K())
+      // close-up distance: a bit further back on narrow (portrait) screens
+      const closeZ = () => Math.max(CLOSE_Z, 7 / (VIEW_K() * camera.aspect))
 
       const planes = []
-      const order = Array.from({ length: TOTAL }, (_, i) => i % TEX_VARIANTS)
+      const order = Array.from({ length: word.length }, (_, i) => i % TEX_VARIANTS)
       for (let i = order.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [order[i], order[j]] = [order[j], order[i]] }
 
-      for (let i = 0; i < TOTAL; i++) {
-        const [px, py] = word[Math.floor(i * word.length / TOTAL)]
+      word.forEach(([px, py], i) => {
         const size = randomBetween(...SIZE_RANGE)
         const texIndex = order[i]
         const mesh = new THREE.Mesh(
@@ -149,53 +160,65 @@
           new THREE.MeshBasicMaterial({ map: textures[texIndex], side: THREE.DoubleSide })
         )
         // keep each image's real proportions (same area as the square), never cropped
+        // (very wide/tall images are shrunk, not cropped, so no plane becomes a bar)
         const fitAspect = (a) => {
+          let w = size * Math.sqrt(a), h = size / Math.sqrt(a)
+          const over = Math.max(w, h) / (size * 1.9)
+          if (over > 1) { w /= over; h /= over }
           mesh.geometry.dispose()
-          mesh.geometry = new THREE.PlaneGeometry(size * Math.sqrt(a), size / Math.sqrt(a))
+          mesh.geometry = new THREE.PlaneGeometry(w, h)
         }
         const known = textures[texIndex].userData.aspect
         known ? fitAspect(known) : aspectListeners[texIndex].push(fitAspect)
 
         const baseZ = randomBetween(...DEPTH_RANGE)
         mesh.position.set(px + randomBetween(-JITTER, JITTER), py + randomBetween(-JITTER, JITTER), baseZ)
-
         const proxy = { value: 1 }
-        mesh.userData.setScale = gsap.quickTo(proxy, 'value', {
-          duration: 0.45,
-          ease: 'power3.out',
-          onUpdate: () => {
-            mesh.scale.setScalar(proxy.value)
-            mesh.position.z = baseZ + (proxy.value - 1) * FOCUS_LIFT
-          },
+        const to = gsap.quickTo(proxy, 'value', {
+          duration: 0.45, ease: 'power3.out',
+          onUpdate: () => { mesh.scale.setScalar(proxy.value); mesh.position.z = baseZ + (proxy.value - 1) * FOCUS_LIFT },
         })
+        let last = 1
+        mesh.userData.setScale = (v) => { if (Math.abs(v - last) > 0.01) { last = v; to(v) } }
         planes.push(mesh)
         scene.add(mesh)
+      })
+
+      // centre image tops out at ~85% of the visible area (matters on phones)
+      function computeFocusScale(distance) {
+        const z = closeZ(), viewH = z * VIEW_K(), viewW = viewH * camera.aspect
+        const maxS = Math.min(MAX_SCALE, 0.85 * Math.min(viewW, viewH))
+        const f = 1 - distance / FOCUS_DIST
+        return 1 + f ** 2.2 * (maxS - 1)
       }
 
-      function computeFocusScale(distance) {
-        const f = 1 - distance / FOCUS_DIST
-        return 1 + f ** 2.4 * (MAX_SCALE - 1)
-      }
+      // start with the whole phrase visible, then dive in to travel along it
+      const zoomIn = { v: 0 }
+      let dived = false
+      const dive = () => { if (dived) return; dived = true; gsap.to(zoomIn, { v: 1, duration: 2.2, ease: 'power3.inOut' }) }
+      setTimeout(dive, 1400)
 
       const camProxy = { t: 0 }
       const setCamT = gsap.quickTo(camProxy, 't', { duration: 1, ease: 'power3.out' })
       let targetT = 0
-      const SENSITIVITY = 0.5 / (window.innerHeight * 4)
+      const SENSITIVITY = 0.35 / (window.innerHeight * 4)
 
       Observer.create({
         target: window,
         type: 'wheel,touch,pointer',
         onChange: (self) => {
+          dive()
           if (autoScroll) return
           targetT += (self.deltaY + self.deltaX) * SENSITIVITY
           setCamT(targetT)
         },
       })
 
-      const AUTO_T_PER_SEC = 1 / 40
+      const AUTO_T_PER_SEC = 1 / 90
       let autoScroll = false
       const scrollToggleBtn = document.getElementById('scroll-toggle')
       scrollToggleBtn.addEventListener('click', () => {
+        dive()
         autoScroll = !autoScroll
         scrollToggleBtn.classList.toggle('active', autoScroll)
         scrollToggleBtn.textContent = autoScroll ? 'Auto' : 'Scroll'
@@ -209,14 +232,15 @@
         lastTime = now
         if (autoScroll) { targetT += AUTO_T_PER_SEC * delta; setCamT(targetT) }
 
-        const t = ((camProxy.t % 1) + 1) % 1
-        const c = camPoint(t)
-        camera.position.set(c.x, c.y, camDistance())
-        camera.lookAt(c.x, c.y, 0)
+        const v = zoomIn.v, r = routePoint(camProxy.t)
+        const cx = r.x * v, cy = r.y * v
+        camera.position.set(cx, cy, overviewZ() + (closeZ() - overviewZ()) * v)
+        camera.lookAt(cx, cy, 0)
 
         for (const plane of planes) {
-          const d = Math.hypot(camera.position.x - plane.position.x, camera.position.y - plane.position.y)
-          plane.userData.setScale(d < FOCUS_DIST ? computeFocusScale(d) : 1)
+          const d = Math.hypot(cx - plane.position.x, cy - plane.position.y)
+          const s = d < FOCUS_DIST ? computeFocusScale(d) : 1
+          plane.userData.setScale(1 + (s - 1) * v)
         }
         renderer.render(scene, camera)
       }

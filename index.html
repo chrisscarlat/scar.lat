@@ -1854,6 +1854,7 @@
         document.querySelectorAll('.header-lang-list button').forEach(function (b) { b.classList.toggle('active', b.dataset.lang === code); });
         document.querySelectorAll('.menu-lang button').forEach(function (b) { b.classList.toggle('active', b.dataset.lang === code); });
         setGoogLang(LANG[code] || 'en');
+        try { localStorage.setItem('scarlat-lang', code); } catch (e) {} // the gallery reads this
         if (pt) splashWords(pt.x, pt.y, code);
       }
 
