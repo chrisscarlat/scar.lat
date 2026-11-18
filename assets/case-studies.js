@@ -327,5 +327,83 @@ window.CASE_STUDIES = {
     "paras": [
       "A 50th-anniversary rebrand for Transsylvania Phoenix, one of Romania's most storied rock bands — honouring five decades of legacy while refreshing the mark for a new era."
     ]
+  },
+  "Metabolic": {
+    "title": "Metabolic",
+    "client": "Metabolic",
+    "city": "Amsterdam",
+    "industry": "Sustainability Consulting & Venture Building",
+    "year": "2012",
+    "brandColor": "#C8203A",
+    "brandText": "#FFFFFF",
+    "hero": "./img/metabolic.jpg",
+    "story": [
+      {
+        "title": "Systems thinking, made visible",
+        "images": [
+          "./img/metabolic.jpg"
+        ],
+        "text": "Metabolic is an Amsterdam consulting and venture-building company that uses systems thinking to take on global sustainability challenges. The brief: give that big-picture work a face as bold as its ambition."
+      },
+      {
+        "title": "Where the work happens",
+        "images": [
+          "./img/metabolic/site-1.webp",
+          "./img/metabolic/site-2.webp",
+          "./img/metabolic/site-3.webp"
+        ],
+        "text": "Houseboats, boardwalks and a hands-on workshop. The identity had to feel at home in a place where sustainability gets built, not just talked about."
+      },
+      {
+        "title": "From lab to landmark",
+        "images": [
+          "./img/metabolic/logo-before.webp",
+          "./img/metabolic/logo-after.webp"
+        ],
+        "text": "Out went the purple “metabolic lab” starburst. In came one faceted M: a network of connected points, like the systems Metabolic maps. A mark that stands out among sustainability players."
+      },
+      {
+        "title": "One mark, many materials",
+        "images": [
+          "./img/metabolic/logo-mark.webp",
+          "./img/metabolic/tshirt.webp",
+          "./img/metabolic/notebook.webp",
+          "./img/metabolic/laser-cut.webp"
+        ],
+        "text": "The wireframe M stretches from a red-to-black gradient tee and field notebooks to laser-cut plywood wired up with electronics."
+      },
+      {
+        "title": "Building what comes next",
+        "images": [
+          "./img/metabolic/window.webp",
+          "./img/metabolic/aerial.webp",
+          "./img/metabolic/people.webp"
+        ],
+        "text": "Metabolic Ventures builds and backs new organisations that improve how the global metabolism works, increase resource security and empower people. The M now sits on the windows, right where that work happens."
+      }
+    ],
+    "url": "https://www.cultural.design/portfolio/metabolic/",
+    "images": [
+      "./img/metabolic.jpg",
+      "./img/metabolic/site-1.webp",
+      "./img/metabolic/site-2.webp",
+      "./img/metabolic/site-3.webp",
+      "./img/metabolic/logo-before.webp",
+      "./img/metabolic/logo-after.webp",
+      "./img/metabolic/logo-mark.webp",
+      "./img/metabolic/tshirt.webp",
+      "./img/metabolic/notebook.webp",
+      "./img/metabolic/laser-cut.webp",
+      "./img/metabolic/window.webp",
+      "./img/metabolic/aerial.webp",
+      "./img/metabolic/people.webp"
+    ],
+    "paras": [
+      "Metabolic is an Amsterdam consulting and venture-building company that uses systems thinking to take on global sustainability challenges. The brief: give that big-picture work a face as bold as its ambition.",
+      "Houseboats, boardwalks and a hands-on workshop. The identity had to feel at home in a place where sustainability gets built, not just talked about.",
+      "Out went the purple “metabolic lab” starburst. In came one faceted M: a network of connected points, like the systems Metabolic maps. A mark that stands out among sustainability players.",
+      "The wireframe M stretches from a red-to-black gradient tee and field notebooks to laser-cut plywood wired up with electronics.",
+      "Metabolic Ventures builds and backs new organisations that improve how the global metabolism works, increase resource security and empower people. The M now sits on the windows, right where that work happens."
+    ]
   }
 };
