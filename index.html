@@ -1252,7 +1252,8 @@
     .story-tip .st-k { display: block; font-size: 11px; font-weight: 700; letter-spacing: .08em; margin-bottom: 6px; font-variant-numeric: tabular-nums; }
     .story-tip strong { display: block; font-size: 16px; font-weight: 700; line-height: 1.2; margin-bottom: 6px; }
     .story-tip p { margin: 0; }
-    .story-tip.docked { left: 12px; right: 12px; top: 66px; max-width: none; transform: none !important; max-height: 38vh; overflow: auto; }
+    .story-tip.docked { left: 12px; right: 12px; top: 66px; max-width: none; transform: none !important; max-height: 30vh; overflow: auto; -webkit-overflow-scrolling: touch; overscroll-behavior: contain; pointer-events: auto; }
+    .story-tip p + p { margin-top: 8px; }
     .vote-bar {
       position: fixed; left: 50%; top: 16px; transform: translateX(-50%); z-index: 100011;
       display: flex; gap: 56px; opacity: 0; pointer-events: none; transition: opacity .3s ease;
@@ -1445,7 +1446,19 @@
       function MOBILE() { return window.innerWidth <= 768 || !!(window.matchMedia && matchMedia('(hover: none)').matches); }
       function absUrl(u) { try { return new URL(u, location.href).href; } catch (e) { return u; } }
       function pad2(n) { return (n < 10 ? '0' : '') + n; }
-      function storyFor(key) { var d = key && DATA[key]; return d && d.story && d.story.length ? d : null; }
+      // Story cases (chapters) everywhere; on phones, any case with a description
+      // also gets the panel above the image, holding its description.
+      function storyFor(key) {
+        var d = key && DATA[key];
+        if (!d) return null;
+        if (d.story && d.story.length) return d;
+        if (MOBILE() && d.paras && d.paras.length) {
+          return d._panel || (d._panel = { pseudo: true, brandColor: d.brandColor, brandText: d.brandText,
+            kicker: [d.city, d.year].filter(Boolean).join(' \u00b7 '),
+            story: [{ title: d.title || key, text: d.paras.join('\n\n'), images: [] }] });
+        }
+        return null;
+      }
       function chapterOf(d, url) {
         for (var c = 0; c < d.story.length; c++)
           for (var j = 0; j < d.story[c].images.length; j++)
@@ -1461,12 +1474,14 @@
         var ch = d.story[c];
         stip.style.background = d.brandColor || '#16161a';
         stip.style.color = d.brandText || '#fff';
-        stip.innerHTML = '<span class="st-k">' + pad2(c + 1) + ' / ' + pad2(d.story.length) + '</span>' +
-          '<strong>' + esc(ch.title) + '</strong><p>' + esc(ch.text) + '</p>';
+        var kick = d.pseudo ? d.kicker : pad2(c + 1) + ' / ' + pad2(d.story.length);
+        stip.innerHTML = (kick ? '<span class="st-k">' + esc(kick) + '</span>' : '') +
+          '<strong>' + esc(ch.title) + '</strong>' +
+          ch.text.split('\n\n').map(function (t) { return '<p>' + esc(t) + '</p>'; }).join('');
       }
       function renderStory() {
         var d = storyFor(zoom.key);
-        if (!d || !zoom.active || zoom.isVideo) return;
+        if (!d || !zoom.active || (zoom.isVideo && !d.pseudo)) return;
         var c = chapterOf(d, zoom.slides[zoom.i]);
         if (c === stipCh) return;
         stipCh = c; fillStory(d, c);
@@ -1760,7 +1775,7 @@
         // sticky brand-coloured text panel at the top, so the image sits below it.
         zoom.topRes = CAP_RESERVE; zoom.botRes = CAP_RESERVE;
         var sd = storyFor(key);
-        if (sd && !zoom.isVideo && MOBILE()) zoom.topRes = Math.max(CAP_RESERVE, measureStoryPanel(sd) + 12);
+        if (sd && (!zoom.isVideo || sd.pseudo) && MOBILE()) zoom.topRes = Math.max(CAP_RESERVE, measureStoryPanel(sd) + 12);
         zoom.cy = (zoom.topRes + zoom.vh - zoom.botRes) / 2;
         // Height budget is symmetric around the centre so a centred image still
         // clears the caption band at the bottom.
@@ -1784,7 +1799,7 @@
         hero.classList.add('zoomed');
         fitLayer(); // first slide already loaded (it's the card's own image)
         stipCh = -1; voteUI();
-        if (sd && !zoom.isVideo) { renderStory(); if (MOBILE()) stip.classList.add('show', 'docked'); }
+        if (sd && (!zoom.isVideo || sd.pseudo)) { renderStory(); if (MOBILE()) stip.classList.add('show', 'docked'); }
         // Ignore hover-out while the entrance animation is still running.
         setTimeout(function () { zoom.settling = false; }, ENTER_MS + 120);
         zoom.raf = requestAnimationFrame(pinLoop);
@@ -1890,7 +1905,7 @@
       // Click while zoomed: on the image -> next image; outside -> zoom out now.
       window.addEventListener('click', function (e) {
         if (!zoom.active) return;
-        if (e.target && e.target.closest && e.target.closest('.vote-bar')) return; // like / dislike buttons
+        if (e.target && e.target.closest && e.target.closest('.vote-bar, .story-tip.docked')) return; // like / dislike, text panel
         e.stopImmediatePropagation(); e.preventDefault();
         if (zoom.swiped && performance.now() - zoom.swiped < 600) return; // end of a swipe, not a tap
         // If the user has pinched in, the first click steps back to base framing
@@ -1912,7 +1927,7 @@
       window.addEventListener('touchstart', function (e) {
         sw = null;
         if (!zoom.active || zoom.settling || e.touches.length !== 1 || zoom.userScale > 1.02) return;
-        if (e.target && e.target.closest && e.target.closest('.frame, .vote-bar, .theme-toggle, .chat-widget')) return;
+        if (e.target && e.target.closest && e.target.closest('.frame, .vote-bar, .theme-toggle, .chat-widget, .story-tip')) return;
         var t = e.touches[0]; sw = { x: t.clientX, y: t.clientY, dx: 0, on: false };
       }, { capture: true, passive: true });
       window.addEventListener('touchmove', function (e) {
