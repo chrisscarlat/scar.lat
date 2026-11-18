@@ -15,7 +15,7 @@
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 	<style>* { font-family: 'Inter', Helvetica, Arial, sans-serif !important; }</style>
-  <script type="module" crossorigin src="./assets/index-v2.js?v=20261118b"></script>
+  <script type="module" crossorigin src="./assets/index-v2.js?v=20261118c"></script>
   <link rel="stylesheet" href="./assets/index-89f78340.css">
 </head>
 <body>
@@ -1284,6 +1284,39 @@
     .swipe-stamp.is-nope { color: #e11d48; transform: translate(-50%,-50%) rotate(12deg); }
     @media (hover: none) { .zoom-cursor { display: none !important; } } /* touch: no pointer to follow */
     .frame .cdawrap .vote-note { font-size: 11px; line-height: 1.4; opacity: .55; max-width: 260px; margin-top: 18px; text-transform: none; letter-spacing: 0; font-weight: 400; }
+    /* ==== Gravity mode (assets/gravity.js) ==== */
+    .gravity-btn {
+      position: fixed; left: 16px; bottom: calc(18px + env(safe-area-inset-bottom, 0px)); z-index: 100011;
+      display: flex; align-items: center; gap: 7px; padding: 10px 14px 10px 12px; border-radius: 999px;
+      border: 0; background: #16161a; color: #fff; font: 600 12px/1 Inter, Helvetica, Arial, sans-serif;
+      letter-spacing: .02em; box-shadow: 0 8px 24px rgba(0,0,0,.22); cursor: pointer;
+      transition: transform .2s cubic-bezier(.34,1.56,.64,1), background .2s ease, color .2s ease, opacity .25s ease;
+    }
+    .gravity-btn:active { transform: scale(.93); }
+    .gravity-btn[aria-pressed="true"] { background: #fff; color: #16161a; box-shadow: 0 0 0 1px rgba(22,22,26,.15), 0 8px 24px rgba(0,0,0,.18); }
+    .gravity-btn[disabled] { opacity: .6; }
+    html.dark .gravity-btn { background: #f0f0f2; color: #16161a; }
+    html.dark .gravity-btn[aria-pressed="true"] { background: #16161a; color: #f0f0f2; box-shadow: 0 0 0 1px rgba(255,255,255,.25); }
+    body.zoom-mode .gravity-btn, body:has(#case-detail-overlay.open) .gravity-btn { opacity: 0; pointer-events: none; }
+    body.gravity-on #hero { visibility: hidden; }
+    .gravity-world { position: fixed; inset: 0; z-index: 100005; overflow: hidden; touch-action: none; -webkit-user-select: none; user-select: none; }
+    .gv-block { position: absolute; left: 0; top: 0; will-change: transform; }
+    .gv-img { border-radius: 6px; overflow: hidden; background: #f2f2f2; box-shadow: 0 6px 18px rgba(0,0,0,.12); }
+    .gv-img.gv-logo { background: #fff; }
+    .gv-img img, .gv-img video { display: block; width: 100%; height: 100%; object-fit: contain; pointer-events: none; }
+    .gv-txt { background: #fff; color: #16161a; border: 1px solid #e4e4e4; border-radius: 10px; padding: 9px 11px; font: 400 11px/1.35 Inter, Helvetica, Arial, sans-serif; box-shadow: 0 6px 18px rgba(0,0,0,.08); }
+    .gv-txt .brand-name { display: block; font-weight: 700; text-transform: uppercase; margin-bottom: 3px; }
+    html.dark .gv-txt { background: #1b1b20; color: #f0f0f2; border-color: #2c2c33; }
+    html.dark .gv-img.gv-logo img { filter: invert(1) brightness(2.4) grayscale(1); }
+    html.dark .gv-img.gv-logo { background: #1b1b20; }
+    .gravity-toast {
+      position: fixed; left: 50%; top: 72px; transform: translate(-50%, -8px); z-index: 100013; max-width: calc(100vw - 32px);
+      background: #16161a; color: #fff; font: 500 12px/1.4 Inter, Helvetica, Arial, sans-serif; padding: 9px 13px; border-radius: 10px;
+      opacity: 0; pointer-events: none; transition: opacity .25s ease, transform .25s ease; text-align: center;
+    }
+    .gravity-toast.show { opacity: 1; transform: translate(-50%, 0); }
+    /* the grid pans with a finger (handled in JS), so the browser shouldn't scroll or pinch it */
+    #hero { touch-action: none; }
     .zoom-cap .zc-swipe { display: block; margin-top: 6px; opacity: .65; font-size: 11px; }
   </style>
 
@@ -1297,6 +1330,7 @@
   </div>
 
   <script src="./assets/case-studies.js?v=20261118a"></script>
+  <script src="./assets/gravity.js?v=20261118a" defer></script>
   <script>
     (function () {
       var DATA = window.CASE_STUDIES || {};
