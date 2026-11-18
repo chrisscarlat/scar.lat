@@ -15,7 +15,7 @@
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 	<style>* { font-family: 'Inter', Helvetica, Arial, sans-serif !important; }</style>
-  <script type="module" crossorigin src="./assets/index-v2.js?v=20261118a"></script>
+  <script type="module" crossorigin src="./assets/index-v2.js?v=20261118b"></script>
   <link rel="stylesheet" href="./assets/index-89f78340.css">
 </head>
 <body>
@@ -55,6 +55,7 @@
 				<a href="tel:+491705958989">+49 170 595 8989</a>
 				<a href="https://calendar.scar.lat" class="nav-book-call">BOOK CALL</a>
 				<a href="./gallery/" class="nav-gallery">GALLERY</a>
+				<p class="vote-note">Likes are anonymous. Only an approximate location (country and city) is kept, never your IP address.</p>
 			</div>
 
 			<div class="menu-overlay"></div>
@@ -1282,6 +1283,7 @@
     .swipe-stamp.is-like { color: #15803d; transform: translate(-50%,-50%) rotate(-12deg); }
     .swipe-stamp.is-nope { color: #e11d48; transform: translate(-50%,-50%) rotate(12deg); }
     @media (hover: none) { .zoom-cursor { display: none !important; } } /* touch: no pointer to follow */
+    .frame .cdawrap .vote-note { font-size: 11px; line-height: 1.4; opacity: .55; max-width: 260px; margin-top: 18px; text-transform: none; letter-spacing: 0; font-weight: 400; }
     .zoom-cap .zc-swipe { display: block; margin-top: 6px; opacity: .65; font-size: 11px; }
   </style>
 
@@ -1475,7 +1477,7 @@
       function sendVote(rec) {
         var q; try { q = JSON.parse(localStorage.getItem(QKEY) || '[]'); } catch (e) { q = []; }
         q.push(rec);
-        var url = window.SCARLAT_VOTES_URL; // vote store endpoint, not set up yet
+        var url = window.SCARLAT_VOTES_URL || 'https://dcfuliyfkbeyqmumfagp.supabase.co/functions/v1/scarlat-vote';
         if (url && navigator.sendBeacon) {
           try { if (navigator.sendBeacon(url, new Blob([JSON.stringify(q)], { type: 'text/plain' }))) q = []; } catch (e) {}
         }
