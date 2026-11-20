@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Chris Scarlat — Logo Design</title>
+  <meta name="description" content="Logos and brand marks designed by Chris Scarlat.">
+  <meta name="theme-color" content="#000000">
+  <link rel="icon" href="../fav/fav.ico" sizes="any">
+  <link rel="icon" href="../fav/fav.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;800&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { background: #000; }
+    body { background: #000; color: #fff; font-family: 'Inter', Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased; min-height: 100vh; }
+    a { color: inherit; text-decoration: none; }
+    button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+    :focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
+
+    /* ---- top bar ---- */
+    .lg-top {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 20;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 22px 28px; font-size: 14px; font-weight: 600; text-transform: uppercase; letter-spacing: .01em;
+      background: #000;
+    }
+    .lg-top nav { display: flex; gap: 22px; }
+    .lg-top a { opacity: .55; transition: opacity .2s; }
+    .lg-top a:hover, .lg-top a[aria-current] { opacity: 1; }
+    .lg-top .lg-name { opacity: 1; }
+
+    /* ---- heading ---- */
+    .lg-head { padding: 120px 28px 70px; display: flex; align-items: flex-end; justify-content: space-between; gap: 28px; flex-wrap: wrap; }
+    .lg-head h1 { font-size: clamp(56px, 10.5vw, 168px); font-weight: 800; line-height: .86; letter-spacing: -.045em; }
+    .lg-head p { font-size: clamp(15px, 1.6vw, 22px); font-weight: 300; text-transform: uppercase; letter-spacing: .04em; line-height: 1.3; max-width: 340px; padding-bottom: 6px; }
+    .lg-head p b { font-weight: 600; }
+
+    /* ---- grid ---- */
+    .lg-grid {
+      list-style: none; display: grid; grid-template-columns: repeat(5, 1fr);
+      column-gap: 32px; row-gap: 76px; padding: 0 28px 120px; max-width: 1500px; margin-left: auto;
+    }
+    @media (max-width: 1200px) { .lg-grid { grid-template-columns: repeat(4, 1fr); } }
+    @media (max-width: 960px)  { .lg-grid { grid-template-columns: repeat(3, 1fr); } }
+    .lg-item { position: relative; }
+    .lg-tile { display: block; width: 100%; text-align: left; }
+    .lg-mark { aspect-ratio: 1 / 1; display: flex; align-items: center; justify-content: center; }
+    .lg-mark img {
+      width: 62%; height: 62%; object-fit: contain; filter: brightness(0) invert(1);
+      transition: transform .45s cubic-bezier(.2,.8,.2,1);
+    }
+    .lg-tile:hover .lg-mark img { transform: scale(1.06); }
+    .lg-cap { margin-top: 26px; font-size: 14px; line-height: 1.3; }
+    .lg-cap b { display: block; font-weight: 500; }
+    .lg-cap span { display: block; font-size: 12.5px; font-weight: 300; opacity: .85; }
+    .lg-cap i { display: block; font-style: normal; font-weight: 300; opacity: .85; }
+    .lg-dot { position: absolute; top: 4px; right: 4px; width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity .2s; pointer-events: none; }
+    .lg-dot svg { width: 15px; height: 15px; }
+    .lg-item[data-vote="like"] .lg-dot { opacity: 1; color: #22c55e; }
+    .lg-item[data-vote="dislike"] .lg-dot { opacity: .9; color: #f43f5e; }
+
+    /* ---- detail view (desktop click / mobile list tap) ---- */
+    .lg-detail {
+      position: fixed; inset: 0; z-index: 40; background: #000; display: grid; grid-template-columns: 1.25fr 1fr;
+      opacity: 0; visibility: hidden; transition: opacity .3s, visibility 0s .3s;
+    }
+    .lg-detail.open { opacity: 1; visibility: visible; transition: opacity .3s; }
+    .lg-detail .d-mark { display: flex; align-items: center; justify-content: center; padding: 90px 40px; }
+    .lg-detail .d-mark img { width: min(62%, 560px); max-height: 62vh; object-fit: contain; filter: brightness(0) invert(1); }
+    .lg-detail .d-side { padding: 110px 56px 48px 24px; display: flex; flex-direction: column; overflow-y: auto; }
+    .d-name { font-size: clamp(32px, 3.6vw, 56px); font-weight: 800; letter-spacing: -.03em; line-height: 1; }
+    .d-desc { margin-top: 22px; font-size: 16px; line-height: 1.55; font-weight: 300; max-width: 460px; color: rgba(255,255,255,.82); }
+    .d-close { position: absolute; top: 18px; right: 22px; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; z-index: 2; }
+    .d-close svg { width: 22px; height: 22px; }
+    .d-nav { display: flex; gap: 10px; margin-top: auto; padding-top: 32px; align-items: center; }
+    .d-nav .d-count { font-size: 12px; letter-spacing: .2em; opacity: .5; margin-right: auto; }
+    .round { width: 52px; height: 52px; border-radius: 50%; border: 1px solid rgba(255,255,255,.28); display: flex; align-items: center; justify-content: center; transition: background .2s, border-color .2s, color .2s, transform .2s; }
+    .round:hover { border-color: #fff; }
+    .round svg { width: 20px; height: 20px; }
+    .round.vote-yes[aria-pressed="true"] { background: #16a34a; border-color: #16a34a; }
+    .round.vote-no[aria-pressed="true"]  { background: #e11d48; border-color: #e11d48; }
+
+    /* Front Style-like facts, left aligned: thin spaced label over a rule, heavy spaced value */
+    .facts { margin-top: 30px; display: grid; grid-template-columns: 1fr; max-width: 460px; }
+    .facts .row { display: grid; grid-template-columns: 116px 1fr; gap: 16px; align-items: baseline; padding: 11px 0; border-top: 1px solid rgba(255,255,255,.22); }
+    .facts .row:last-child { border-bottom: 1px solid rgba(255,255,255,.22); }
+    .facts .lab { font-size: 9px; font-weight: 400; letter-spacing: 3px; text-transform: uppercase; color: rgba(255,255,255,.75); }
+    .facts .val { font-size: 10px; font-weight: 800; letter-spacing: 3.5px; text-transform: uppercase; line-height: 1.6; color: rgba(255,255,255,.6); white-space: pre-line; }
+    .facts .val a:hover { color: #fff; text-decoration: underline; text-underline-offset: 3px; }
+
+    .lg-note { padding: 0 28px 40px; font-size: 11px; color: rgba(255,255,255,.4); max-width: 520px; }
+
+    /* ---- mobile: card deck ---- */
+    .lg-switch { display: none; }
+    .deck { display: none; }
+    @media (max-width: 768px) {
+      .lg-top { padding: 16px 16px; font-size: 13px; }
+      .lg-top nav { gap: 16px; }
+      .lg-head { padding: 78px 16px 22px; }
+      .lg-head h1 { font-size: 52px; }
+      .lg-head p { font-size: 13px; }
+      .lg-switch { display: flex; margin: 0 16px 18px; border: 1px solid rgba(255,255,255,.25); border-radius: 999px; padding: 3px; width: max-content; }
+      .lg-switch button { padding: 7px 16px; border-radius: 999px; font-size: 11px; letter-spacing: .14em; text-transform: uppercase; font-weight: 600; opacity: .6; }
+      .lg-switch button[aria-pressed="true"] { background: #fff; color: #000; opacity: 1; }
+      .lg-grid { grid-template-columns: repeat(2, 1fr); column-gap: 18px; row-gap: 40px; padding: 4px 16px 80px; }
+      .lg-cap { margin-top: 12px; font-size: 13px; }
+      body.mode-cards .lg-grid, body.mode-cards .lg-note { display: none; }
+      body.mode-cards .deck { display: flex; }
+      body.mode-cards { height: 100vh; height: 100svh; display: flex; flex-direction: column; overflow: hidden; }
+      body.mode-cards .lg-head { padding: 66px 16px 12px; }
+      body.mode-cards .lg-head h1 { font-size: 34px; letter-spacing: -.035em; }
+      body.mode-cards .lg-head h1 br { display: none; }
+      body.mode-cards .lg-head p { display: none; }
+      body.mode-cards .lg-switch { margin-bottom: 12px; flex: none; }
+      body.mode-cards .deck { flex: 1; min-height: 0; }
+      body.mode-cards .deck-stack { flex: 1; min-height: 0; height: auto; }
+      body.mode-cards .deck-text { flex: none; max-height: 24vh; max-height: 24svh; min-height: 0; }
+      .card .facts .k-designer { display: none; }
+      .card .facts .row:nth-last-child(2) { border-bottom: 1px solid rgba(255,255,255,.22); }
+    }
+    @media (max-width: 768px) and (max-height: 760px) {
+      body.mode-cards .lg-head { padding-top: 58px; padding-bottom: 8px; }
+      body.mode-cards .lg-head h1 { font-size: 28px; }
+      body.mode-cards .deck-text { max-height: 19vh; max-height: 19svh; padding: 10px 14px; }
+      .deck-text p { font-size: 13px; }
+      .card .facts .k-location { display: none; }
+      .card .c-mark { padding: 14px; }
+      .card .c-mark img { width: 52%; }
+      .deck-btns { margin-top: 10px; }
+      .deck-btns .round { width: 54px; height: 54px; }
+
+      .lg-detail { grid-template-columns: 1fr; grid-template-rows: auto 1fr; overflow-y: auto; }
+      .lg-detail .d-mark { padding: 80px 16px 10px; }
+      .lg-detail .d-mark img { width: 58%; max-height: 34vh; }
+      .lg-detail .d-side { padding: 18px 16px 32px; overflow: visible; }
+      .d-name { font-size: 34px; }
+      .d-desc { font-size: 15px; }
+      .d-close { top: 10px; right: 8px; }
+    }
+
+    .deck { flex-direction: column; padding: 0 16px calc(24px + env(safe-area-inset-bottom)); }
+    /* description on top, like the case studies on the main page */
+    .deck-text { min-height: 92px; max-height: 26vh; overflow-y: auto; overscroll-behavior: contain; padding: 14px 16px; border-radius: 14px; background: #fff; color: #0b0b0d; margin-bottom: 14px; }
+    .deck-text .k { font-size: 10px; letter-spacing: .18em; text-transform: uppercase; font-weight: 600; opacity: .55; }
+    .deck-text strong { display: block; font-size: 17px; font-weight: 800; letter-spacing: -.01em; margin: 3px 0 4px; }
+    .deck-text p { font-size: 13.5px; line-height: 1.45; font-weight: 400; }
+    .deck-stack { position: relative; height: min(58vh, 520px); touch-action: pan-y; }
+    .card {
+      position: absolute; inset: 0; border-radius: 18px; background: #121214; border: 1px solid rgba(255,255,255,.08);
+      display: flex; flex-direction: column; overflow: hidden; will-change: transform; user-select: none; -webkit-user-select: none;
+    }
+    .card .c-mark { flex: 1; display: flex; align-items: center; justify-content: center; min-height: 0; padding: 26px; }
+    .card .c-mark img { width: 58%; max-height: 100%; object-fit: contain; filter: brightness(0) invert(1); pointer-events: none; -webkit-user-drag: none; }
+    .card .facts { margin: 0 16px 14px; flex: none; }
+    .card .facts .row { grid-template-columns: 96px 1fr; padding: 7px 0; }
+    .card.back { transform: scale(.95) translateY(14px); opacity: .55; }
+    .card.back2 { transform: scale(.9) translateY(28px); opacity: .25; }
+    .stamp {
+      position: absolute; top: 28px; z-index: 3; padding: 6px 14px; border: 4px solid currentColor; border-radius: 10px;
+      font-size: 34px; font-weight: 800; letter-spacing: .06em; opacity: 0; pointer-events: none;
+    }
+    .stamp.like { left: 22px; color: #22c55e; transform: rotate(-14deg); }
+    .stamp.nope { right: 22px; color: #f43f5e; transform: rotate(14deg); }
+    .deck-btns { display: flex; justify-content: center; align-items: center; gap: 26px; margin-top: 14px; flex: none; }
+    .deck-btns .round { width: 62px; height: 62px; }
+    .deck-btns .round svg { width: 24px; height: 24px; }
+    .deck-btns .round.vote-no { color: #f43f5e; border-color: rgba(244,63,94,.5); }
+    .deck-btns .round.vote-yes { color: #22c55e; border-color: rgba(34,197,94,.5); }
+    .deck-count { font-size: 11px; letter-spacing: .2em; opacity: .5; min-width: 54px; text-align: center; }
+    .deck-done { position: absolute; inset: 0; display: none; flex-direction: column; align-items: center; justify-content: center; gap: 18px; text-align: center; padding: 24px; }
+    .deck-done.show { display: flex; }
+    .deck-done strong { font-size: 24px; font-weight: 800; }
+    .deck-done button { border: 1px solid #fff; border-radius: 999px; padding: 11px 22px; font-size: 12px; letter-spacing: .14em; text-transform: uppercase; font-weight: 600; }
+
+    @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+  </style>
+</head>
+<body class="mode-cards">
+  <header class="lg-top notranslate" translate="no">
+    <a href="../" class="lg-name">Chris Scarlat</a>
+    <nav><a href="../">Work</a><a href="./" aria-current="page">Logos</a><a href="../gallery/">Gallery</a></nav>
+  </header>
+
+  <section class="lg-head">
+    <h1>Logos &amp; <br>Brands</h1>
+    <p>A collection of marks <b>designed by Chris Scarlat</b>, <span id="lg-total"></span> brands and counting.</p>
+  </section>
+
+  <div class="lg-switch" role="group" aria-label="View">
+    <button type="button" data-mode="cards" aria-pressed="true">Cards</button>
+    <button type="button" data-mode="all" aria-pressed="false">All logos</button>
+  </div>
+
+  <section class="deck" aria-label="Logo cards: swipe right to like, left to pass">
+    <div class="deck-text" aria-live="polite"></div>
+    <div class="deck-stack">
+      <div class="deck-done"><strong>That's all of them.</strong><span>Thanks for voting.</span><button type="button" data-mode="all">See all logos</button></div>
+    </div>
+    <div class="deck-btns">
+      <button type="button" class="round vote-no" aria-label="Pass on this logo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+      <span class="deck-count"></span>
+      <button type="button" class="round vote-yes" aria-label="Like this logo"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 21s-7.5-4.6-9.6-9.2C.9 8.4 3 4.5 6.7 4.5c2.1 0 3.6 1.1 4.3 2.4h2c.7-1.3 2.2-2.4 4.3-2.4 3.7 0 5.8 3.9 4.3 7.3C19.5 16.4 12 21 12 21z"/></svg></button>
+    </div>
+  </section>
+
+  <ul class="lg-grid" id="lg-grid"></ul>
+  <p class="lg-note">Likes are anonymous. Only an approximate location (country and city) is kept, never your IP address.</p>
+
+  <div class="lg-detail" role="dialog" aria-modal="true" aria-labelledby="d-name">
+    <button type="button" class="d-close" aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M5 5l14 14M19 5L5 19"/></svg></button>
+    <div class="d-mark"><img alt=""></div>
+    <div class="d-side">
+      <h2 class="d-name" id="d-name"></h2>
+      <p class="d-desc"></p>
+      <div class="facts"></div>
+      <div class="d-nav">
+        <span class="d-count"></span>
+        <button type="button" class="round d-prev" aria-label="Previous logo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button>
+        <button type="button" class="round vote-no" aria-label="Dislike this logo" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 14V3h4v11h-4zM17 14l-4 8a3 3 0 0 1-3-3v-4H4.5a2 2 0 0 1-2-2.3l1.4-8A2 2 0 0 1 5.9 3H17"/></svg></button>
+        <button type="button" class="round vote-yes" aria-label="Like this logo" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 10v11H3V10h4zM7 10l4-8a3 3 0 0 1 3 3v4h5.5a2 2 0 0 1 2 2.3l-1.4 8A2 2 0 0 1 18.1 21H7"/></svg></button>
+        <button type="button" class="round d-next" aria-label="Next logo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+  (function () {
+    // Logos come from the brand libraries on front.style (all designed by Chris Scarlat).
+    // svg: ./svg/<slug>.svg, drawn white on black.
+    var LOGOS = [
+      { slug: 'grover', name: 'Grover', industry: 'Fintech · Circular tech rental', location: 'Berlin\nGermany', year: '2016–2018',
+        desc: 'A bold, slightly squashed ring: the "O" of Grover pulled out as a symbol. It reads as a loop of products going out, coming back and going out again, which is the whole idea of renting tech instead of buying it.' },
+      { slug: 'district', name: 'DISTRICT', industry: 'VR · Music & festival', location: 'Berlin\nGermany', year: '2024',
+        desc: 'A "D" cut from two blocks with a step in the middle, like a room seen in perspective. It fronts DISTRICT BERLIN, a DJ VR simulator built with Denyo from Beginner.' },
+      { slug: 'longcutrecords', name: 'Longcut Records', industry: 'Record label', location: '', year: '2024',
+        desc: 'A dachshund in full flight: long, low and in a hurry, a playful take on the label\'s name. It works alone, with the wordmark on its back, or chasing a ball.' },
+      { slug: 'printhorse', name: 'Print Horse', industry: 'Print studio', location: '', year: '2024',
+        desc: 'A rearing horse drawn with the swagger of an old printer\'s stamp. It sits happily in a curved lockup with "PRINT HORSE" or on its own as a profile picture.' },
+      { slug: 'northandes', name: 'North Andes Coffee', industry: 'Coffee', location: '', year: '2024',
+        desc: 'A coffee bean that is also a mountain range: the Andes rise out of the bean\'s centre line. It also comes as a round seal for packaging.' },
+      { slug: 'stegreif', name: 'STEGREIF', industry: 'Improvising orchestra', location: 'Berlin\nGermany', year: '2016–2018',
+        desc: 'Berlin\'s conductor-less, improvising orchestra. The "S" is broken into loose strokes, like music that is never played the same way twice.' },
+      { slug: 'alephalpha', name: 'Aleph Alpha', industry: 'Artificial intelligence', location: '', year: '2024',
+        desc: 'A symmetrical knot of strokes that reads as both Aleph and Alpha, the first letters of two alphabets. It holds up on its own or next to the wordmark in any direction.' },
+      { slug: 'wildblume', name: 'Wildblume', industry: 'Brand identity', location: '', year: '2024',
+        desc: 'A ring of petals drawn as fine outlines, more wildflower than rose. It pairs with a light serif wordmark, stacked or in one line.' },
+      { slug: 'liechtensteinlife', name: 'LiechtensteinLife', industry: 'Life insurance', location: '', year: '2024',
+        desc: 'A sphere wrapped in a spiral, a cocoon that protects what grows inside. The mark carries the whole family: Liechtenstein Life, Prosperity and Partner Life.' },
+      { slug: 'liveloop', name: 'LIVELOOP', industry: 'Looping software for live music', location: '', year: '2024',
+        desc: 'An endless loop with a dot that keeps the beat. It is software for looping live music, and the infinity sign slips straight into the wordmark as the double "O".' },
+      { slug: 'musicmoon', name: 'MUSICMOON', industry: 'Music', location: '', year: '2024',
+        desc: 'A full moon with a small satellite, which together read as a musical note. It also stands in for the "OO" in the wordmark.' },
+      { slug: 'drkeck', name: 'Dr. Merle Keck', industry: 'Neurology', location: 'Berlin\nGermany', year: '2025',
+        desc: 'A practice for neurology. The name sits on a gently curved plate, calm and clear like a well-made sign in a quiet waiting room.' },
+      { slug: 'changemakercompanies', name: 'Changemaker Companies', industry: 'Brand identity', location: '', year: '2024',
+        desc: 'Three crescents growing out of each other: one change setting off the next. The same rhythm runs through a whole set of hand-drawn patterns.' },
+      { slug: 'comicoin', name: 'COMICOIN', industry: 'Digital currency', location: '', year: '2024',
+        desc: 'A coin with a lightning cut through it, turning the "C" into something fast. It holds up as an app icon and next to the rounded wordmark.' },
+      { slug: 'blueverry', name: 'Blueverry', industry: 'Brand identity', location: '', year: '2024',
+        desc: 'Six dots and a leaf: a bunch of berries reduced to the simplest geometry, with lots of room around it.' },
+      { slug: 'barbaraneuhofer', name: 'Barbara Neuhofer', industry: 'Personal brand', location: '', year: '2024',
+        desc: 'A dragonfly drawn in one fine line: light, precise and always in motion.' },
+      { slug: 'mischablanos', name: 'Mischa Blanos', industry: 'Music · Neoclassical / Electronic', location: 'Bucharest\nRomania', year: '2023',
+        desc: 'A grand piano seen from above, cut down to a single shape. It belongs to a neoclassical and electronic pianist on Longcut Records.' },
+      { slug: 'operdigital', name: 'Oper Digital', industry: 'Opera · Digital culture', location: '', year: '2024',
+        desc: 'A stage opening, or an open mouth singing: one soft frame for bringing opera online.' },
+      { slug: 'futurevibrations', name: 'Future Vibrations', industry: 'Brand identity', location: '', year: '2024',
+        desc: 'One wave, drawn in a single stroke. Simple enough for a sticker, clear enough for a stage screen.' },
+      { slug: 'whybrilliant', name: 'WhyBrilliant', industry: 'AI', location: '', year: '2025',
+        desc: 'Three points joined by soft curves into one shape, like ideas connecting. Friendly, round and easy to recognise at any size.' },
+      { slug: 'vara', name: 'Vara AI', industry: 'AI', location: '', year: '2024',
+        desc: 'A light, rounded wordmark with open counters that makes AI feel approachable. It also comes in outline and framed versions, with a "V" app icon.' },
+      { slug: 'roa', name: 'ROA', industry: 'Brand identity', location: 'Cluj-Napoca\nRomania', year: '2024',
+        desc: 'A sculpted serif "R" with a cut in its bowl, confident and a little theatrical. It is also used in the full ROA wordmark.' },
+      { slug: 'spellbound', name: 'Spellbound', industry: 'Brand identity', location: '', year: '2024',
+        desc: 'A spell cast in four creatures: phoenix, mermaid, elephant and a figure, set around a single diagonal line.' },
+      { slug: 'sacredbyte', name: 'Sacred Byte', industry: 'Brand identity', location: '', year: '2024',
+        desc: 'A tilted tablet with a single notch: a byte carved like a monument.' },
+      { slug: 'sensingmind', name: 'Sensing Mind', industry: 'Brand identity', location: '', year: '2024',
+        desc: 'A tree whose branches mirror its roots: what you sense above reflects what grows below.' },
+      { slug: 'polymer', name: 'POLYMER', industry: 'Brand identity', location: '', year: '2024',
+        desc: 'A wide, technical wordmark where the "O" is a single link in a chain, the building block a polymer is made of.' },
+      { slug: 'frontstyle', name: 'FRONT STYLE', industry: 'Brand delivery', location: 'Berlin\nGermany', year: '2026',
+        desc: 'Nested frames, a brand library inside a screen. FRONT STYLE is the digital home where all of these logos live.' }
+    ];
+
+    var MOBILE = function () { return window.innerWidth <= 768; };
+    var $ = function (s, r) { return (r || document).querySelector(s); };
+    var esc = function (s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
+    var src = function (l) { return './svg/' + l.slug + '.svg'; };
+    var id = function (l) { return '/logos/svg/' + l.slug + '.svg'; };
+    $('#lg-total').textContent = LOGOS.length;
+
+    // ---- votes: same store as the main site (this browser + the anonymous vote table) ----
+    var VKEY = 'scarlat-votes', QKEY = 'scarlat-vote-queue';
+    var votes = (function () { try { return JSON.parse(localStorage.getItem(VKEY) || '{}') || {}; } catch (e) { return {}; } })();
+    function sendVote(rec) {
+      var q; try { q = JSON.parse(localStorage.getItem(QKEY) || '[]'); } catch (e) { q = []; }
+      q.push(rec);
+      var url = window.SCARLAT_VOTES_URL || 'https://dcfuliyfkbeyqmumfagp.supabase.co/functions/v1/scarlat-vote';
+      if (navigator.sendBeacon) {
+        try { if (navigator.sendBeacon(url, new Blob([JSON.stringify(q)], { type: 'text/plain' }))) q = []; } catch (e) {}
+      }
+      try { localStorage.setItem(QKEY, JSON.stringify(q.slice(-500))); } catch (e) {}
+    }
+    function voteOf(l) { var v = votes[id(l)]; return v && v.v; }
+    function castVote(l, v, toggle) {
+      var k = id(l);
+      if (toggle && votes[k] && votes[k].v === v) { delete votes[k]; v = 'none'; }
+      else votes[k] = { v: v, c: 'Logo: ' + l.name, t: Date.now() };
+      try { localStorage.setItem(VKEY, JSON.stringify(votes)); } catch (e) {}
+      sendVote({ image: k, project: 'Logo: ' + l.name, vote: v, ts: new Date().toISOString(),
+        lang: document.documentElement.lang || 'en', device: MOBILE() ? 'mobile' : 'desktop' });
+      var li = document.querySelector('.lg-item[data-slug="' + l.slug + '"]');
+      if (li) li.dataset.vote = v;
+      return v;
+    }
+
+    function factsHTML(l, card) {
+      var rows = card ? [['Client', l.name], ['Location', l.location], ['Year', l.year], ['Designer', 'Chris Scarlat']]
+                      : [['Client', l.name], ['Location', l.location], ['Industry', l.industry], ['Year', l.year],
+                         ['Designer', '<a href="../">Chris Scarlat</a>']];
+      return rows.filter(function (r) { return r[1]; }).map(function (r) {
+        return '<div class="row k-' + r[0].toLowerCase() + '"><span class="lab">' + r[0] + '</span><span class="val">' + (r[0] === 'Designer' && !card ? r[1] : esc(r[1])) + '</span></div>';
+      }).join('');
+    }
+
+    // ---- grid ----
+    var HEART = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 21s-7.5-4.6-9.6-9.2C.9 8.4 3 4.5 6.7 4.5c2.1 0 3.6 1.1 4.3 2.4h2c.7-1.3 2.2-2.4 4.3-2.4 3.7 0 5.8 3.9 4.3 7.3C19.5 16.4 12 21 12 21z"/></svg>';
+    var grid = $('#lg-grid');
+    grid.innerHTML = LOGOS.map(function (l, i) {
+      return '<li class="lg-item" data-slug="' + l.slug + '" data-vote="' + (voteOf(l) || '') + '">' +
+        '<button type="button" class="lg-tile" data-i="' + i + '" aria-label="' + esc(l.name) + ': details">' +
+        '<div class="lg-mark"><img src="' + src(l) + '" alt="' + esc(l.name) + ' logo" loading="lazy" decoding="async"></div>' +
+        '<div class="lg-cap"><b>' + esc(l.name) + '</b><span>' + esc(l.industry) + '</span><i>—</i><i>' + esc(l.year) + '</i></div>' +
+        '</button><span class="lg-dot" aria-hidden="true">' + HEART + '</span></li>';
+    }).join('');
+
+    // ---- detail view ----
+    var det = $('.lg-detail'), cur = 0, lastFocus = null;
+    function fillDetail(i) {
+      cur = (i + LOGOS.length) % LOGOS.length;
+      var l = LOGOS[cur];
+      $('.d-mark img', det).src = src(l); $('.d-mark img', det).alt = l.name + ' logo';
+      $('.d-name', det).textContent = l.name;
+      $('.d-desc', det).textContent = l.desc;
+      $('.facts', det).innerHTML = factsHTML(l);
+      $('.d-count', det).textContent = String(cur + 1).padStart(2, '0') + ' / ' + LOGOS.length;
+      var v = voteOf(l);
+      $('.vote-yes', det).setAttribute('aria-pressed', v === 'like' ? 'true' : 'false');
+      $('.vote-no', det).setAttribute('aria-pressed', v === 'dislike' ? 'true' : 'false');
+    }
+    function openDetail(i) {
+      lastFocus = document.activeElement;
+      fillDetail(i); det.classList.add('open'); document.body.style.overflow = 'hidden';
+      $('.d-close', det).focus({ preventScroll: true });
+    }
+    function closeDetail() {
+      det.classList.remove('open'); document.body.style.overflow = '';
+      if (lastFocus && lastFocus.focus) lastFocus.focus({ preventScroll: true });
+    }
+    grid.addEventListener('click', function (e) { var t = e.target.closest('.lg-tile'); if (t) openDetail(+t.dataset.i); });
+    $('.d-close', det).addEventListener('click', closeDetail);
+    $('.d-prev', det).addEventListener('click', function () { fillDetail(cur - 1); });
+    $('.d-next', det).addEventListener('click', function () { fillDetail(cur + 1); });
+    det.addEventListener('click', function (e) {
+      var b = e.target.closest('.vote-yes, .vote-no'); if (!b) return;
+      var v = castVote(LOGOS[cur], b.classList.contains('vote-yes') ? 'like' : 'dislike', true);
+      fillDetail(cur);
+      if (b.animate) b.animate([{ transform: 'scale(1)' }, { transform: 'scale(1.25)' }, { transform: 'scale(1)' }], { duration: 280, easing: 'cubic-bezier(.34,1.56,.64,1)' });
+      if (v !== 'none') setTimeout(function () { if (det.classList.contains('open')) fillDetail(cur + 1); }, 420);
+    });
+    document.addEventListener('keydown', function (e) {
+      if (!det.classList.contains('open')) return;
+      if (e.key === 'Escape') closeDetail();
+      else if (e.key === 'ArrowRight') fillDetail(cur + 1);
+      else if (e.key === 'ArrowLeft') fillDetail(cur - 1);
+    });
+
+    // ---- mobile card deck (Tinder-style) ----
+    var stack = $('.deck-stack'), text = $('.deck-text'), countEl = $('.deck-count'), done = $('.deck-done');
+    // logos not voted on yet come first
+    var order = LOGOS.map(function (_, i) { return i; }).sort(function (a, b) { return (voteOf(LOGOS[a]) ? 1 : 0) - (voteOf(LOGOS[b]) ? 1 : 0); });
+    var pos = 0, cards = [];
+    function cardHTML(l) {
+      return '<span class="stamp like">LIKE</span><span class="stamp nope">NOPE</span>' +
+        '<div class="c-mark"><img src="' + src(l) + '" alt="' + esc(l.name) + ' logo" draggable="false"></div>' +
+        '<div class="facts">' + factsHTML(l, true) + '</div>';
+    }
+    function renderDeck() {
+      cards.forEach(function (c) { c.remove(); }); cards = [];
+      done.classList.toggle('show', pos >= order.length);
+      if (pos >= order.length) { text.innerHTML = '<span class="k">Logos</span><strong>All done</strong><p>Switch to "All logos" to browse the whole collection.</p>'; countEl.textContent = order.length + ' / ' + order.length; return; }
+      for (var k = Math.min(pos + 2, order.length - 1); k >= pos; k--) {
+        var c = document.createElement('div');
+        c.className = 'card' + (k === pos + 1 ? ' back' : k === pos + 2 ? ' back2' : '');
+        c.innerHTML = cardHTML(LOGOS[order[k]]);
+        stack.appendChild(c); cards.push(c);
+      }
+      var l = LOGOS[order[pos]];
+      text.innerHTML = '<span class="k">' + esc([l.industry, l.year].filter(Boolean).join(' · ')) + '</span><strong>' + esc(l.name) + '</strong><p>' + esc(l.desc) + '</p>';
+      text.scrollTop = 0;
+      countEl.textContent = (pos + 1) + ' / ' + order.length;
+    }
+    function topCard() { return cards[cards.length - 1]; }
+    function fling(v) {
+      var c = topCard(); if (!c || pos >= order.length) return;
+      castVote(LOGOS[order[pos]], v, false);
+      var dir = v === 'like' ? 1 : -1;
+      c.querySelector('.stamp.' + (v === 'like' ? 'like' : 'nope')).style.opacity = 1;
+      c.style.transition = 'transform .38s cubic-bezier(.3,.7,.4,1), opacity .38s';
+      c.style.transform = 'translate(' + dir * window.innerWidth * 1.2 + 'px, -30px) rotate(' + dir * 24 + 'deg)';
+      c.style.opacity = 0;
+      setTimeout(function () { pos++; renderDeck(); }, 300);
+    }
+    $('.deck-btns .vote-yes').addEventListener('click', function () { fling('like'); });
+    $('.deck-btns .vote-no').addEventListener('click', function () { fling('dislike'); });
+
+    var sx = 0, sy = 0, dx = 0, dragging = false, locked = null;
+    stack.addEventListener('touchstart', function (e) {
+      if (!topCard() || pos >= order.length) return;
+      var t = e.touches[0]; sx = t.clientX; sy = t.clientY; dx = 0; dragging = true; locked = null;
+      topCard().style.transition = 'none';
+    }, { passive: true });
+    stack.addEventListener('touchmove', function (e) {
+      if (!dragging) return;
+      var t = e.touches[0], mx = t.clientX - sx, my = t.clientY - sy;
+      if (locked === null && Math.abs(mx) + Math.abs(my) > 8) locked = Math.abs(mx) > Math.abs(my) ? 'x' : 'y';
+      if (locked !== 'x') return;
+      e.preventDefault();
+      dx = mx;
+      var c = topCard();
+      c.style.transform = 'translate(' + dx + 'px,' + my * 0.15 + 'px) rotate(' + dx / 18 + 'deg)';
+      var p = Math.min(1, Math.abs(dx) / 90);
+      c.querySelector('.stamp.like').style.opacity = dx > 0 ? p : 0;
+      c.querySelector('.stamp.nope').style.opacity = dx < 0 ? p : 0;
+    }, { passive: false });
+    function endDrag() {
+      if (!dragging) return; dragging = false;
+      var c = topCard(); if (!c) return;
+      if (locked === 'x' && Math.abs(dx) > 90) { fling(dx > 0 ? 'like' : 'dislike'); return; }
+      c.style.transition = 'transform .3s cubic-bezier(.34,1.56,.64,1)';
+      c.style.transform = '';
+      c.querySelectorAll('.stamp').forEach(function (s) { s.style.opacity = 0; });
+    }
+    stack.addEventListener('touchend', endDrag);
+    stack.addEventListener('touchcancel', endDrag);
+
+    // ---- Cards / All logos switch (mobile) ----
+    function setMode(m) {
+      document.body.classList.toggle('mode-cards', m === 'cards');
+      document.querySelectorAll('.lg-switch button').forEach(function (b) { b.setAttribute('aria-pressed', b.dataset.mode === m ? 'true' : 'false'); });
+      try { sessionStorage.setItem('scarlat-logos-mode', m); } catch (e) {}
+      if (m === 'all') document.querySelectorAll('.lg-item').forEach(function (li) { var l = LOGOS.find(function (x) { return x.slug === li.dataset.slug; }); li.dataset.vote = voteOf(l) || ''; });
+    }
+    document.addEventListener('click', function (e) { var b = e.target.closest('[data-mode]'); if (b) setMode(b.dataset.mode); });
+    var saved = null; try { saved = sessionStorage.getItem('scarlat-logos-mode'); } catch (e) {}
+    setMode(saved || 'cards');
+    renderDeck();
+  })();
+  </script>
+</body>
+</html>
