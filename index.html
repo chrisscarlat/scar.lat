@@ -68,13 +68,15 @@
 			</div>
 
 			<div id="cdawrap" class="cdawrap">
-				<a href="https://linkedin.com/in/scarlat" class="nav-linkedin" target="_blank" rel="noopener">LinkedIn</a>
-				<a href="tel:+491705958989">+49 170 595 8989</a>
-				<a href="https://calendar.scar.lat" class="nav-book-call">BOOK CALL</a>
 				<a href="./logos/" class="nav-logos">LOGO DESIGN</a>
 				<a href="./gallery/" class="nav-gallery">GALLERY</a>
-				<a href="./imprint/" class="nav-imprint">IMPRINT</a>
+				<a href="https://linkedin.com/in/scarlat" class="nav-linkedin" target="_blank" rel="noopener">LinkedIn</a>
+				<div class="menu-foot">
+					<a href="https://calendar.scar.lat" class="nav-book-call">BOOK CALL</a>
+					<a href="tel:+491705958989" class="nav-phone">+49 170 595 8989</a>
+					<a href="./imprint/" class="nav-imprint">IMPRINT</a>
 				<p class="vote-note">Likes are anonymous. Only an approximate location (country and city) is kept, never your IP address.</p>
+				</div>
 			</div>
 
 			<div class="menu-overlay"></div>
@@ -1317,6 +1319,14 @@
     .swipe-stamp.is-like { color: #15803d; transform: translate(-50%,-50%) rotate(-12deg); }
     .swipe-stamp.is-nope { color: #e11d48; transform: translate(-50%,-50%) rotate(12deg); }
     @media (hover: none) { .zoom-cursor { display: none !important; } } /* touch: no pointer to follow */
+    /* Menu: main links on top, call / phone / imprint small at the bottom */
+    .frame .cdawrap { justify-content: flex-start !important; gap: 18px !important; padding-top: 96px; padding-bottom: 28px; }
+    .frame .cdawrap > a { font-size: 18px !important; }
+    .frame .cdawrap .menu-foot { margin-top: auto; display: flex; flex-direction: column; align-items: inherit; gap: 10px; }
+    .frame .cdawrap .menu-foot a { font-size: 13px !important; }
+    @media (min-width: 1025px) { .frame .cdawrap { padding-top: 64px; } }
+    .frame .cdawrap .vote-note { color: #16161a; }
+    html.dark .frame .cdawrap .vote-note { color: #f0f0f2; }
     .frame .cdawrap .vote-note { font-size: 11px; line-height: 1.4; opacity: .55; max-width: 260px; margin-top: 18px; text-transform: none; letter-spacing: 0; font-weight: 400; }
     /* ==== Gravity mode (assets/gravity.js) ==== */
     .gravity-btn {
