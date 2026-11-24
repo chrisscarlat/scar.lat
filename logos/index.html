@@ -202,7 +202,7 @@
 
   <section class="lg-head">
     <h1>Logos &amp; <br>Brands</h1>
-    <p>A collection of marks <b>designed by Chris Scarlat</b>, <span id="lg-total"></span> brands and counting.</p>
+    <p>A collection of marks <b>designed by Chris Scarlat</b>, designing brands since 1998.</p>
   </section>
 
   <div class="lg-switch" role="group" aria-label="View">
@@ -267,10 +267,8 @@
         desc: 'An endless loop with a dot that keeps the beat. It is software for looping live music, and the infinity sign slips straight into the wordmark as the double "O".' },
       { slug: 'musicmoon', name: 'MUSICMOON', industry: 'Music', location: '', year: '2024',
         desc: 'A full moon with a small satellite, which together read as a musical note. It also stands in for the "OO" in the wordmark.' },
-      { slug: 'drkeck', name: 'Dr. Merle Keck', industry: 'Neurology', location: 'Berlin\nGermany', year: '2025',
-        desc: 'A practice for neurology. The name sits on a gently curved plate, calm and clear like a well-made sign in a quiet waiting room.' },
-      { slug: 'drkeck-mark', name: 'Dr. Merle Keck', industry: 'Neurology · Symbol', location: 'Berlin\nGermany', year: '2025',
-        desc: 'The curved plate on its own, without the name: a calm signet for the practice.' },
+      { slug: 'drkeck-mark', name: 'Dr. Merle Keck', industry: 'Neurology', location: 'Berlin\nGermany', year: '2025',
+        desc: 'A gently curved plate, calm and clear like a well-made sign in a quiet waiting room. A practice for neurology in Berlin.' },
       { slug: 'changemakercompanies', name: 'Changemaker Companies', industry: 'Brand identity', location: '', year: '2024',
         desc: 'Three crescents growing out of each other: one change setting off the next. The same rhythm runs through a whole set of hand-drawn patterns.' },
       { slug: 'comicoin', name: 'COMICOIN', industry: 'Digital currency', location: '', year: '2024',
@@ -307,14 +305,6 @@
         desc: 'Stacked layers that form a gateway, like courses served one after another, for a restaurant that tells stories through food.' },
       { slug: 'coee', name: 'The College of Extraordinary Experiences', industry: 'Experience design · Education', location: 'Copenhagen\nDenmark', year: '2016',
         desc: 'A phoenix rising with a star overhead: the symbol of an experience-design festival held in a castle.' },
-      { slug: 'coee-wordmark', name: 'The College of Extraordinary Experiences', industry: 'Experience design · Education', location: 'Copenhagen\nDenmark', year: '2016',
-        desc: 'The phoenix above the full name, set in a bold, square typeface.' },
-      { slug: 'coee-hydra', name: 'CoEE · The Attack of the Hydra', industry: 'Experience design · Event', location: 'Copenhagen\nDenmark', year: '2016',
-        desc: 'One of the event\'s story chapters: a hydra curling out of the College\'s circle.' },
-      { slug: 'coee-tower', name: 'CoEE · The Tower of Transformation', industry: 'Experience design · Event', location: 'Copenhagen\nDenmark', year: '2016',
-        desc: 'Another chapter: a castle tower twisting like a drill as it rises.' },
-      { slug: 'coee-wild', name: 'CoEE · The Call of the Wild', industry: 'Experience design · Event', location: 'Copenhagen\nDenmark', year: '2016',
-        desc: 'A howling wolf wrapped around the College\'s dots, for the chapter that sends everyone outdoors.' },
       { slug: '1618', name: '1618 Natural Design Jewelry', industry: 'Jewelry & craft', location: 'Wrocław\nPoland', year: '2017',
         desc: 'Geometric cuts and lines that spell out 1618, the golden ratio that nature and good jewelry share.' },
       { slug: 'financefox', name: 'FinanceFox', industry: 'Insurance app', location: 'Zurich\nSwitzerland', year: '2015',
@@ -338,7 +328,6 @@
     var esc = function (s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
     var src = function (l) { return './svg/' + l.slug + '.svg'; };
     var id = function (l) { return '/logos/svg/' + l.slug + '.svg'; };
-    $('#lg-total').textContent = LOGOS.length;
 
     // ---- votes: same store as the main site (this browser + the anonymous vote table) ----
     var VKEY = 'scarlat-votes', QKEY = 'scarlat-vote-queue';

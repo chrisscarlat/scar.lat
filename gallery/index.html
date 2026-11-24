@@ -115,9 +115,10 @@
     const FOCUS_DIST = 3.2    // planes this close to the screen centre grow
     const MAX_SCALE = 9       // how big the centre image gets
     const FOCUS_LIFT = 0.35   // focused planes come forward so nothing covers them
-    const JITTER = 0.15
-    const DEPTH_RANGE = [-0.3, 0.3]
-    const SIZE_RANGE = [0.5, 0.82]
+    const JITTER = 0.05       // small, so the letter outlines stay smooth
+    const DEPTH_RANGE = [-0.12, 0.12]
+    const SIZE_RANGE = [0.56, 0.74]
+    const MAX_ASPECT = 2      // wider / taller images are centre-cropped to 2:1, never thin bars
 
     function randomBetween(min, max) { return min + Math.random() * (max - min) }
 
@@ -183,12 +184,17 @@
         )
         // keep each image's real proportions (same area as the square), never cropped
         // (very wide/tall images are shrunk, not cropped, so no plane becomes a bar)
-        const fitAspect = (a) => {
-          let w = size * Math.sqrt(a), h = size / Math.sqrt(a)
-          const over = Math.max(w, h) / (size * 1.9)
-          if (over > 1) { w /= over; h /= over }
+        const fitAspect = (a0) => {
+          const a = Math.min(MAX_ASPECT, Math.max(1 / MAX_ASPECT, a0))
+          const w = size * Math.sqrt(a), h = size / Math.sqrt(a)
+          const g = new THREE.PlaneGeometry(w, h)
+          if (a !== a0) { // crop the middle of the image via UVs (texture is shared)
+            const uv = g.attributes.uv, kx = a0 > a ? a / a0 : 1, ky = a0 < a ? a0 / a : 1
+            for (let k = 0; k < uv.count; k++) uv.setXY(k, 0.5 + (uv.getX(k) - 0.5) * kx, 0.5 + (uv.getY(k) - 0.5) * ky)
+            uv.needsUpdate = true
+          }
           mesh.geometry.dispose()
-          mesh.geometry = new THREE.PlaneGeometry(w, h)
+          mesh.geometry = g
         }
         const known = textures[texIndex].userData.aspect
         known ? fitAspect(known) : aspectListeners[texIndex].push(fitAspect)
