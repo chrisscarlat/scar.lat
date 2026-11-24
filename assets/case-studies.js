@@ -405,5 +405,91 @@ window.CASE_STUDIES = {
       "The wireframe M stretches from a red-to-black gradient tee and field notebooks to laser-cut plywood wired up with electronics.",
       "Metabolic Ventures builds and backs new organisations that improve how the global metabolism works, increase resource security and empower people. The M now sits on the windows, right where that work happens."
     ]
+  },
+  "IEHANA™ Cosmetics": {
+    "title": "IEHANA™ Cosmetics",
+    "client": "IEHANA Cosmetics",
+    "city": "Bucharest",
+    "industry": "Organic Cosmetics",
+    "year": "2019",
+    "deliverables": "Rebranding, Packaging Redesign",
+    "brandColor": "#111111",
+    "brandText": "#F4EFEA",
+    "hero": "./img/iehana.webp",
+    "story": [
+      {
+        "title": "Luxury organic, from Bucharest",
+        "images": [
+          "./img/iehana.webp",
+          "./img/iehana/product-hero.webp"
+        ],
+        "text": "IEHANA makes luxury organic cosmetics in Bucharest, from make-up removers with Kangen water to shampoos with ceramides and Ayurvedic herbs. The products were good. The brand and the bottles didn’t look the part yet. The brief: a rebrand and a full packaging redesign."
+      },
+      {
+        "title": "Drawn from water",
+        "images": [
+          "./img/iehana/sketches.webp"
+        ],
+        "text": "The mark started with 水, the character for water. Its strokes became a seedling: three leaves above and roots below. We tried a drop, a diamond and a dot as the base before settling on roots, the plant drawing up water."
+      },
+      {
+        "title": "From a boxed label to a living mark",
+        "images": [
+          "compare:./img/iehana/logo-before.webp|./img/iehana/logo-after.webp",
+          "./img/iehana/logo-old.webp"
+        ],
+        "text": "Drag the slider to compare. Before: a boxed wordmark with “luxury organic cosmetics” in script. After: the seedling over a light, widely spaced IEHANA. A sign that works on its own, from a jar lid to a sticker."
+      },
+      {
+        "title": "A bottle that dresses in black",
+        "images": [
+          "compare:./img/iehana/bottle-before.webp|./img/iehana/bottle-after.webp",
+          "./img/iehana/bottle-after.webp"
+        ],
+        "text": "Drag to compare. The clear bottle with a white label became glossy black glass, with the white seedling, a few quiet lines of type and “Made in Romania”. It finally looks like the luxury product it is."
+      },
+      {
+        "title": "One family on the shelf",
+        "images": [
+          "./img/iehana/gift-box.webp",
+          "./img/iehana/family.webp",
+          "./img/iehana/shampoo.webp",
+          "./img/iehana/textures.webp"
+        ],
+        "text": "Bottles, jars and the gift box share one system: black surfaces, the white mark and generous space. The textures show what’s inside, oils, creams, clays and scrubs."
+      },
+      {
+        "title": "A campaign in white",
+        "images": [
+          "./img/iehana/campaign.webp",
+          "./img/iehana/instagram.webp"
+        ],
+        "text": "The launch campaign went outdoors: models in white among the trees, filmed and photographed in soft daylight. The same calm carries over to the website and Instagram."
+      }
+    ],
+    "url": "https://www.cultural.design/portfolio/iehana-cosmetics/",
+    "images": [
+      "./img/iehana.webp",
+      "./img/iehana/product-hero.webp",
+      "./img/iehana/sketches.webp",
+      "compare:./img/iehana/logo-before.webp|./img/iehana/logo-after.webp",
+      "./img/iehana/logo-old.webp",
+      "compare:./img/iehana/bottle-before.webp|./img/iehana/bottle-after.webp",
+      "./img/iehana/bottle-after.webp",
+      "./img/iehana/gift-box.webp",
+      "./img/iehana/family.webp",
+      "./img/iehana/shampoo.webp",
+      "./img/iehana/textures.webp",
+      "./img/iehana/campaign.webp",
+      "./img/iehana/instagram.webp"
+    ],
+    "paras": [
+      "IEHANA makes luxury organic cosmetics in Bucharest, from make-up removers with Kangen water to shampoos with ceramides and Ayurvedic herbs. The products were good. The brand and the bottles didn’t look the part yet. The brief: a rebrand and a full packaging redesign.",
+      "The mark started with 水, the character for water. Its strokes became a seedling: three leaves above and roots below. We tried a drop, a diamond and a dot as the base before settling on roots, the plant drawing up water.",
+      "Drag the slider to compare. Before: a boxed wordmark with “luxury organic cosmetics” in script. After: the seedling over a light, widely spaced IEHANA. A sign that works on its own, from a jar lid to a sticker.",
+      "Drag to compare. The clear bottle with a white label became glossy black glass, with the white seedling, a few quiet lines of type and “Made in Romania”. It finally looks like the luxury product it is.",
+      "Bottles, jars and the gift box share one system: black surfaces, the white mark and generous space. The textures show what’s inside, oils, creams, clays and scrubs.",
+      "The launch campaign went outdoors: models in white among the trees, filmed and photographed in soft daylight. The same calm carries over to the website and Instagram."
+    ]
   }
 };

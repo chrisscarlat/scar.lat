@@ -15,7 +15,7 @@
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 	<style>* { font-family: 'Inter', Helvetica, Arial, sans-serif !important; }</style>
-  <script type="module" crossorigin src="./assets/index-v2.js?v=20261118c"></script>
+  <script type="module" crossorigin src="./assets/index-v2.js?v=20261125a"></script>
   <link rel="stylesheet" href="./assets/index-89f78340.css">
 
 	<link rel="canonical" href="https://scar.lat/">
@@ -1121,6 +1121,20 @@
        (The ID selector beats the bundle's "item-image img { object-fit: cover }".) */
     #hero #images .item .item-image .carousel-layer .cs-img { object-fit: contain; transform: none; }
     body.zoom-mode #hero #images .zoomed-item .item-image { overflow: visible; }
+    /* Before / after slider (case-study slides written as "compare:before|after").
+       The layer is scaled with the camera, so UI sizes use --s (= 1 / zoom). */
+    .carousel-layer .cmp { position: absolute; inset: 0; display: none; cursor: ew-resize; touch-action: none; }
+    .carousel-layer.is-cmp .cmp { display: block; }
+    #hero #images .item .item-image .carousel-layer .cmp-before { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; transform: none;
+      clip-path: inset(0 calc(100% - var(--p)) 0 0); pointer-events: none; user-select: none; -webkit-user-drag: none; }
+    .cmp .cmp-line { position: absolute; top: 0; bottom: 0; left: var(--p); width: calc(2px * var(--s, 1)); transform: translateX(-50%); background: #fff; box-shadow: 0 0 calc(6px * var(--s, 1)) rgba(0,0,0,.35); pointer-events: none; }
+    .cmp .cmp-knob { position: absolute; top: 50%; left: var(--p); width: calc(46px * var(--s, 1)); height: calc(46px * var(--s, 1)); transform: translate(-50%, -50%);
+      border-radius: 50%; background: #fff; color: #111; display: flex; align-items: center; justify-content: center; gap: calc(6px * var(--s, 1));
+      font: 600 calc(18px * var(--s, 1))/1 Inter, Helvetica, Arial, sans-serif; box-shadow: 0 calc(2px * var(--s, 1)) calc(12px * var(--s, 1)) rgba(0,0,0,.3); pointer-events: none; }
+    .cmp .cmp-tag { position: absolute; top: calc(10px * var(--s, 1)); padding: calc(4px * var(--s, 1)) calc(9px * var(--s, 1)); border-radius: 999px;
+      background: rgba(17,17,17,.7); color: #fff; font: 600 calc(10px * var(--s, 1))/1.2 Inter, Helvetica, Arial, sans-serif; letter-spacing: .08em; text-transform: uppercase; pointer-events: none; }
+    .cmp .cmp-tag.b { left: calc(10px * var(--s, 1)); }
+    .cmp .cmp-tag.a { right: calc(10px * var(--s, 1)); }
 
     /* Hide the native cursor while zoomed; a zoom-out cursor follows the pointer. */
     body.zoom-mode, body.zoom-mode * { cursor: none !important; }
@@ -1349,7 +1363,7 @@
     </button>
   </div>
 
-  <script src="./assets/case-studies.js?v=20261118a"></script>
+  <script src="./assets/case-studies.js?v=20261125a"></script>
   <script src="./assets/gravity.js?v=20261118a" defer></script>
   <script>
     (function () {
@@ -1430,6 +1444,41 @@
       // pointer the whole time. ---
       // Slides are easy to extend: add URLs to a case study's `images`, or to the
       // placeholder array below (non-case items reuse their own image a few times).
+      // "compare:before|after" slides: a draggable before / after slider
+      function isCmp(u) { return typeof u === 'string' && u.indexOf('compare:') === 0; }
+      function cmpParts(u) { var p = u.slice(8).split('|'); return { b: absUrl(p[0]), a: absUrl(p[1] || p[0]) }; }
+      function curCmp() { return zoom.active && !zoom.isVideo && !!zoom.layer && isCmp(zoom.slides[zoom.i]); }
+      function setCmpX(x) {
+        if (!zoom.layer) return;
+        var b = zoom.layer.getBoundingClientRect(); if (!b.width) return;
+        var p = Math.max(0, Math.min(100, (x - b.left) / b.width * 100));
+        zoom.layer.style.setProperty('--p', p.toFixed(2) + '%');
+      }
+      function nearCmpLine(x) {
+        if (!zoom.layer) return false;
+        var b = zoom.layer.getBoundingClientRect(), p = parseFloat(zoom.layer.style.getPropertyValue('--p')) || 50;
+        return Math.abs(x - (b.left + b.width * p / 100)) < 32;
+      }
+      function applySlide(u) {
+        var L = zoom.layer;
+        if (isCmp(u) && L) {
+          var p = cmpParts(u), c = L.querySelector('.cmp');
+          if (!c) {
+            c = document.createElement('div'); c.className = 'cmp';
+            c.innerHTML = '<img class="cmp-before" alt="Before" draggable="false"><span class="cmp-line"></span>' +
+              '<span class="cmp-knob" aria-hidden="true">\u2039 \u203a</span><span class="cmp-tag b">Before</span><span class="cmp-tag a">After</span>';
+            L.appendChild(c);
+          }
+          c.querySelector('.cmp-before').src = p.b;
+          zoom.img.src = p.a;
+          L.style.setProperty('--p', '50%');
+          L.classList.add('is-cmp');
+        } else {
+          if (L) L.classList.remove('is-cmp');
+          zoom.img.src = u;
+        }
+      }
+
       function carouselSlides(item, key, thumb) {
         var list;
         if (key && DATA[key] && DATA[key].story) {
@@ -1443,7 +1492,7 @@
         }
         if (thumb) list = [thumb].concat(list);
         // same file under a relative vs absolute URL counts once
-        list = list.map(function (u) { try { return new URL(u, location.href).href; } catch (e) { return u; } });
+        list = list.map(function (u) { if (isCmp(u)) return u; try { return new URL(u, location.href).href; } catch (e) { return u; } });
         return list.filter(function (u, i) { return list.indexOf(u) === i; });
       }
       // Only offer "next" for images that really load (some case links are dead).
@@ -1454,7 +1503,7 @@
         var im = new Image();
         im.onload = function () { IMG_OK[u] = im.naturalWidth > 0; IMG_OK[u + '#cb'].forEach(function (f) { f(IMG_OK[u]); }); };
         im.onerror = function () { IMG_OK[u] = false; IMG_OK[u + '#cb'].forEach(function (f) { f(false); }); };
-        im.src = u;
+        im.src = isCmp(u) ? cmpParts(u).a : u;
       }
 
       var hero = document.getElementById('hero');
@@ -1647,6 +1696,7 @@
         var L = zoom.layer.style;
         L.inset = 'auto'; L.width = w + 'px'; L.height = h + 'px';
         L.left = ((bw - w) / 2) + 'px'; L.top = ((bh - h) / 2) + 'px';
+        zoom.layer.style.setProperty('--s', (1 / (Z * (zoom.userScale || 1))).toFixed(4));
       }
       function canNext() { return !zoom.isVideo && zoom.slides.length > 1; }
       function updateCount() { countEl.textContent = (zoom.i + 1) + ' / ' + zoom.slides.length; }
@@ -1654,7 +1704,7 @@
         if (!zoom.slides.length || !zoom.img) return;
         var dir = idx >= zoom.i ? 1 : -1;
         zoom.i = ((idx % zoom.slides.length) + zoom.slides.length) % zoom.slides.length;
-        zoom.img.src = zoom.slides[zoom.i];
+        applySlide(zoom.slides[zoom.i]);
         if (zoom.img.animate) zoom.img.animate([{ opacity: .35 }, { opacity: 1 }], { duration: 260, easing: 'ease-out' });
         if (cur.animate) cur.animate([{ transform: 'translate(-50%,-50%) scale(1)' }, { transform: 'translate(-50%,-50%) scale(.82)' }, { transform: 'translate(-50%,-50%) scale(1)' }], { duration: 220, easing: 'ease-out' });
         updateCount();
@@ -1671,6 +1721,7 @@
       function applyHero(fast) {
         hero.style.transition = fast ? 'transform .14s ease-out' : '';
         setHeroT();
+        if (zoom.layer) zoom.layer.style.setProperty('--s', (1 / ((zoom.Z || 1) * (zoom.userScale || 1))).toFixed(4));
       }
       // Nudge the camera so the zoomed image's centre lands exactly on the
       // target screen point (both axes). Corrects for the grid's own per-item
@@ -1858,7 +1909,7 @@
         document.body.classList.remove('zoom-mode');
         var item = zoom.item, layer = zoom.layer;
         zoom.session = (zoom.session || 0) + 1; // ignore late image checks
-        zoom.active = false; zoom.item = null; zoom.box = null; zoom.locked = false;
+        zoom.active = false; zoom.item = null; zoom.box = null; zoom.locked = false; zoom.cmpDrag = null; zoom.cmpTouch = null;
         zoom.layer = null; zoom.img = null; zoom.slides = []; zoom.isVideo = false; zoom.video = null;
         setTimeout(function () {
           hero.classList.remove('zoomed');
@@ -1880,6 +1931,11 @@
         lastX = e.clientX; lastY = e.clientY;
         cur.style.left = e.clientX + 'px'; cur.style.top = e.clientY + 'px';
         e.stopImmediatePropagation(); // freeze the grid's own mouse handling
+        if (zoom.cmpDrag) { // dragging the before / after slider
+          if (Math.abs(e.clientX - zoom.cmpDrag.x) > 3) zoom.cmpDrag.moved = true;
+          if (zoom.cmpDrag.moved) { setCmpX(e.clientX); stip.classList.remove('show'); }
+          return;
+        }
         // over the like/dislike buttons or the top bar: normal pointer, no close countdown
         var onUI = !!(e.target && e.target.closest && e.target.closest('.vote-bar, .theme-toggle, .frame-left, .frame-right'));
         document.body.classList.toggle('zoom-ui', onUI);
@@ -1918,7 +1974,17 @@
         applyHero(true);
       }, { capture: true, passive: false });
       window.addEventListener('pointermove', function (e) { if (zoom.active) e.stopImmediatePropagation(); }, true);
-      window.addEventListener('mousedown', function (e) { if (zoom.active) e.stopImmediatePropagation(); }, true);
+      window.addEventListener('mousedown', function (e) {
+        if (!zoom.active) return;
+        e.stopImmediatePropagation();
+        if (e.button === 0 && curCmp() && overImage(e.clientX, e.clientY)) { zoom.cmpDrag = { x: e.clientX, moved: false, grab: nearCmpLine(e.clientX) }; e.preventDefault(); }
+      }, true);
+      window.addEventListener('mouseup', function () {
+        if (!zoom.cmpDrag) return;
+        // a drag, or a click on the handle, belongs to the slider (no "next image")
+        zoom.cmpHold = (zoom.cmpDrag.moved || zoom.cmpDrag.grab) ? performance.now() : 0;
+        zoom.cmpDrag = null;
+      }, true);
       window.addEventListener('pointerdown', function (e) { if (zoom.active) e.stopImmediatePropagation(); }, true);
 
       // Click while zoomed: on the image -> next image; outside -> zoom out now.
@@ -1927,6 +1993,7 @@
         if (e.target && e.target.closest && e.target.closest('.vote-bar, .story-tip.docked')) return; // like / dislike, text panel
         e.stopImmediatePropagation(); e.preventDefault();
         if (zoom.swiped && performance.now() - zoom.swiped < 600) return; // end of a swipe, not a tap
+        if (zoom.cmpHold && performance.now() - zoom.cmpHold < 500) { zoom.cmpHold = 0; return; } // slider drag
         // If the user has pinched in, the first click steps back to base framing
         // (so there's always an "outside" to click for the full zoom-out).
         if (zoom.userScale > 1.02) {
@@ -1944,12 +2011,19 @@
 
       var SWIPE_PX = 90, sw = null;
       window.addEventListener('touchstart', function (e) {
-        sw = null;
+        sw = null; zoom.cmpTouch = null;
         if (!zoom.active || zoom.settling || e.touches.length !== 1 || zoom.userScale > 1.02) return;
         if (e.target && e.target.closest && e.target.closest('.frame, .vote-bar, .theme-toggle, .chat-widget, .story-tip')) return;
-        var t = e.touches[0]; sw = { x: t.clientX, y: t.clientY, dx: 0, on: false };
+        var t = e.touches[0];
+        if (curCmp() && overImage(t.clientX, t.clientY)) { zoom.cmpTouch = { moved: false }; return; } // slider, not a swipe vote
+        sw = { x: t.clientX, y: t.clientY, dx: 0, on: false };
       }, { capture: true, passive: true });
       window.addEventListener('touchmove', function (e) {
+        if (zoom.cmpTouch && zoom.active && e.touches.length === 1) {
+          e.preventDefault(); e.stopImmediatePropagation();
+          zoom.cmpTouch.moved = true; setCmpX(e.touches[0].clientX);
+          return;
+        }
         if (!sw || !zoom.active || !zoom.layer) return;
         if (e.touches.length !== 1) { sw = null; return; }
         var t = e.touches[0], dy = t.clientY - sw.y; sw.dx = t.clientX - sw.x;
@@ -1962,6 +2036,7 @@
         showStamp(sw.dx > 0 ? 'like' : 'dislike', Math.min(1, Math.abs(sw.dx) / SWIPE_PX));
       }, { capture: true, passive: false });
       window.addEventListener('touchend', function () {
+        if (zoom.cmpTouch) { if (zoom.cmpTouch.moved) zoom.swiped = performance.now(); zoom.cmpTouch = null; return; }
         var s0 = sw; sw = null;
         if (!s0 || !s0.on || !zoom.layer) return;
         zoom.swiped = performance.now();
