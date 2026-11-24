@@ -1210,8 +1210,12 @@
     body.zoom-mode .zoomed-item small { visibility: hidden !important; }
     /* Keep only the focused image on screen: fade the rest out smoothly and hide
        the item's original underlying image so the carousel layer isn't doubled. */
-    #hero #images .item { transition: opacity .55s ease; }
-    body.zoom-mode #hero #images .item:not(.zoomed-item) { opacity: 0 !important; pointer-events: none; }
+    #hero #images .item { transition: opacity .55s ease, visibility 0s linear 0s; }
+    /* after the fade the other items are also visibility:hidden, so the browser
+       doesn't keep them as huge GPU layers while the scene is scaled up (Safari
+       ran out of memory and showed them white after closing) */
+    body.zoom-mode #hero #images .item:not(.zoomed-item) { opacity: 0 !important; visibility: hidden; pointer-events: none;
+      transition: opacity .55s ease, visibility 0s linear .55s; }
     body.zoom-mode .zoomed-item .item-image > img,
     body.zoom-mode .zoomed-item .item-image > video { visibility: hidden; }
     /* #hero clips to the viewport in its own local space (before the zoom
@@ -1518,6 +1522,7 @@
       }
 
       var hero = document.getElementById('hero');
+      var grid = document.getElementById('images');
       var zoom = { active: false, item: null, box: null, slides: [], i: 0, locked: false, acc: 0, layer: null, img: null, key: null, raf: 0, isVideo: false, video: null };
       var lastX = 0, lastY = 0;
 
@@ -1923,10 +1928,21 @@
         zoom.active = false; zoom.item = null; zoom.box = null; zoom.locked = false; zoom.cmpDrag = null; zoom.cmpTouch = null;
         zoom.layer = null; zoom.img = null; zoom.slides = []; zoom.isVideo = false; zoom.video = null;
         setTimeout(function () {
+          if (zoom.active) { if (layer && layer.parentNode) layer.remove(); if (item && item !== zoom.item) item.classList.remove('zoomed-item'); return; }
           hero.classList.remove('zoomed');
           if (item) item.classList.remove('zoomed-item');
           if (layer && layer.parentNode) layer.remove();
+          healGrid();
         }, 1200);
+      }
+
+      // Back from a zoom: reload any grid image the browser dropped, restart videos.
+      function healGrid() {
+        if (!grid) return;
+        grid.querySelectorAll('.item-image > img').forEach(function (im) {
+          if (im.complete && im.naturalWidth === 0 && im.src) { var u = im.src; im.src = ''; im.src = u; }
+        });
+        grid.querySelectorAll('.item-image > video').forEach(function (v) { if (v.paused) v.play().catch(function () {}); });
       }
 
       function overImage(x, y) {
@@ -2073,7 +2089,6 @@
         }, 340);
       }, true);
 
-      var grid = document.getElementById('images');
       if (!grid) return;
       var dX = 0, dY = 0, dragged = false;
       grid.addEventListener('pointerdown', function (e) { dX = e.clientX; dY = e.clientY; dragged = false; }, true);
