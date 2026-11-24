@@ -1,0 +1,31 @@
+# scar.lat — Chris Scarlat
+# Search engines and AI crawlers are welcome.
+
+User-agent: *
+Allow: /
+Disallow: /payment/
+Disallow: /supabase/
+
+# AI crawlers and assistants — explicitly allowed
+User-agent: GPTBot
+User-agent: OAI-SearchBot
+User-agent: ChatGPT-User
+User-agent: ClaudeBot
+User-agent: Claude-User
+User-agent: Claude-SearchBot
+User-agent: anthropic-ai
+User-agent: PerplexityBot
+User-agent: Perplexity-User
+User-agent: Google-Extended
+User-agent: Applebot-Extended
+User-agent: meta-externalagent
+User-agent: CCBot
+User-agent: Bytespider
+User-agent: Amazonbot
+User-agent: DuckAssistBot
+User-agent: MistralAI-User
+Allow: /
+Disallow: /payment/
+Disallow: /supabase/
+
+Sitemap: https://scar.lat/sitemap.xml
