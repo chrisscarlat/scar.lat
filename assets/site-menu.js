@@ -114,7 +114,7 @@
 
   // first-visit privacy bar (shared)
   if (!document.querySelector('script[src*="consent.js"]')) {
-    var ck = document.createElement('script'); ck.src = '/assets/consent.js?v=20261125a'; document.head.appendChild(ck);
+    var ck = document.createElement('script'); ck.src = '/assets/consent.js?v=20261125b'; document.head.appendChild(ck);
   }
 
   // keep clicks / wheel / touches inside the menu from reaching page handlers (gallery canvas, logo deck)

@@ -53,7 +53,7 @@
       '</g></svg>' +
       '<span class="ck-sec">' + SECONDS + '</span>' +
     '</div>' +
-    '<p class="ck-txt"><b>No tracking here.</b> When you like an image we only keep the country and city it came from. No IP address, no cookies for ads, nothing else.</p>' +
+    '<p class="ck-txt"><b>Cookie:</b> When you like an image, we use your IP once to find your country and city, keep only those, and don\'t store the IP.</p>' +
     '<div class="ck-act"><a class="ck-no" role="button" tabindex="0">No</a><button type="button" class="ck-ok">OK</button></div>';
 
   function mount() {
