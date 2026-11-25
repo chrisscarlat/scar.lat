@@ -15,7 +15,22 @@
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 	<style>* { font-family: 'Inter', Helvetica, Arial, sans-serif !important; }</style>
-  <script type="module" crossorigin src="./assets/index-v2.js?v=20261125b"></script>
+	<script>
+	  // /?chat → chat-only view, embedded by the other pages (logos, gallery, imprint) in their side panel.
+	  if (/[?&]chat\b/.test(location.search)) { window.CHAT_ONLY = true; document.documentElement.classList.add('chat-only'); }
+	</script>
+	<style>
+	  html.chat-only, html.chat-only body { background: transparent !important; overflow: hidden !important; }
+	  html.chat-only body > *:not(main):not(script):not(style) { display: none !important; }
+	  html.chat-only main > *:not(.chat-widget) { display: none !important; }
+	  html.chat-only .chat-widget { position: fixed !important; inset: 0 !important; }
+	  html.chat-only .chat-widget .chat-toggle { display: none !important; }
+	  html.chat-only .chat-widget .chat-window { position: fixed !important; inset: 0 !important; top: 0 !important; width: 100% !important; max-width: none !important;
+	    border: 0 !important; border-radius: 0 !important; background: transparent !important; backdrop-filter: none !important; -webkit-backdrop-filter: none !important;
+	    opacity: 1 !important; pointer-events: all !important; transform: none !important; }
+	</style>
+
+  <script type="module" crossorigin src="./assets/index-v2.js?v=20261125c"></script>
   <link rel="stylesheet" href="./assets/index-89f78340.css">
 
 	<link rel="canonical" href="https://scar.lat/">
@@ -258,6 +273,11 @@
       chatClose.addEventListener('click', () => {
         chatWidget.classList.remove('open');
       });
+      window.openChat = () => chatWidget.classList.add('open');
+      if (window.CHAT_ONLY) {
+        chatWidget.classList.add('open');
+        chatClose.addEventListener('click', () => { try { parent.postMessage({ type: 'scar-chat-close' }, location.origin); } catch (e) {} });
+      }
 
       // Conversation state
       let state = 'intro'; // intro, select_project, chatting, asking_details, asking_name, asking_brand, asking_role, asking_email, asking_budget, done
@@ -344,7 +364,6 @@
         "Interesting! Tell me more – who's this for?",
         "Got it! What's the main problem we're solving?",
         "Nice! How soon do you need this?",
-        "Cool! What makes your project unique?",
         "I see! Who's the competition we're beating?"
       ];
 
@@ -437,13 +456,7 @@
               if (typeId === 'other') {
                 setTimeout(() => addMessageTyping("Intriguing! I love unusual projects. Tell me what you have in mind."), 400);
               } else {
-                const responses = [
-                  `${type.label.split(' ')[0]} - Nice choice! Tell me a bit about it.`, 
-                  `${type.label} – exciting! What's the story behind this project?`, 
-                  `Love it! What's the vision?`, 
-                  `Great pick! I've done quite a few of these. What makes yours special?`
-                ];
-                setTimeout(() => addMessageTyping(getRandomResponse(responses)), 400);
+                setTimeout(() => askVision(type.label), 400);
               }
             });
 
@@ -459,6 +472,37 @@
         });
       }
       
+      // Optional: ask whether there's already a vision. Yes opens the input, Skip moves on.
+      function askVision(label) {
+        state = 'vision_choice';
+        const bs = 'padding:10px 18px;border:1px solid #ddd;border-radius:20px;background:#fff;cursor:pointer;font-size:13px;transition:all 0.2s;';
+        const html = `<p>${label} – nice choice! Do you already have a vision for it? <span style="color:#999;">(optional)</span></p>
+          <div style="display:flex;gap:8px;margin-top:12px;">
+            <button class="vision-btn" data-v="yes" style="${bs}">Yes</button>
+            <button class="vision-btn" data-v="skip" style="${bs}">Skip</button>
+          </div>`;
+        addMessageTyping(html, true, () => {
+          const btns = document.querySelectorAll('.vision-btn');
+          btns.forEach(btn => {
+            btn.addEventListener('click', function () {
+              if (state !== 'vision_choice') return;
+              btns.forEach(x => { x.disabled = true; x.style.opacity = x === this ? '1' : '.4'; x.style.cursor = 'default'; });
+              addMessage(this.textContent, 'user');
+              if (this.dataset.v === 'yes') {
+                state = 'vision';
+                setTimeout(() => addMessageTyping("Great – tell me about it."), 400);
+                if (chatInput) setTimeout(() => chatInput.focus(), 900);
+              } else {
+                state = 'asking_name';
+                setTimeout(() => addMessageTyping("No worries – we'll figure it out together. Quick intro – what's your name?"), 400);
+              }
+            });
+            btn.addEventListener('mouseenter', function () { if (!this.disabled) { this.style.borderColor = '#333'; this.style.background = '#f5f5f5'; } });
+            btn.addEventListener('mouseleave', function () { this.style.borderColor = '#ddd'; this.style.background = '#fff'; });
+          });
+        });
+      }
+
       function showContactMethodToggle() {
         const toggleHtml = `
           <p>How do you prefer to be contacted?</p>
@@ -657,6 +701,13 @@
         });
       }
 
+      // "don't know", "no idea", "skip", "nothing", "no" … → reassure instead of "Love it!"
+      function isUnsure(t) {
+        const l = t.toLowerCase().replace(/[’']/g, '').trim();
+        return /^(no+|nope|nah|nothing|none|skip|pass|later|idk|dunno|not sure|no idea|whatever|n\/a|-+|\?+)[.!?]*$/.test(l) ||
+          /(dont know|don t know|donno|dono|dunno|no idea|not sure|no clue|havent thought|not yet|no vision|dont have (one|a vision)|idk)/.test(l);
+      }
+
       function handleUserMessage() {
         const text = chatInput.value.trim();
         if (!text) return;
@@ -727,6 +778,13 @@
             return;
           }
 
+          // Unsure / dismissive answers: reassure, don't cheer, and don't ask another question about it
+          if (isUnsure(text)) {
+            state = 'asking_name';
+            setTimeout(() => addMessageTyping("No worries – we'll figure it out together. Quick intro – what's your name?"), 400);
+            return;
+          }
+
           // After 2 messages, start collecting info
           if (messageCount >= 2) {
             state = 'asking_name';
@@ -735,6 +793,16 @@
           }
 
           setTimeout(() => addMessageTyping(getRandomResponse(generalFollowUps)), 400);
+          return;
+        }
+
+        if (state === 'vision' || state === 'vision_choice') {
+          collectedInfo.projectDetails.push(text);
+          state = 'asking_name';
+          const reply = isUnsure(text)
+            ? "No worries at all – that's exactly what we'll figure out together. Quick intro – what's your name?"
+            : "Love it! Quick intro – what's your name?";
+          setTimeout(() => addMessageTyping(reply), 400);
           return;
         }
 
@@ -924,7 +992,13 @@
       pointer-events: auto !important;
       transition: transform .35s cubic-bezier(.34,1.56,.64,1);
     }
-    #hero #images .item-image.logo-item:hover { transform: scale(1.28); }
+    /* Hover used to scale the rasterised box up 1.28x, which pixelated the vector logos.
+       Now each SVG is drawn at its hover size and shown at 0.78 at rest, so it never upsamples. */
+    #hero #images .item-image.logo-item img {
+      transform: scale(.78) translateZ(0) !important; transform-origin: 50% 50%;
+      transition: transform .35s cubic-bezier(.34,1.56,.64,1) !important;
+    }
+    #hero #images .item-image.logo-item:hover img { transform: scale(1) translateZ(0) !important; }
 
     /* ---- Google Translate: hide banner & keep layout stable ---- */
     .goog-te-banner-frame, .skiptranslate iframe, #goog-gt-tt, .goog-te-balloon-frame { display: none !important; }
@@ -1379,6 +1453,7 @@
   </div>
 
   <script src="./assets/case-studies.js?v=20261125b"></script>
+  <script src="./assets/consent.js?v=20261125a"></script>
   <script src="./assets/gravity.js?v=20261118a" defer></script>
   <script>
     (function () {
@@ -1608,10 +1683,12 @@
         try { var x = new URL(u, location.href); return x.origin === location.origin ? x.pathname : x.href; } catch (e) { return u; }
       }
       function sendVote(rec) {
+        var consent = window.scarConsent ? window.scarConsent() : null;
+        if (consent === 'no') return; // visitor said no: nothing is kept or sent
         var q; try { q = JSON.parse(localStorage.getItem(QKEY) || '[]'); } catch (e) { q = []; }
         q.push(rec);
         var url = window.SCARLAT_VOTES_URL || 'https://dcfuliyfkbeyqmumfagp.supabase.co/functions/v1/scarlat-vote';
-        if (url && navigator.sendBeacon) {
+        if (url && consent === 'yes' && navigator.sendBeacon) {
           try { if (navigator.sendBeacon(url, new Blob([JSON.stringify(q)], { type: 'text/plain' }))) q = []; } catch (e) {}
         }
         try { localStorage.setItem(QKEY, JSON.stringify(q.slice(-500))); } catch (e) {}

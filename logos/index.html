@@ -56,6 +56,16 @@
     .lg-cap b { display: block; font-weight: 500; }
     .lg-cap span { display: block; font-size: 12.5px; font-weight: 300; opacity: .85; }
     .lg-cap i { display: block; font-style: normal; font-weight: 300; opacity: .85; }
+    .lg-cta .lg-mark { padding: 6%; box-sizing: border-box; }
+    .cta-box { width: 100%; height: 100%; box-sizing: border-box; border-radius: 20px; background: #fff; color: #000;
+      display: flex; flex-direction: column; justify-content: center; gap: 10px; padding: 12%; text-align: left;
+      transition: transform .45s cubic-bezier(.2,.8,.2,1); }
+    .lg-tile:hover .cta-box { transform: scale(1.04); }
+    .cta-box strong { font-size: clamp(17px, 1.7vw, 24px); font-weight: 700; line-height: 1.1; letter-spacing: -.01em; }
+    .cta-box span { font-size: clamp(12px, 1vw, 14px); font-weight: 400; line-height: 1.35; opacity: .75; }
+    .cta-box em { font-style: normal; font-size: 13px; font-weight: 600; text-decoration: underline; text-underline-offset: 3px; margin-top: 4px; }
+    .deck-cta { font-size: 13px; text-decoration: underline; text-underline-offset: 3px; opacity: .85; }
+    .deck-cta:hover { opacity: 1; }
     .lg-dot { position: absolute; top: 4px; right: 4px; width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity .2s; pointer-events: none; }
     .lg-dot svg { width: 15px; height: 15px; }
     .lg-item[data-vote="like"] .lg-dot { opacity: 1; color: #22c55e; }
@@ -195,7 +205,7 @@
 	<script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "CollectionPage", "url": "https://scar.lat/logos/", "name": "Logo Design", "isPartOf": {"@id": "https://scar.lat/#website"}, "author": {"@id": "https://scar.lat/#person"}}, {"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Chris Scarlat", "item": "https://scar.lat/"}, {"@type": "ListItem", "position": 2, "name": "Logo Design", "item": "https://scar.lat/logos/"}]}]}</script>
 </head>
 <body class="mode-cards">
-  <script src="/assets/site-menu.js?v=20261125a" defer></script>
+  <script src="/assets/site-menu.js?v=20261125b" defer></script>
 
   <section class="lg-head">
     <h1>Logos &amp; <br>Brands</h1>
@@ -210,7 +220,7 @@
   <section class="deck" aria-label="Logo cards: swipe right to like, left to pass">
     <div class="deck-text" aria-live="polite"></div>
     <div class="deck-stack">
-      <div class="deck-done"><strong>That's all of them.</strong><span>Thanks for voting.</span><button type="button" data-mode="all">See all logos</button></div>
+      <div class="deck-done"><strong>That's all of them.</strong><span>Thanks for voting.</span><button type="button" data-mode="all">See all logos</button><a href="#chat" class="deck-cta" data-open-chat>Like what you see? Get your logo designed by me →</a></div>
     </div>
     <div class="deck-btns">
       <button type="button" class="round vote-no" aria-label="Pass on this logo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
@@ -330,10 +340,12 @@
     var VKEY = 'scarlat-votes', QKEY = 'scarlat-vote-queue';
     var votes = (function () { try { return JSON.parse(localStorage.getItem(VKEY) || '{}') || {}; } catch (e) { return {}; } })();
     function sendVote(rec) {
+      var consent = window.scarConsent ? window.scarConsent() : null;
+      if (consent === 'no') return; // visitor said no: nothing is kept or sent
       var q; try { q = JSON.parse(localStorage.getItem(QKEY) || '[]'); } catch (e) { q = []; }
       q.push(rec);
       var url = window.SCARLAT_VOTES_URL || 'https://dcfuliyfkbeyqmumfagp.supabase.co/functions/v1/scarlat-vote';
-      if (navigator.sendBeacon) {
+      if (consent === 'yes' && navigator.sendBeacon) {
         try { if (navigator.sendBeacon(url, new Blob([JSON.stringify(q)], { type: 'text/plain' }))) q = []; } catch (e) {}
       }
       try { localStorage.setItem(QKEY, JSON.stringify(q.slice(-500))); } catch (e) {}
@@ -370,6 +382,12 @@
         '<div class="lg-cap"><b>' + esc(l.name) + '</b><span>' + esc(l.industry) + '</span><i>—</i><i>' + esc(l.year) + '</i></div>' +
         '</button><span class="lg-dot" aria-hidden="true">' + HEART + '</span></li>';
     }).join('');
+    // closing tile, same size as a logo: invites a logo project, opens the chat (assets/site-menu.js)
+    grid.insertAdjacentHTML('beforeend',
+      '<li class="lg-item lg-cta"><a href="#chat" class="lg-tile" data-open-chat>' +
+        '<div class="lg-mark"><div class="cta-box"><strong>Do you like what you see?</strong>' +
+        '<span>Would you like your logo designed by me?</span><em>Let\u2019s talk \u2192</em></div></div>' +
+        '<div class="lg-cap"><b>Your logo</b><span>Brand identity</span><i>—</i><i>Next</i></div></a></li>');
 
     // ---- detail view ----
     var det = $('.lg-detail'), cur = 0, lastFocus = null;
@@ -394,7 +412,7 @@
       det.classList.remove('open'); document.body.style.overflow = '';
       if (lastFocus && lastFocus.focus) lastFocus.focus({ preventScroll: true });
     }
-    grid.addEventListener('click', function (e) { var t = e.target.closest('.lg-tile'); if (t) openDetail(+t.dataset.i); });
+    grid.addEventListener('click', function (e) { var t = e.target.closest('.lg-tile'); if (t && t.dataset.i != null) openDetail(+t.dataset.i); });
     $('.d-close', det).addEventListener('click', closeDetail);
     $('.d-prev', det).addEventListener('click', function () { fillDetail(cur - 1); });
     $('.d-next', det).addEventListener('click', function () { fillDetail(cur + 1); });
@@ -486,7 +504,7 @@
       document.body.classList.toggle('mode-cards', m === 'cards');
       document.querySelectorAll('.lg-switch button').forEach(function (b) { b.setAttribute('aria-pressed', b.dataset.mode === m ? 'true' : 'false'); });
       try { sessionStorage.setItem('scarlat-logos-mode', m); } catch (e) {}
-      if (m === 'all') document.querySelectorAll('.lg-item').forEach(function (li) { var l = LOGOS.find(function (x) { return x.slug === li.dataset.slug; }); li.dataset.vote = voteOf(l) || ''; });
+      if (m === 'all') document.querySelectorAll('.lg-item[data-slug]').forEach(function (li) { var l = LOGOS.find(function (x) { return x.slug === li.dataset.slug; }); li.dataset.vote = voteOf(l) || ''; });
     }
     document.addEventListener('click', function (e) { var b = e.target.closest('[data-mode]'); if (b) setMode(b.dataset.mode); });
     var saved = null; try { saved = sessionStorage.getItem('scarlat-logos-mode'); } catch (e) {}
