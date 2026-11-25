@@ -30,7 +30,7 @@
 	    opacity: 1 !important; pointer-events: all !important; transform: none !important; }
 	</style>
 
-  <script type="module" crossorigin src="./assets/index-v2.js?v=20261125c"></script>
+  <script type="module" crossorigin src="./assets/index-v2.js?v=20261125d"></script>
   <link rel="stylesheet" href="./assets/index-89f78340.css">
 
 	<link rel="canonical" href="https://scar.lat/">
@@ -907,6 +907,9 @@
 
     /* ---- Case study detail (light side panel, à la draggable-grid) ---- */
     #hero #images .item { cursor: pointer; }
+    /* depth: front works sit above the slower, smaller back layer (assets/index-v2.js marks .is-back) */
+    #hero #images .item { z-index: 2; }
+    #hero #images .item.is-back { z-index: 1; }
     #case-detail-overlay { position: fixed; inset: 0; z-index: 100000; visibility: hidden; }
     #case-detail-overlay.open { visibility: visible; }
     .cd-backdrop { position: absolute; inset: 0; background: rgba(20,20,25,0); transition: background .45s ease; }
@@ -982,7 +985,7 @@
     }
     #hero #images .item-image.logo-item img {
       object-fit: contain !important;
-      padding: 14% !important;
+      padding: 6% !important; /* each SVG carries its own even margin (normalised viewBox) */
       box-sizing: border-box !important;
     }
     /* Logos are interactive for hover only (clicks/drag still pass through to the
@@ -999,6 +1002,9 @@
       transition: transform .35s cubic-bezier(.34,1.56,.64,1) !important;
     }
     #hero #images .item-image.logo-item:hover img { transform: scale(1) translateZ(0) !important; }
+    /* BISO keeps its white (formerly yellow) parts: plain black, no flattening filter */
+    #hero #images .item-image.logo-item img[src*="client-biso"] { filter: none !important; }
+    html.dark #hero #images .item-image.logo-item img[src*="client-biso"] { filter: invert(1) brightness(1.4) !important; }
 
     /* ---- Google Translate: hide banner & keep layout stable ---- */
     .goog-te-banner-frame, .skiptranslate iframe, #goog-gt-tt, .goog-te-balloon-frame { display: none !important; }
@@ -2021,6 +2027,11 @@
         });
         grid.querySelectorAll('.item-image > video').forEach(function (v) { if (v.paused) v.play().catch(function () {}); });
       }
+      // iOS can refuse autoplay (Low Power Mode); the poster frame shows meanwhile, and the first touch starts the videos
+      ['touchstart', 'pointerdown', 'scroll'].forEach(function (t) {
+        window.addEventListener(t, function kick() { healGrid(); window.removeEventListener(t, kick, true); }, { passive: true, capture: true });
+      });
+      document.addEventListener('visibilitychange', function () { if (!document.hidden) healGrid(); });
 
       function overImage(x, y) {
         if (!zoom.box) return false;
@@ -2202,6 +2213,57 @@
       var n = 0, iv = setInterval(function () { retag(); if (++n > 20) clearInterval(iv); }, 400);
       var grid = document.getElementById('images');
       if (window.MutationObserver && grid) new MutationObserver(retag).observe(grid, { childList: true, subtree: true });
+    })();
+  </script>
+
+  <!-- Client logos: hover (or tap) shows what Chris did for that client. Logos without an entry show no tooltip. -->
+  <style>
+    .cl-tip { position: fixed; z-index: 100015; max-width: 280px; padding: 12px 14px; border-radius: 14px; background: #000; color: #fff;
+      font: 400 12.5px/1.45 Inter, Helvetica, Arial, sans-serif; pointer-events: none; opacity: 0; transform: translateY(6px);
+      transition: opacity .2s ease, transform .2s ease; box-shadow: 0 12px 36px rgba(0,0,0,.25); }
+    .cl-tip.show { opacity: 1; transform: none; }
+    .cl-tip b { display: block; font-weight: 600; font-size: 13.5px; margin-bottom: 3px; }
+    .cl-tip span { display: block; opacity: .8; }
+    html.dark .cl-tip { background: #fff; color: #000; }
+  </style>
+  <script>
+    (function () {
+      var CLIENTS = {
+        'Heinemann': ['Heinemann', 'App design, UX/UI for the Heinemann fidelity card app. Designed with GARAGE Agency for the Heinemann Group, January 2026.'],
+        'amazon': ['Amazon', 'UX/UI design of the Amazon Germany credit card app, used daily by 2 million users. Freelance, solo designer. Munich, 2018–2020.'],
+        'grover': ['Grover', 'Brand refresh, creative direction, UX research, digital and print design. Berlin, 2016–2018.'],
+        'tedx': ['TEDx Amsterdam', 'Print design. Amsterdam, 2012.'],
+        'coee': ['The College of Extraordinary Experiences', 'Creative direction, branding and all festival materials. 2015 – present.']
+      };
+      function keyOf(img) { var m = (img.getAttribute('src') || '').match(/client-([^/]+)\.svg/i); return m && m[1]; }
+      var tip = document.createElement('div'); tip.className = 'cl-tip notranslate'; tip.setAttribute('role', 'tooltip');
+      document.body.appendChild(tip);
+      var cur = null;
+      function show(box, x, y) {
+        var img = box.querySelector('img'), d = img && CLIENTS[keyOf(img)];
+        if (!d) { hide(); return; }
+        if (cur !== box) { tip.innerHTML = '<b>' + d[0] + '</b><span>' + d[1] + '</span>'; cur = box; }
+        var w = tip.offsetWidth, h = tip.offsetHeight;
+        var left = Math.min(Math.max(12, x + 16), innerWidth - w - 12), top = y + 18;
+        if (top + h > innerHeight - 12) top = y - h - 14;
+        tip.style.left = left + 'px'; tip.style.top = top + 'px';
+        tip.classList.add('show');
+      }
+      function hide() { tip.classList.remove('show'); cur = null; }
+      document.addEventListener('mousemove', function (e) {
+        if (document.body.classList.contains('zoom-mode')) { hide(); return; }
+        var box = e.target.closest && e.target.closest('#images .logo-item');
+        box ? show(box, e.clientX, e.clientY) : (cur && hide());
+      }, { passive: true });
+      // phones: a tap on a client logo shows its note for a few seconds
+      var tT;
+      document.addEventListener('touchend', function (e) {
+        var box = e.target.closest && e.target.closest('#images .logo-item'); if (!box) return;
+        var t = e.changedTouches[0], r = box.getBoundingClientRect();
+        show(box, Math.max(12, r.left), r.bottom - 10);
+        clearTimeout(tT); tT = setTimeout(hide, 3500);
+      }, { passive: true });
+      window.addEventListener('wheel', hide, { passive: true });
     })();
   </script>
 
