@@ -7,7 +7,7 @@
   function ready(fn) { if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', fn); else fn(); }
   ready(function () {
     // read the config ahead so the tap itself can ask for full screen and the camera
-    if (window.Duofy) window.Duofy.preload(CONFIG).catch(function () {});
+    if (window.Duofy) { window.Duofy.preload(CONFIG).catch(function () {}); if (window.Duofy.refresh) window.Duofy.refresh(); }
   });
   // Duofy sizes its text in rem. The home page sets html{font-size:1px}, which would shrink the book's
   // text to 1/16, so the root goes back to 16px while the book is open (the page behind is covered).
@@ -25,6 +25,6 @@
     if (!b || !window.Duofy) return;
     e.preventDefault();
     remFix(true);
-    window.Duofy.open(CONFIG, { trigger: b }).catch(function () { remFix(false); });
+    window.Duofy.open(CONFIG, { trigger: b }).then(function (opened) { if (!opened) remFix(false); }, function () { remFix(false); });
   }, true); // capture: runs before header handlers that stop propagation
 })();

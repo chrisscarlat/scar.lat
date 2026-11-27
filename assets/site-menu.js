@@ -23,7 +23,9 @@
     '.sm-toggle{display:flex;align-items:center;justify-content:center;width:40px;height:40px;padding:8px;margin:-8px;border:0;background:none;color:inherit;cursor:pointer}' +
     '.sm-toggle .sm-close{display:none}' +
     '.sm-right{display:flex;align-items:center;gap:18px}' +
-    '.sm-book{display:flex;align-items:center;justify-content:center;width:44px;height:44px;padding:10px;margin:-10px;border:0;background:none;color:inherit;cursor:pointer}' +
+    // book icon: only where Duofy's showOn "landscape-and-foldables" holds (same rule as Duofy, so no flash before it runs)
+    '.sm-book{display:none;align-items:center;justify-content:center;width:44px;height:44px;padding:10px;margin:-10px;border:0;background:none;color:inherit;cursor:pointer}' +
+    '@media (pointer:coarse) and (orientation:landscape),(pointer:coarse) and (max-width:767.98px) and (min-aspect-ratio:74/100){.sm-book{display:flex}}' +
     '.sm-book:focus-visible,.sm-toggle:focus-visible{outline:2px solid currentColor;outline-offset:2px;border-radius:8px}' +
     '.sm-open .sm-frame{mix-blend-mode:normal}' +
     '.sm-open .sm-book{color:#16161a}' +
@@ -49,7 +51,7 @@
   frame.className = 'sm-frame notranslate';
   frame.setAttribute('translate', 'no');
   frame.innerHTML = '<a class="sm-name" href="/">CHRIS SCARLAT</a>' +
-    '<div class="sm-right"><button class="sm-book book-toggle" type="button" aria-label="Open the portfolio as a book">' +
+    '<div class="sm-right"><button class="sm-book book-toggle" type="button" aria-label="Open the portfolio as a book" data-duofy-show="landscape-and-foldables">' +
       '<svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6.5C10.2 5.1 7.6 4.5 4 4.5v13c3.6 0 6.2.6 8 2 1.8-1.4 4.4-2 8-2v-13c-3.6 0-6.2.6-8 2z"/><path d="M12 6.5v13"/></svg>' +
     '</button>' +
     '<button class="sm-toggle" type="button" aria-label="Open menu" aria-expanded="false">' +
@@ -121,13 +123,13 @@
 
   // Duofy book (git submodule vendor/duofy) + the book icon's handler, unless the page already loads them
   if (!document.querySelector('link[href*="duofy.css"]')) {
-    var dl = document.createElement('link'); dl.rel = 'stylesheet'; dl.href = '/vendor/duofy/duofy.css'; document.head.appendChild(dl);
+    var dl = document.createElement('link'); dl.rel = 'stylesheet'; dl.href = '/vendor/duofy/duofy.css?v=1.1.0'; document.head.appendChild(dl);
   }
   if (!document.querySelector('script[src*="duofy.js"]')) {
-    var dj = document.createElement('script'); dj.src = '/vendor/duofy/duofy.js'; dj.async = false; document.head.appendChild(dj);
+    var dj = document.createElement('script'); dj.src = '/vendor/duofy/duofy.js?v=1.1.0'; dj.async = false; document.head.appendChild(dj);
   }
   if (!document.querySelector('script[src*="book.js"]')) {
-    var bj = document.createElement('script'); bj.src = '/assets/book.js?v=20261127a'; bj.async = false; document.head.appendChild(bj);
+    var bj = document.createElement('script'); bj.src = '/assets/book.js?v=20261127b'; bj.async = false; document.head.appendChild(bj);
   }
 
   // first-visit privacy bar (shared)

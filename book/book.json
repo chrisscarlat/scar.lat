@@ -3,6 +3,8 @@
     "lang": "en",
     "startPage": 0,
     "spreadRatio": 0.74,
+    "showOn": "landscape-and-foldables",
+    "foldableMaxWidth": 768,
     "camera": true,
     "fullscreen": true,
     "reducedMotionStill": false,

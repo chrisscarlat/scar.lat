@@ -8,3 +8,4 @@ exclude:
   - vendor/duofy/docs
   - vendor/duofy/tools
   - vendor/duofy/README.md
+  - vendor/duofy/README.pdf
