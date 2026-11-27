@@ -23,6 +23,12 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://scar.lat/book/</loc>
+    <lastmod>2026-11-27</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://scar.lat/imprint/</loc>
     <lastmod>2026-11-25</lastmod>
     <changefreq>yearly</changefreq>

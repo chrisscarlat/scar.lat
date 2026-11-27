@@ -1,0 +1,3 @@
+[submodule "vendor/duofy"]
+	path = vendor/duofy
+	url = https://github.com/chrisscarlat/duofy.git

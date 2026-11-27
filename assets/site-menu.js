@@ -22,7 +22,11 @@
     '.sm-name{font-size:14.4px;font-weight:600;color:inherit;text-decoration:none;letter-spacing:normal}' +
     '.sm-toggle{display:flex;align-items:center;justify-content:center;width:40px;height:40px;padding:8px;margin:-8px;border:0;background:none;color:inherit;cursor:pointer}' +
     '.sm-toggle .sm-close{display:none}' +
+    '.sm-right{display:flex;align-items:center;gap:18px}' +
+    '.sm-book{display:flex;align-items:center;justify-content:center;width:44px;height:44px;padding:10px;margin:-10px;border:0;background:none;color:inherit;cursor:pointer}' +
+    '.sm-book:focus-visible,.sm-toggle:focus-visible{outline:2px solid currentColor;outline-offset:2px;border-radius:8px}' +
     '.sm-open .sm-frame{mix-blend-mode:normal}' +
+    '.sm-open .sm-book{color:#16161a}' +
     '.sm-open .sm-toggle{color:#16161a}.sm-open .sm-toggle .sm-dots{display:none}.sm-open .sm-toggle .sm-close{display:block}' +
     '.sm-overlay{position:fixed;inset:0;z-index:100008;background:rgba(0,0,0,.4);opacity:0;pointer-events:none;transition:opacity .4s ease}' +
     '.sm-open .sm-overlay{opacity:1;pointer-events:all}' +
@@ -45,10 +49,13 @@
   frame.className = 'sm-frame notranslate';
   frame.setAttribute('translate', 'no');
   frame.innerHTML = '<a class="sm-name" href="/">CHRIS SCARLAT</a>' +
+    '<div class="sm-right"><button class="sm-book book-toggle" type="button" aria-label="Open the portfolio as a book">' +
+      '<svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6.5C10.2 5.1 7.6 4.5 4 4.5v13c3.6 0 6.2.6 8 2 1.8-1.4 4.4-2 8-2v-13c-3.6 0-6.2.6-8 2z"/><path d="M12 6.5v13"/></svg>' +
+    '</button>' +
     '<button class="sm-toggle" type="button" aria-label="Open menu" aria-expanded="false">' +
       '<svg class="sm-dots" viewBox="0 0 24 24" width="24" height="24"><circle cx="12" cy="8" r="2" fill="currentColor"/><circle cx="12" cy="16" r="2" fill="currentColor"/></svg>' +
       '<svg class="sm-close" viewBox="0 0 24 24" width="24" height="24"><circle cx="8" cy="8" r="2" fill="currentColor"/><circle cx="16" cy="8" r="2" fill="currentColor"/><circle cx="8" cy="16" r="2" fill="currentColor"/><circle cx="16" cy="16" r="2" fill="currentColor"/></svg>' +
-    '</button>';
+    '</button></div>';
   var overlay = document.createElement('div');
   overlay.className = 'sm-overlay';
   var panel = document.createElement('nav');
@@ -111,6 +118,17 @@
   window.addEventListener('message', function (e) { if (e.origin === location.origin && e.data && e.data.type === 'scar-chat-close') setChat(false); });
   document.addEventListener('keydown', function (e) { if (e.key === 'Escape') setChat(false); });
   document.addEventListener('click', function (e) { var a = e.target.closest && e.target.closest('[data-open-chat]'); if (a) { e.preventDefault(); setChat(true); } });
+
+  // Duofy book (git submodule vendor/duofy) + the book icon's handler, unless the page already loads them
+  if (!document.querySelector('link[href*="duofy.css"]')) {
+    var dl = document.createElement('link'); dl.rel = 'stylesheet'; dl.href = '/vendor/duofy/duofy.css'; document.head.appendChild(dl);
+  }
+  if (!document.querySelector('script[src*="duofy.js"]')) {
+    var dj = document.createElement('script'); dj.src = '/vendor/duofy/duofy.js'; dj.async = false; document.head.appendChild(dj);
+  }
+  if (!document.querySelector('script[src*="book.js"]')) {
+    var bj = document.createElement('script'); bj.src = '/assets/book.js?v=20261127a'; bj.async = false; document.head.appendChild(bj);
+  }
 
   // first-visit privacy bar (shared)
   if (!document.querySelector('script[src*="consent.js"]')) {

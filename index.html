@@ -32,6 +32,10 @@
 
   <script type="module" crossorigin src="./assets/index-v2.js?v=20261125d"></script>
   <link rel="stylesheet" href="./assets/index-89f78340.css">
+  <!-- Duofy (git submodule vendor/duofy, tag v1.0.0): the portfolio as a book, opened by the book icon. Same content as text on /book/. -->
+  <link rel="stylesheet" href="/vendor/duofy/duofy.css">
+  <script src="/vendor/duofy/duofy.js" defer></script>
+  <script src="/assets/book.js?v=20261127a" defer></script>
 
 	<link rel="canonical" href="https://scar.lat/">
 	<link rel="sitemap" type="application/xml" href="https://scar.lat/sitemap.xml">
@@ -58,6 +62,9 @@
 			</div>
 
 			<div class="frame-right">
+				<button class="book-toggle" type="button" aria-label="Open the portfolio as a book">
+					<svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6.5C10.2 5.1 7.6 4.5 4 4.5v13c3.6 0 6.2.6 8 2 1.8-1.4 4.4-2 8-2v-13c-3.6 0-6.2.6-8 2z"/><path d="M12 6.5v13"/></svg>
+				</button>
 				<button class="menu-toggle" aria-label="Toggle menu">
 				<svg class="menu-icon" viewBox="0 0 24 24" width="24" height="24">
 					<circle cx="12" cy="8" r="2" fill="currentColor"/>
@@ -1059,6 +1066,9 @@
     .frame .frame-right { display: flex; align-items: center; gap: 14px; }
     .frame .frame-right .header-lang { order: -1; }
     .frame .menu-toggle { color: inherit; }
+    .frame .book-toggle { display: flex; align-items: center; justify-content: center; width: 44px; height: 44px; padding: 10px; margin: -10px; border: 0; background: none; color: inherit; cursor: pointer; }
+    .frame .book-toggle:focus-visible { outline: 2px solid currentColor; outline-offset: 2px; border-radius: 8px; }
+    html.chat-only .book-toggle { display: none !important; }
 
     /* ==== Adaptive contrast: header text/icons invert per-pixel against the
        artwork behind them (dark over light areas, light over dark). The blend

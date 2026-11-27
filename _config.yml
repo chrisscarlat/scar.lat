@@ -1,0 +1,10 @@
+# GitHub Pages (Jekyll) settings. The site is plain HTML; this file only keeps the Duofy
+# submodule's demo, sample videos and tooling out of the published site. scar.lat serves
+# just vendor/duofy/duofy.js and duofy.css from it.
+exclude:
+  - vendor/duofy/index.html
+  - vendor/duofy/config.json
+  - vendor/duofy/assets
+  - vendor/duofy/docs
+  - vendor/duofy/tools
+  - vendor/duofy/README.md

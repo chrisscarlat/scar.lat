@@ -1,0 +1,118 @@
+{
+    "title": "Chris Scarlat, Portfolio",
+    "lang": "en",
+    "startPage": 0,
+    "spreadRatio": 0.74,
+    "camera": true,
+    "fullscreen": true,
+    "reducedMotionStill": false,
+    "brand": {
+        "accent": "#6b6b6b",
+        "dark": "#0b0b0c",
+        "light": "#ffffff",
+        "paper": "#ffffff",
+        "font": "Inter, \"Helvetica Neue\", Arial, sans-serif"
+    },
+    "info": {
+        "show": true,
+        "title": "Chris Scarlat",
+        "subtitle": "Portfolio",
+        "description": "Designing brands since 1998. Brand and digital product consulting from Berlin."
+    },
+    "front": {
+        "image": "../img/chris-scarlat.png",
+        "alt": "Chris Scarlat talking and gesturing with one hand, a black and white photo",
+        "color": "#ffffff",
+        "fit": "cover",
+        "position": "70% 30%",
+        "title": "Chris Scarlat",
+        "subtitle": "Portfolio",
+        "textColor": "#ffffff",
+        "shade": true,
+        "video": false
+    },
+    "back": {
+        "color": "#000000",
+        "video": false
+    },
+    "pages": [
+        {
+            "video": {
+                "sources": [ { "src": "../img/amazon-app.mp4", "type": "video/mp4" } ],
+                "poster": "../img/amazon-app-poster.webp",
+                "fit": "contain"
+            },
+            "image": "../img/amazon-app-poster.webp",
+            "fit": "contain",
+            "color": "#111111",
+            "alt": "Amazon Germany Credit Card App, Munich 2018. Freelance, solo UX/UI designer; the app is used daily by 2 million users. A phone showing the app's card screen (a looping video)."
+        },
+        {
+            "image": "../img/grover.jpg",
+            "fit": "cover",
+            "color": "#7a1fd6",
+            "alt": "Grover, Berlin 2016–2017. Chief Creative Officer: brand design, website, materials, dashboard and campaigns. The Grover logo, a white ring, on a purple to pink gradient."
+        },
+        {
+            "image": "../img/tedx.jpg",
+            "fit": "contain",
+            "color": "#ff0a1e",
+            "alt": "TEDx Amsterdam, print design, Amsterdam 2012. A red programme with large white TEDx letters."
+        },
+        {
+            "image": "../img/coee.jpg",
+            "fit": "cover",
+            "color": "#1a1a1a",
+            "alt": "The College of Extraordinary Experiences, Copenhagen, 2016 to present. Branding and all materials for the experience design festival. Its winged emblem, embossed in black on dark paper."
+        },
+        {
+            "image": "../img/metabolic.jpg",
+            "fit": "contain",
+            "color": "#ffffff",
+            "alt": "Metabolic, rebranding and visual identity, Amsterdam 2012. Low buildings and a garden under a cyan to red colour gradient."
+        },
+        {
+            "image": "../img/iehana.webp",
+            "fit": "contain",
+            "color": "#ffffff",
+            "alt": "IEHANA™ Cosmetics, rebranding and packaging redesign, Bucharest 2019. A hand reaching out to touch a tree trunk in soft light."
+        },
+        {
+            "image": "../img/dstoq.webp",
+            "fit": "contain",
+            "color": "#ffffff",
+            "alt": "DSTOQ, brand refresh and web design, Vaduz 2018. The website's start page, “Exchange Without Borders”, beside a line drawing of a hand holding a phone with the exchange app."
+        },
+        {
+            "image": "../img/mozilla.webp",
+            "fit": "contain",
+            "color": "#ffffff",
+            "alt": "Mozilla, pitch, research and concept, Berlin 2017. Runners in silhouette against the low sun, the Victory Column behind them."
+        },
+        {
+            "image": "../img/stegreif.png",
+            "fit": "contain",
+            "color": "#ffffff",
+            "alt": "Stegreif Orchestra, rebranding, albums and merch design, Berlin 2016. The black and white album cover beside a red vinyl record."
+        },
+        {
+            "image": "../img/financefox.webp",
+            "fit": "contain",
+            "color": "#ffffff",
+            "alt": "FinanceFox, rebranding and app redesign, Zurich 2015. A man in an American football jersey sitting on a sofa, a still with financefox.com in the corner.",
+            "link": { "href": "/book/", "label": "All projects as text" }
+        }
+    ],
+    "labels": {
+        "book": "Book",
+        "back": "Back",
+        "backLabel": "Close the book and go back to the website",
+        "next": "Next page",
+        "prev": "Previous page",
+        "page": "Page {n} of {total}",
+        "info": "About this book",
+        "frontCover": "Front cover",
+        "backCover": "Back cover",
+        "link": "Open"
+    }
+}
